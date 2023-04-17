@@ -1,0 +1,175 @@
+﻿@model Penfolio2.Models.CreateProfileViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4 onmouseover='showDescription( "profile-info", "new-profile")'>New Profile</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4" >
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group" onmouseover='showDescription("profile-info", "display-name")' >
+                <label asp-for="DisplayName" class="control-label"></label>
+                <input asp-for="DisplayName" class="form-control" onfocus='showDescription("profile-info", "display-name")' />
+                <span asp-validation-for="DisplayName" class="text-danger"></span>
+            </div>
+            <div onmouseover='showDescription("profile-info", "role-type")'>
+                <label asp-for="RoleType" class="control-label"></label>
+                <select asp-for="RoleType" class="form-control" onfocus='showDescription("profile-info", "role-type")'>
+                    <option value="1">Writer</option>
+                    <option value="2">Publisher</option>
+                    <option value="3">Literary Agent</option>
+                </select>
+            </div>
+            @if(ViewBag.HasProfile == "true") 
+            {
+                <div class="form-group form-check collapse" onmouseover='showDescription("profile-info", "main-profile")'>
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="IsMainProfile" onfocus='showDescription("profile-info", "main-profile")' /> @Html.DisplayNameFor(model => model.IsMainProfile)
+                    </label>
+                </div>
+            }
+            else 
+            {
+                <div class="form-group form-check" onmousever='showDescription("profile-info", "main-profile")'>
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="IsMainProfile" checked readonly onfocus='showDescription("profile-info", "main-profile")' /> @Html.DisplayNameFor(model => model.IsMainProfile)
+                    </label>
+                </div>
+            }
+            <div class="form-group" onmouseover='showDescription("profile-info", "profile-description")'>
+                <label asp-for="ProfileDescription" class="control-label"></label>
+                <textarea asp-for="ProfileDescription" class="form-control" onfocus='showDescription("profile-info", "profile-description")'></textarea>
+                <span asp-validation-for="ProfileDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group" onmouseover='showDescription("profile-info", "custom-url")'>
+                <label asp-for="UrlString" class="control-label"></label>
+                <input asp-for="UrlString" class="form-control" onfocus='showDescription("profile-info", "custom-url")' />
+                <span asp-validation-for="UrlString" class="text-danger"></span>
+            </div>
+            <div class="form-group" onmouseover='showDescription("profile-info", "profile-image")'>
+                <lable asp-for="ProfileImage" class="control-lable"></lable>
+                <input type="file" accept=".png,.jpg,.jpeg,.gif,.tif" asp-for="ProfileImage" class="form-control" onfocus='showDescription("profile-info", "profile-image")' />
+                <span asp-validation-for="ProfileImage" class="text-danger"></span>
+            </div>
+            
+            <h5 onmouseover='showDescription("profile-info", "access-permission-options")'>Access Permission Options</h5>
+            <div class="form-group form-check" onmouseover='showDescription("profile-info", "allow-public-access")' id="public-access">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="PublicAccess" onfocus='showDescription("profile-info", "allow-public-access")' onchange='changeAccess("public-access")' /> @Html.DisplayNameFor(model => model.PublicAccess)
+                </label>
+            </div>
+            <div class="form-group form-check" onmouseover='showDescription("profile-info", "allow-friend-access")' id="friend-access">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="FriendAccess" onfocus='showDescription("profile-info", "allow-friend-access")' onchange='changeAccess("friend-access")' /> @Html.DisplayNameFor(model => model.FriendAccess)
+                </label>
+            </div>
+            <div class="form-group form-check" onmouseover='showDescription("profile-info", "allow-publisher-access")' id="publisher-access">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="PublisherAccess" onfocus='showDescription("profile-info", "allow-publisher-access")' onchange='changeAccess("publisher-access")' /> @Html.DisplayNameFor(model => model.PublisherAccess)
+                </label>
+            </div>
+            <div class="form-group form-check" onmouseover='showDescription("profile-info", "minor-access")'>
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="MinorAccess" onfocus='showDescription("profile-info", "minor-access")' /> @Html.DisplayNameFor(model => model.MinorAccess)
+                </label>
+            </div>
+            <div class="form-group form-check" onmouseover='showDescription("profile-info", "shows-up-in-search")'>
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="ShowsUpInSearch" onfocus='showDescription("profile-info", "shows-up-in-search")' /> @Html.DisplayNameFor(model => model.ShowsUpInSearch)
+                </label>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+    <div class="col-md-4" float="right" id="profile-info">
+        <p>A profile is a separate entity from your user account and will be used for most of the things you do on Penfolio. You can make as many profiles as you would like. Think of a profile as the face you show the world. That face might change depending on who you are interacting with or the content you are making. For example, if you write both children&#39;s books and erotica, you probably don&#39;t write them under the same name! Separate profiles also allow for separate ways of interacting with the site. You can create one writer profile for your own writing and a separate literary agent profile where you represent various writers.</p>
+
+        <p>Importantly, while you use one account to control all of your profiles, you are the only one who will see that connection. So, if you are an author who writes both children&#39;s literature and erotica like in the example above, the children you write for as a children&#39;s writer will never know about the other types of stories you write.</p>
+    </div>
+</div>
+
+<div class="collapse">
+    <div id="new-profile">
+        <p>A profile is a separate entity from your user account and will be used for most of the things you do on Penfolio. You can make as many profiles as you would like. Think of a profile as the face you show the world. That face might change depending on who you are interacting with or the content you are making. For example, if you write both children&#39;s books and erotica, you probably don&#39;t write them under the same name! Separate profiles also allow for separate ways of interacting with the site. You can create one writer profile for your own writing and a separate literary agent profile where you represent various writers.</p>
+        
+        <p>Importantly, while you use one account to control all of your profiles, you are the only one who will see that connection. So, if you are an author who writes both children&#39;s literature and erotica like in the example above, the children you write for as a children&#39;s writer will never know about the other types of stories you write.</p>
+    </div>
+
+    <div id="display-name">
+        <p>This is the name that will be connected to this profile when you post a piece of writing, make a friend request, or otherwise interact with Penfolio. This doesn&#39;t need to match your username, and it doesn&#39;t have to be unique. After all, there&#39;s more than one John Smith in the world.</p>
+    </div>
+
+    <div id="role-type">
+        <p>This profile will be classed as either a writer, a publisher, or a literary agent. As you might expect, a writer profile can post writings while a publisher or literary agent is able to represent writers. If you want to do both, you will have to create two different profiles.</p>
+    </div>
+
+    <div id="main-profile">
+        <p>Your main profile is the default profile that will be used for interactions. This means that it will be the profile that is initially selected when making a comment or liking a piece of writing. However, it&#39;s easy to change which profile you are interacting through, and your main profile can be changed at any time.</p>
+    </div>
+
+    <div id="profile-description">
+        <p>Tell the world a little about yourself! Feel free to be verbose, or leave this blank for now if you aren&#39;t sure what to say. You can always come back to this later.</p>
+    </div>
+
+    <div id="custom-url">
+        <p>This is the URL where people who have the ability to access your profile will be able to find it. If you don&#39;t enter anything, a random URL will be created for you. Aren&#39;t sure what to put right now? Don&#39;t worry, you can change this later.</P>
+            
+        <p>Whatever URL is used will be displayed at the end of the address. For example, if you put &#34;stinkycheese&#34; as your Custom URL, then &#34;penfolio.com/profile/stinkycheese&#34; will be the final address.</p>
+    </div>
+
+    <div id="profile-image">
+        <p>A profile image is the visual representation of how you present yourself to the world. Pick a favorite photo of yourself like you would for a book jacket, or choose something else if you want to be more anonymous. If you don&#39;t upload a picture, you will be given Penfolio&#39;s default image, which is a quill and inkwell.</p>
+    </div>
+
+    <div id="access-permission-options">
+        <p>At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with them. That&#39;s why whenever you create a profile or a piece of writing, you select exactly who can see it. These options are incredibly customizable and can be changed later. You can even make special exceptions to allow or revoke access for individual users who don&#39;t fit in with your chosen access permissions.</p>
+    </div>
+
+    <div id="allow-public-access">
+        <p>At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with them. That&#39;s why whenever you create a profile or a piece of writing, you select exactly who can see it. These options are incredibly customizable and can be changed later. You can even make special exceptions to allow or revoke access for individual users who don&#39;t fit in with your chosen access permissions.</p>
+        
+        <p>Public access means that anyone can see this profile, so if you check the Allow Public Access box, it will automatically check all of the other boxes except for Allow Minor Access, which can be checked or unchecked separately.</p>
+    </div>
+
+    <div id="allow-friend-access">
+        <p>At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with them. That&#39;s why whenever you create a profile or a piece of writing, you select exactly who can see it. These options are incredibly customizable and can be changed later. You can even make special exceptions to allow or revoke access for individual users who don&#39;t fit in with your chosen access permissions.</p>
+        
+        <p>Friend access means that your profile can be seen by people who have accepted a friend request from you or who you have accepted a friend request from. Friend access is part of public access, so if you uncheck the box marked Allow Friend Access when you have Allow Public Access checked, it will also uncheck Allow Public Access.</p>
+    </div>
+
+    <div id="allow-publisher-access">
+        <p>At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with them. That&#39;s why whenever you create a profile or a piece of writing, you select exactly who can see it. These options are incredibly customizable and can be changed later. You can even make special exceptions to allow or revoke access for individual users who don&#39;t fit in with your chosen access permissions.</p>
+        
+        <p>Are you a writer looking to get discovered or a publisher or literary agent looking to connect with other industry professionals? Then you might consider checking the Allow Publisher and Literary Agent Access box. This option will allow verified publisher and literary agent accounts to view your profile, even if you don&#39;t allow more general access.</p>
+        
+        <p>Publisher and literary agent access is part of public access, so if you uncheck the box marked Allow Publisher and Literary Agent Access when you have Allow Public Access checked, it will also uncheck Allow Public Access.</p>
+    </div>
+
+    <div id="minor-access">
+        <p>At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with them. That&#39;s why whenever you create a profile or a piece of writing, you select exactly who can see it. These options are incredibly customizable and can be changed later.</p>
+        
+        <p>Not all materials are appropriate for minors. Please only check Allow Minor Access if you believe that your profile is friendly for individuals under 18. (Accounts without birthdays set will be assumed to be under 18.) That said, when you post a writing to a writer profile, you will also set individual permissions for the piece, so it is possible to have writing that is appropriate for minors and writing that is not appropriate for minors connected to the same profile, so use your best judgement.</p>
+    </div>
+
+    <div id="shows-up-in-search">
+        <p>At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with them. That&#39;s why whenever you create a profile or a piece of writing, you select exactly who can see it. These options are incredibly customizable and can be changed later. You can even make special exceptions to allow or revoke access for individual users who don&#39;t fit in with your chosen access permissions.</p>
+        
+        <p>Would you like to have the content of your profile have something other than public access but still have people be able to find you in a search and request access to view your profile? In that case, you will want to check the box marked Profile Shows Up in Search. Please keep in mind that while this option allows you to show up in the search results of people who don't have access to your profile, this distinction does not apply to minor access. If you do not have the Allow Minor Access box checked, you will still not show up in the search results of users under 18 or who have yet to specify their birthday for their account.</p>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    <script src="~/js/profileCreateScript.js" type="text/javascript"></script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

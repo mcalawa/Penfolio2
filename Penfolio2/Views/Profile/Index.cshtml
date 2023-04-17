@@ -1,0 +1,44 @@
+﻿@model Penfolio2.Models.PenProfile
+
+@{
+    ViewData["Title"] = "Index";
+}
+@await Component.InvokeAsync("Profile", new { urlString = Model.UrlString })
+
+<h1>@Model.DisplayName</h1>
+
+<div>
+    @if (Model.UseSecondaryRoleName)
+    {
+        <h4>@Model.PenRole.SecondaryRoleName</h4>
+    }
+    else
+    {
+        <h4>@Model.PenRole.RoleName</h4>
+    }
+    <hr />
+    <dl class="row">
+        <dd class="col-sm-10">
+            <img id="profilePicture" style="width:350px;height:350px;object-fit:cover" src="data:image/*;base64,@(Convert.ToBase64String(Model.ProfileImage))" />
+        </dd>
+        <dd class="col-sm-10">
+            @Model.ProfileDescription
+        </dd>
+    </dl>
+    <hr />
+    @if (Model.RoleId == 1)
+    {
+        <h4>Writing</h4>
+    }
+    else
+    {
+        <h4>Writers</h4>
+    }
+</div>
+<div>
+    @if (ViewBag.OwnProfile == "true")
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.ProfileId">Edit</a>
+    }
+    <a asp-action="Index">Back to List</a>
+</div>
