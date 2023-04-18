@@ -262,9 +262,20 @@ namespace Penfolio2.Controllers
             return true;
         }
 
-        //maybe modify to return errors? TBD
         protected bool IsAccessableByUser(int accessPermissionId, ref List<IdentityError> errors)
         {
+            return IsAccessableByUser(accessPermissionId, ref errors, null);
+        }
+
+        protected bool IsAccessableByUser(int accessPermissionId, ref List<IdentityError> errors, string action)
+        {
+            if(action == null)
+            {
+                action = "";
+            }
+
+            action = action.ToLower().Trim();
+
             //if the error list doesn't exist, create it
             if(errors == null)
             {
@@ -308,6 +319,15 @@ namespace Penfolio2.Controllers
             if (db.PenProfiles.Any(i => i.AccessPermissionId == accessPermissionId && i.UserId == userId))
             {
                 return true;
+            } //if it's a profile, they aren't allowed to edit it unless it's their own
+            else if(accessType == "profile" && (action == "edit" || action == "delete"))
+            {
+                errors.Add(new IdentityError
+                {
+                    Description = "You are not allowed to " + action + " a profile you are not the owner of."
+                });
+
+                return false;
             } //if the AccessPermission is for a piece of writing
             else if (db.Writings.Any(i => i.AccessPermissionId == accessPermissionId))
             {
@@ -333,6 +353,17 @@ namespace Penfolio2.Controllers
                         }
                     }
                 } //if the writing was not created by the user
+
+                //if they have reached this point, they are not an owner or collaborator, so create an error message and return false
+                if(action == "edit" || action == "delete")
+                {
+                    errors.Add(new IdentityError
+                    {
+                        Description = "You may not " + action + " a piece of writing that you do not own or which you are not a collaborator on."
+                    });
+
+                    return false;
+                }
             } //if the AccessPermission is for a Folder
             else if (db.Folders.Any(i => i.AccessPermissionId == accessPermissionId))
             {
@@ -358,6 +389,17 @@ namespace Penfolio2.Controllers
                         }
                     }
                 } //if the folder was not created by the user
+
+                //if they have reached this point, they are not an owner or a contributor, so create an error message and return false
+                if (action == "edit" || action == "delete")
+                {
+                    errors.Add(new IdentityError
+                    {
+                        Description = "You may not " + action + " a folder that you do not own or which you are not a contributor on."
+                    });
+
+                    return false;
+                }
             } //if the AccessPermission matches to a Series
             else if (db.Series.Any(i => i.AccessPermissionId == accessPermissionId))
             {
@@ -383,6 +425,17 @@ namespace Penfolio2.Controllers
                         }
                     }
                 } // if the user is not the creator of the series
+
+                //if they have reached this point, they are not an owner or contributor, so create an error message and return false
+                if (action == "edit" || action == "delete")
+                {
+                    errors.Add(new IdentityError
+                    {
+                        Description = "You may not " + action + " a series that you do not own or which you are not a contributor on."
+                    });
+
+                    return false;
+                }
             } //if the AccessPermission is for a Series
 
             //if the user is a minor and minor access has not been granted, we do not allow permission even in the case of an individual access grant having been given

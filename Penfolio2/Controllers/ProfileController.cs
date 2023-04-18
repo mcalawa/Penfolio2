@@ -165,7 +165,36 @@ namespace Penfolio2.Controllers
         // GET: ProfileController/Edit/betty-suarez
         public ActionResult Edit(string id)
         {
-            return View();
+            if (string.IsNullOrEmpty(id))
+            {
+                PenProfile? penProfile = db.PenProfiles.Where(i => i.UrlString == id).FirstOrDefault();
+
+                if(penProfile == null)
+                {
+                    return RedirectToAction("NotFound");
+                }
+
+                AccessPermission accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == penProfile.AccessPermissionId).FirstOrDefault();
+
+                if(accessPermission == null)
+                {
+                    return RedirectToAction("NotFound");
+                }
+
+                List<IdentityError> errors = new List<IdentityError>();
+                bool isAccessable = IsAccessableByUser(penProfile.AccessPermissionId, ref errors, "edit");
+
+                if (isAccessable)
+                {
+                    return View(penProfile);
+                }
+                else
+                {
+                    return RedirectToAction("EditAccessDenied", new { id = penProfile.AccessPermissionId });
+                }
+            }
+
+            return RedirectToAction("NotFound");
         }
 
         // POST: ProfileController/Edit/betty-suarez
@@ -184,17 +213,46 @@ namespace Penfolio2.Controllers
             }
         }
 
-        // GET: ProfileController/Delete/5
+        // GET: ProfileController/Delete/betty-suarez
         [Route("Profile/Delete/{id}")]
-        public ActionResult Delete(int id)
+        public ActionResult Delete(string id)
         {
-            return View();
+            if (string.IsNullOrEmpty(id))
+            {
+                PenProfile? penProfile = db.PenProfiles.Where(i => i.UrlString == id).FirstOrDefault();
+
+                if (penProfile == null)
+                {
+                    return RedirectToAction("NotFound");
+                }
+
+                AccessPermission accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == penProfile.AccessPermissionId).FirstOrDefault();
+
+                if (accessPermission == null)
+                {
+                    return RedirectToAction("NotFound");
+                }
+
+                List<IdentityError> errors = new List<IdentityError>();
+                bool isAccessable = IsAccessableByUser(penProfile.AccessPermissionId, ref errors, "delete");
+
+                if (isAccessable)
+                {
+                    return View(penProfile);
+                }
+                else
+                {
+                    return RedirectToAction("DeleteAccessDenied", new { id = penProfile.AccessPermissionId });
+                }
+            }
+
+            return RedirectToAction("NotFound");
         }
 
-        // POST: ProfileController/Delete/5
+        // POST: ProfileController/Delete/betty-suarez
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(string id, IFormCollection collection)
         {
             try
             {
@@ -213,6 +271,52 @@ namespace Penfolio2.Controllers
             IsAccessableByUser(id, ref errors);
 
             if(errors.Any(i => i.Description == "Request not found."))
+            {
+                return RedirectToAction("NotFound");
+            }
+
+            string errorString = "";
+
+            foreach (IdentityError error in errors)
+            {
+                errorString += error.Description + " ";
+            }
+
+            ViewBag.ErrorString = errorString;
+
+            return View();
+        }
+
+        [Route("Profile/EditAccessDenied/{id}")]
+        public ActionResult EditAccessDenied(int id)
+        {
+            List<IdentityError> errors = new List<IdentityError>();
+            IsAccessableByUser(id, ref errors, "edit");
+
+            if (errors.Any(i => i.Description == "Request not found."))
+            {
+                return RedirectToAction("NotFound");
+            }
+
+            string errorString = "";
+
+            foreach (IdentityError error in errors)
+            {
+                errorString += error.Description + " ";
+            }
+
+            ViewBag.ErrorString = errorString;
+
+            return View();
+        }
+
+        [Route("Profile/DeleteAccessDenied/{id}")]
+        public ActionResult DeleteAccessDenied(int id)
+        {
+            List<IdentityError> errors = new List<IdentityError>();
+            IsAccessableByUser(id, ref errors, "delete");
+
+            if (errors.Any(i => i.Description == "Request not found."))
             {
                 return RedirectToAction("NotFound");
             }
