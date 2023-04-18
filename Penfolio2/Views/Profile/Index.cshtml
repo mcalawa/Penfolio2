@@ -3,7 +3,10 @@
 @{
     ViewData["Title"] = "Index";
 }
-@await Component.InvokeAsync("Profile", new { urlString = Model.UrlString })
+@if(ViewBag.OwnProfile == "true")
+{
+    @await Component.InvokeAsync("Profile", new { urlString = Model.UrlString })
+}
 
 <h1 class="clear-right">@Model.DisplayName</h1>
 

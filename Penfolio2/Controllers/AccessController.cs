@@ -117,6 +117,11 @@ namespace Penfolio2.Controllers
             return db.PenProfiles.Any(i => i.UserId == GetUserId() && i.RoleId == 2);
         }
 
+        protected bool UserHasVerifiedPublisherProfile()
+        {
+            return db.PenProfiles.Any(i => i.UserId == GetUserId() && i.RoleId == 2 && i.Verified);
+        }
+
         protected bool ProfileBelongsToUser(int id)
         {
             var penProfile = GetProfileById(id);
@@ -157,6 +162,41 @@ namespace Penfolio2.Controllers
         {
             urlString = urlString.ToLower();
             return ProfileExistsAtUrlString(urlString) ? db.PenProfiles.Where(i => i.UrlString == urlString).FirstOrDefault().ProfileId : 0;
+        }
+
+        protected bool UserHasEnteredBirthdate()
+        {
+            string userId = GetUserId();
+            PenUser user = GetUserById(userId);
+
+            if(user.Birthdate == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        protected bool UserHasEnteredBirthdate(string userId)
+        {
+            PenUser user = GetUserById(userId);
+
+            if (user.Birthdate == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        protected bool UserHasEnteredBirthdate(PenUser user)
+        {
+            if (user.Birthdate == null)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         protected bool UserIsMinor()
@@ -223,8 +263,14 @@ namespace Penfolio2.Controllers
         }
 
         //maybe modify to return errors? TBD
-        protected bool IsAccessableByUser(int accessPermissionId)
+        protected bool IsAccessableByUser(int accessPermissionId, ref List<IdentityError> errors)
         {
+            //if the error list doesn't exist, create it
+            if(errors == null)
+            {
+                errors = new List<IdentityError>();
+            }
+
             string userId = GetUserId();
             PenUser user = GetUserById(userId);
             //get a list of all of this user's profiles
@@ -235,6 +281,11 @@ namespace Penfolio2.Controllers
             //if the access permission doesn't exist, return false
             if (accessPermission == null)
             {
+                errors.Add(new IdentityError
+                {
+                    Description = "Request not found."
+                });
+
                 return false;
             }
 
@@ -244,6 +295,11 @@ namespace Penfolio2.Controllers
             //if this AccessPermission was never assigned an id it is relating to, return false
             if (accessPermission.ProfileId is null && accessPermission.WritingId is null && accessPermission.FolderId is null && accessPermission.SeriesId is null)
             {
+                errors.Add(new IdentityError
+                {
+                    Description = "Request not found."
+                });
+
                 return false;
             }
 
@@ -332,6 +388,20 @@ namespace Penfolio2.Controllers
             //if the user is a minor and minor access has not been granted, we do not allow permission even in the case of an individual access grant having been given
             if (accessPermission.MinorAccess == false && UserIsMinor(user))
             {
+                if(UserHasEnteredBirthdate(user))
+                {
+                    errors.Add(new IdentityError
+                    {
+                        Description = "This " + accessType + " is not accessable by minors."
+                    });
+                }
+                else
+                {
+                    errors.Add(new IdentityError
+                    {
+                        Description = "This " + accessType + " is not accessable by minors or those who have not entered their date of birth for their account. If you are not a minor, you may be able to access this " + accessType + " by editing your user account to include your birthday."
+                    });
+                }
                 return false;
             }
 
@@ -346,6 +416,11 @@ namespace Penfolio2.Controllers
                     || db.Folders.Any(i => i.AccessPermissionId == accessPermissionId && i.CreatorId == block.BlockingUserId)
                     || db.Series.Any(i => i.AccessPermissionId == accessPermissionId && i.CreatorId == block.BlockingUserId))
                 {
+                    errors.Add(new IdentityError
+                    {
+                        Description = "Your account has been blocked from accessing this " + accessType + " by its owner."
+                    });
+
                     return false;
                 }
             }
@@ -460,6 +535,11 @@ namespace Penfolio2.Controllers
             //if they have individual access revokes but no grants, return false
             if (individualAccessRevokes.Count > 0 && individualAccessGrants.Count == 0)
             {
+                errors.Add(new IdentityError
+                {
+                    Description = "You have had your access revoked by the owner of this " + accessType + "."
+                });
+
                 return false;
             } //if they have individual access grants and no revokes, return true
             else if (individualAccessGrants.Count > 0 && individualAccessRevokes.Count == 0)
@@ -474,6 +554,11 @@ namespace Penfolio2.Controllers
                 }
                 else
                 {
+                    errors.Add(new IdentityError
+                    {
+                        Description = "You have had your access revoked by the owner of this " + accessType + "."
+                    });
+
                     return false;
                 }
             }
@@ -550,6 +635,55 @@ namespace Penfolio2.Controllers
                         }
                     } //if it's a series
                 } //if there's friend access
+
+                if(accessPermission.PublisherAccess && accessPermission.FriendAccess)
+                {
+                    if(UserHasVerifiedPublisherProfile() && !UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by verified publishers and friends. To gain access, have your publisher account verified, send a friend request, or request individual access."
+                        });
+                    }
+                    else
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by verified publishers and friends. To gain access, send a friend request or request individual access."
+                        });
+                    }
+                }
+                else if(accessPermission.PublisherAccess)
+                {
+                    if (UserHasVerifiedPublisherProfile() && !UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by verified publishers. To gain access, have your publisher account verified or request individual access."
+                        });
+                    }
+                    else
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by verified publishers. To gain access, request individual access."
+                        });
+                    }
+                }
+                else if(accessPermission.FriendAccess)
+                {
+                    errors.Add(new IdentityError
+                    {
+                        Description = "This " + accessType + " is only accessable by friends. To gain access, send a friend request or request individual access."
+                    });
+                }
+                else
+                {
+                    errors.Add(new IdentityError
+                    {
+                        Description = "This " + accessType + " is only accessable by owner permission. To gain access, request individual access."
+                    });
+                }
             } //if there's not public access
 
             //if you somehow manage to make it this far, return false

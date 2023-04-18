@@ -9,25 +9,31 @@
 {
     <div class="right-align">
         <ul class="navbar-nav profileList">
+            @if(Model.Count() > 1)
+            {
+                <li>
+                    <select id="profileSelect" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+                        @foreach (var profile in Model)
+                        {
+                            <option value="/Profile/@profile.UrlString">
+                                @profile.DisplayName (@if (profile.UseSecondaryRoleName)
+                                {
+                                        @profile.PenRole.SecondaryRoleName
+                                }
+                                else
+                                {
+                                   @profile.PenRole.RoleName
+                                })
+                            </option>
+                        }
+                    </select>
+                </li>
+            }
             <li>
-                <select id="profileSelect" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
-                    @foreach (var profile in Model)
-                    {
-                        <option value="/Profile/@profile.UrlString">
-                            @profile.DisplayName (@if (profile.UseSecondaryRoleName)
-                            {
-                                    @profile.PenRole.SecondaryRoleName
-                            }
-                            else
-                            {
-                               @profile.PenRole.RoleName
-                            })
-                        </option>
-                    }
-                </select>
-            </li>
-            <li>
-                | <a asp-controller="Profile"
+                @if (Model.Count() > 1) 
+                {
+                    <span> | </span>
+                }<a asp-controller="Profile"
                  asp-action="Edit"
                  asp-route-id="@Model.First().UrlString" id="profileEdit">Edit</a>
             </li>

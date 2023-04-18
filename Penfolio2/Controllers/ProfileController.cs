@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Penfolio2.Data;
@@ -38,6 +39,8 @@ namespace Penfolio2.Controllers
                     db.Entry(mainProfile).State = EntityState.Modified;
                     db.SaveChanges();
                 }
+                
+                ViewBag.OwnProfile = "true";
 
                 return View(mainProfile);
             }
@@ -93,13 +96,18 @@ namespace Penfolio2.Controllers
                     ViewBag.OwnProfile = "false";
                 }
 
-                if (IsAccessableByUser(penProfile.AccessPermissionId))
+                List<IdentityError> errors = new List<IdentityError>();
+                bool isAccessable = IsAccessableByUser(penProfile.AccessPermissionId, ref errors);
+
+                if (isAccessable)
                 {
                     return View(penProfile);
                 }
+                else
+                {
+                    return RedirectToAction("AccessDenied", new { id = penProfile.AccessPermissionId });
+                }
             }
-
-            return View();
         }
 
         // GET: ProfileController/Create
@@ -219,6 +227,35 @@ namespace Penfolio2.Controllers
             {
                 return View();
             }
+        }
+
+        [Route("Profile/AccessDenied/{id}")]
+        public ActionResult AccessDenied(int id)
+        {
+            List<IdentityError> errors = new List<IdentityError>();
+            IsAccessableByUser(id, ref errors);
+
+            if(errors.Any(i => i.Description == "Request not found."))
+            {
+                return RedirectToAction("NotFound");
+            }
+
+            string errorString = "";
+
+            foreach (IdentityError error in errors)
+            {
+                errorString += error.Description + " ";
+            }
+
+            ViewBag.ErrorString = errorString;
+
+            return View();
+        }
+
+        [Route("Profile/NotFound")]
+        public ActionResult NotFound()
+        {
+            return View();
         }
 
         public string CreateUrlString()

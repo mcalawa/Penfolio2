@@ -72,6 +72,10 @@ namespace Penfolio2.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Phone number")]
             [AllowNull]
             public string PhoneNumber { get; set; }
+
+            [Display(Name = "Date of Birth"), DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true), DataType(DataType.Date)]
+            [AllowNull]
+            public DateTime? Birthdate { get; set; }
         }
 
         private async Task LoadAsync(PenUser user)
@@ -80,6 +84,7 @@ namespace Penfolio2.Areas.Identity.Pages.Account.Manage
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             var givenName = user.GivenName;
             var surname = user.Surname;
+            var birthdate = user.Birthdate;
 
             Username = userName;
 
@@ -88,7 +93,8 @@ namespace Penfolio2.Areas.Identity.Pages.Account.Manage
                 PhoneNumber = phoneNumber,
                 UserName = userName,
                 GivenName = givenName,
-                Surname = surname
+                Surname = surname,
+                Birthdate = birthdate
             };
         }
 
@@ -141,6 +147,12 @@ namespace Penfolio2.Areas.Identity.Pages.Account.Manage
             if (Input.Surname != surname)
             {
                 user.Surname = Input.Surname;
+                await _userManager.UpdateAsync(user);
+            }
+
+            if(Input.Birthdate != user.Birthdate)
+            {
+                user.Birthdate = Input.Birthdate;
                 await _userManager.UpdateAsync(user);
             }
 
