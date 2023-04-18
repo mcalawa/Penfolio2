@@ -58,32 +58,9 @@ namespace Penfolio2.Controllers
             PenProfile? penProfile = GetProfileFromUrlString(id);
 
             //if there's no profile, return a view with an error message
-            //TBD
             if (penProfile == null)
             {
-                if (UserHasProfile())
-                {
-                    penProfile = GetMainProfile();
-
-                    if (penProfile == null)
-                    {
-                        List<PenProfile> penProfiles = GetPenProfiles().ToList();
-                        penProfiles.OrderBy(i => i.ProfileId).ToList();
-
-                        penProfile = penProfiles.FirstOrDefault();
-                        penProfile.IsMainProfile = true;
-                        db.Entry(penProfile).State = EntityState.Modified;
-                        db.SaveChanges();
-                    }
-
-                    ViewBag.OwnProfile = "true";
-
-                    return View(penProfile);
-                }
-                else
-                {
-                    return RedirectToAction("Create");
-                }
+                return RedirectToAction("NotFound");
             }
             else
             {
