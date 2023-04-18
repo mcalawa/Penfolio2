@@ -20,3 +20,20 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.right-align {
+    float: right;
+}
+
+.profileList { 
+    display: inline-block;
+}
+
+.profileList li {
+    float: left;
+    padding-right: 5px;
+}
+
+.clear-right {
+    clear: right;
+}

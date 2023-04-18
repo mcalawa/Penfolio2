@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Penfolio2.Data;
 using Penfolio2.Models;
-using System.Drawing;
 
 namespace Penfolio2.Controllers
 {
@@ -172,7 +171,7 @@ namespace Penfolio2.Controllers
                 db.Entry(ap).State = EntityState.Modified;
                 db.SaveChanges();
 
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { id = penProfile.UrlString });
             }
 
             return View(model);
@@ -271,13 +270,14 @@ namespace Penfolio2.Controllers
 
         public byte[] CreateProfileImage()
         {
-            var stream = environment.WebRootFileProvider.GetFileInfo("images/defaultprofileicon.png").CreateReadStream();
-            var image = Image.FromStream(stream);
-            //Graphics graphics = Graphics.FromImage(image);
-
-            var imageCoverter = new ImageConverter();
-            byte[] profileImage = (byte[])imageCoverter.ConvertTo(image, typeof(byte[]));
-
+            Stream stream = environment.WebRootFileProvider.GetFileInfo("images/defaultprofileicon.png").CreateReadStream();
+            byte[] profileImage = null;
+            using(BinaryReader reader = new BinaryReader(stream))
+            {
+                profileImage = reader.ReadBytes(Convert.ToInt32(stream.Length));
+                reader.Close();
+            }
+            
             return profileImage;
         }
     }

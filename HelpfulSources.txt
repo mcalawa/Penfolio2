@@ -1,0 +1,39 @@
+Identity:
+https://dev.to/moesmp/how-to-extend-identity-usermanager-class-4e2c Extending the UserManager class
+https://www.yogihosting.com/aspnet-core-identity-username-email-password-policy/ Custom validation username, email, and password
+https://codewithmukesh.com/blog/user-management-in-aspnet-core-mvc/ Setting up and customizing identity
+https://en.wikipedia.org/wiki/Email_address Valid formatting for email addresses
+https://learn.microsoft.com/en-us/aspnet/core/security/authentication/accconfirm?view=aspnetcore-7.0&tabs=visual-studio Documentation for account confirmation and password recovery including using SendGrid
+https://learn.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity?view=aspnetcore-7.0&tabs=visual-studio#scaffold-identity-into-a-razor-project-with-authorization Documentation for scaffolding identity
+https://developer.okta.com/blog/2020/09/23/secure-pii-ef-core-dotnet How to secure PII with Entity Framework Core
+https://stackoverflow.com/questions/53030838/net-core-get-user-in-validationattribute Getting user in Validation
+
+Model:
+https://learn.microsoft.com/en-us/aspnet/core/mvc/models/validation?view=aspnetcore-7.0 Documentation for model validation
+https://geeksarray.com/blog/how-to-do-custom-validation-using-validationattribute-of-aspnet-mvc Custom validation attributes
+https://www.codeproject.com/Articles/1130113/Best-Ways-of-Implementing-Uniqueness-or-Unique-Key Unique key attribute implementation
+https://www.entityframeworktutorial.net/code-first/foreignkey-dataannotations-attribute-in-code-first.aspx Foreign key data annotations.
+
+View:
+https://stackoverflow.com/questions/60127942/how-to-pass-current-selection-value-to-route-id-in-mvc-core-view Passing currently selected option to asp-route-id attribute of a link
+
+Controller:
+https://stackoverflow.com/questions/42587428/get-image-from-wwwroot-images-in-asp-net-core Get image from wwwroot/images
+
+View Components:
+https://www.davepaquette.com/archive/2016/01/02/goodbye-child-actions-hello-view-components.aspx
+
+JavaScript:
+https://www.freecodecamp.org/news/here-is-the-most-popular-ways-to-make-an-http-request-in-javascript-954ce8c95aaa/
+https://stackoverflow.com/questions/43176647/how-to-call-a-action-name-on-dropdown-change-in-mvc
+https://stackoverflow.com/questions/60127942/how-to-pass-current-selection-value-to-route-id-in-mvc-core-view
+
+General: 
+https://learn.microsoft.com/en-us/aspnet/core/introduction-to-aspnet-core?view=aspnetcore-7.0#recommended-learning-path Documentation for ASP.NET Core 7.0
+https://github.com/Apress/pro-asp.net-mvc-5 Source code for my ASP.NET MVC 5 Book
+https://www.c-sharpcorner.com/UploadFile/201fc1/what-is-random-urls-and-how-to-creating-them-in-Asp-Net/ Creating random URLs
+https://stackoverflow.com/questions/61238877/asp-net-core-c-sharp-select-option-redirect-change-selected-option Redirect on option select
+https://blog.elmah.io/how-to-get-base-url-in-asp-net-core/ How to get base URL
+
+Other:
+https://www.publicdomainpictures.net/en/view-image.php?image=75286&picture=ink-amp-feather-quill-clipart Public domain image for the default user icons.

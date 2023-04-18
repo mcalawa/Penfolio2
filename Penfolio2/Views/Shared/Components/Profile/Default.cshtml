@@ -7,52 +7,34 @@
 
 @if (Model.Count() > 0)
 {
-    <ul class="navbar-nav">
-        <li>
-            <select id="profileSelect" onchange="">
-                @foreach (var profile in Model)
-                {
-                    <option value="@profile.UrlString" onchange="location.href='@Url.Action("", "Profile", new {id = profile.UrlString})'">
-                        <a asp-controller="Profile"
-                   asp-action="Index"
-                   asp-route-id="@profile.UrlString">
+    <div class="right-align">
+        <ul class="navbar-nav profileList">
+            <li>
+                <select id="profileSelect" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+                    @foreach (var profile in Model)
+                    {
+                        <option value="/Profile/@profile.UrlString">
                             @profile.DisplayName (@if (profile.UseSecondaryRoleName)
                             {
-                                @profile.PenRole.SecondaryRoleName
+                                    @profile.PenRole.SecondaryRoleName
                             }
                             else
                             {
-                                @profile.PenRole.RoleName
+                               @profile.PenRole.RoleName
                             })
-                        </a>
-                    </option>
-                }
-            </select>
-        </li>
-        <li>
-            | <a asp-controller="Profile"
-             asp-action="Edit"
-             asp-route-id="@Model.First().UrlString" id="profileEdit">Edit</a>
-        </li>
-    </ul>
-
-    <script src="~/lib/jquery/dist/jquery.js" type="text/javascript"></script>
-
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $('select#profileSelect').change(function () {
-                var urlString = 'Profile/' + $(this).children.('option:selected').val();
-                $.ajax({
-                    url: urlString,
-                    type: 'GET'
-                }
-                        });
-        })
-                })
-        $(document).ready(function () {
-            $('select#profileSelect').change(function () {
-                $('a#profileEdit').attr('href', 'Profile/Edit/' + $(this).children('option:selected').val());
-            })
-        })
-    </script>
+                        </option>
+                    }
+                </select>
+            </li>
+            <li>
+                | <a asp-controller="Profile"
+                 asp-action="Edit"
+                 asp-route-id="@Model.First().UrlString" id="profileEdit">Edit</a>
+            </li>
+            <li>
+                | <a asp-controller="Profile"
+                     asp-action="Create">Create New Profile</a>
+            </li>
+        </ul>
+    </div>
 }

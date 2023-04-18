@@ -2,9 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Penfolio2.Data;
 using Penfolio2.Models;
-using Penfolio2.Controllers;
 using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 
 namespace Penfolio2.Validation
 {
@@ -18,10 +16,9 @@ namespace Penfolio2.Validation
                 List<IdentityError> errors = new List<IdentityError>();
                 DbContextOptions<ApplicationDbContext> options = new DbContextOptions<ApplicationDbContext>();
                 ApplicationDbContext db = new ApplicationDbContext(options);
-                AccessController ac = new AccessController();
-                ClaimsPrincipal cp = new ClaimsPrincipal();
-                string? otherUsername = cp?.Identity?.Name;
-                string? username = ac.GetUserName();
+                var httpContextAccesor = (IHttpContextAccessor)validationContext.GetService(typeof(IHttpContextAccessor));
+                var validationUser = httpContextAccesor.HttpContext.User;
+                string username = validationUser.Identity.Name;
                 PenUser user;
 
                 if (profile == null)
@@ -88,9 +85,10 @@ namespace Penfolio2.Validation
                 List<IdentityError> errors = new List<IdentityError>();
                 DbContextOptions<ApplicationDbContext> options = new DbContextOptions<ApplicationDbContext>();
                 ApplicationDbContext db = new ApplicationDbContext(options);
-                AccessController ac = new AccessController();
                 PenProfile currentProfile;
-                string? username = ac.GetUserName();
+                var httpContextAccesor = (IHttpContextAccessor)validationContext.GetService(typeof(IHttpContextAccessor));
+                var validationUser = httpContextAccesor.HttpContext.User;
+                string username = validationUser.Identity.Name;
                 PenUser user;
 
                 if (profile == null)
@@ -165,8 +163,9 @@ namespace Penfolio2.Validation
                 List<IdentityError> errors = new List<IdentityError>();
                 DbContextOptions<ApplicationDbContext> options = new DbContextOptions<ApplicationDbContext>();
                 ApplicationDbContext db = new ApplicationDbContext(options);
-                AccessController ac = new AccessController();
-                string? username = ac.GetUserName();
+                var httpContextAccesor = (IHttpContextAccessor)validationContext.GetService(typeof(IHttpContextAccessor));
+                var validationUser = httpContextAccesor.HttpContext.User;
+                string username = validationUser.Identity.Name;
 
                 if (profile == null)
                 {
@@ -206,8 +205,9 @@ namespace Penfolio2.Validation
                 List<IdentityError> errors = new List<IdentityError>();
                 DbContextOptions<ApplicationDbContext> options = new DbContextOptions<ApplicationDbContext>();
                 ApplicationDbContext db = new ApplicationDbContext(options);
-                AccessController ac = new AccessController();
-                string? username = ac.GetUserName();
+                var httpContextAccesor = (IHttpContextAccessor)validationContext.GetService(typeof(IHttpContextAccessor));
+                var validationUser = httpContextAccesor.HttpContext.User;
+                string username = validationUser.Identity.Name;
 
                 if (profile == null)
                 {
