@@ -27,7 +27,7 @@
             </div>
             @if(ViewBag.HasProfile == "true") 
             {
-                <div class="form-group form-check collapse" onmouseover='showDescription("profile-info", "main-profile")'>
+                <div class="form-group form-check" onmouseover='showDescription("profile-info", "main-profile")'>
                     <label class="form-check-label">
                         <input class="form-check-input" asp-for="IsMainProfile" onfocus='showDescription("profile-info", "main-profile")' /> @Html.DisplayNameFor(model => model.IsMainProfile)
                     </label>
