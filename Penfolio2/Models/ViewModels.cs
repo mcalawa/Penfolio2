@@ -106,4 +106,29 @@ namespace Penfolio2.Models
         [Display(Name = "Profile Shows Up in Search")]
         public bool ShowsUpInSearch { get; set; }
     }
+
+    public class DeleteProfileViewModel
+    {
+        public DeleteProfileViewModel()
+        {
+            OtherProfiles = new HashSet<DeleteProfileViewModel>();
+        }
+
+        [Required]
+        public int ProfileId { get; set; }
+
+        [Required]
+        public string DisplayName { get; set; }
+
+        [Required]
+        public string RoleName { get; set; }
+
+        [Required]
+        public bool IsMainProfile { get; set; }
+
+        [Display(Name = "Select New Main Profile")]
+        public int? NewMainProfile { get; set; }
+
+        public virtual ICollection<DeleteProfileViewModel> OtherProfiles { get; set; }
+    }
 }

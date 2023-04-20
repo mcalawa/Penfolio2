@@ -169,6 +169,7 @@ namespace Penfolio2.Controllers
         {
             if (string.IsNullOrEmpty(id) != true)
             {
+                string userId = GetUserId();
                 PenProfile? penProfile = db.PenProfiles.Where(i => i.UrlString == id).FirstOrDefault();
 
                 if(penProfile == null)
@@ -183,10 +184,7 @@ namespace Penfolio2.Controllers
                     return RedirectToAction("NotFound");
                 }
 
-                List<IdentityError> errors = new List<IdentityError>();
-                bool isAccessable = IsAccessableByUser(penProfile.AccessPermissionId, ref errors, "edit");
-
-                if (isAccessable)
+                if (penProfile.UserId == userId)
                 {
                     string name = penProfile.DisplayName;
                     PenRole role = db.ProfileRoles.Where(i => i.RoleId == penProfile.RoleId).FirstOrDefault();
@@ -575,6 +573,7 @@ namespace Penfolio2.Controllers
         {
             if (!string.IsNullOrEmpty(id))
             {
+                string userId = GetUserId();
                 PenProfile? penProfile = db.PenProfiles.Where(i => i.UrlString == id).FirstOrDefault();
 
                 if (penProfile == null)
@@ -589,12 +588,45 @@ namespace Penfolio2.Controllers
                     return RedirectToAction("NotFound");
                 }
 
-                List<IdentityError> errors = new List<IdentityError>();
-                bool isAccessable = IsAccessableByUser(penProfile.AccessPermissionId, ref errors, "delete");
-
-                if (isAccessable)
+                if (penProfile.UserId == userId)
                 {
-                    return View(penProfile);
+                    List<PenProfile> profileList = db.PenProfiles.Where(i => i.UserId == userId && i.ProfileId != penProfile.ProfileId).ToList();
+                    List<DeleteProfileViewModel> otherProfiles = new List<DeleteProfileViewModel>();
+
+                    foreach(var profile in profileList)
+                    {
+                        PenRole profileRole = db.ProfileRoles.Where(i => i.RoleId == profile.RoleId).FirstOrDefault();
+
+                        var deleteModel = new DeleteProfileViewModel
+                        {
+                            ProfileId = profile.ProfileId,
+                            DisplayName = profile.DisplayName,
+                            RoleName = profile.RoleId == null ? "" : profile.UseSecondaryRoleName ? profileRole.SecondaryRoleName : profileRole.RoleName,
+                            IsMainProfile = profile.IsMainProfile,
+                            OtherProfiles = new List<DeleteProfileViewModel>(),
+                            NewMainProfile = null
+                        };
+
+                        otherProfiles.Add(deleteModel);
+                    }
+
+                    PenRole role = db.ProfileRoles.Where(i => i.RoleId == penProfile.RoleId).FirstOrDefault();
+                    string roleName = role == null ? "" : penProfile.UseSecondaryRoleName ? role.SecondaryRoleName : role.RoleName;
+                    string name = penProfile.DisplayName + " (" + roleName + ")";
+
+                    ViewBag.ProfileName = name;
+
+                    var model = new DeleteProfileViewModel
+                    {
+                        ProfileId = penProfile.ProfileId,
+                        DisplayName = penProfile.DisplayName,
+                        RoleName = roleName,
+                        IsMainProfile = penProfile.IsMainProfile,
+                        OtherProfiles = otherProfiles,
+                        NewMainProfile = null
+                    };
+
+                    return View(model);
                 }
                 else
                 {
@@ -608,16 +640,136 @@ namespace Penfolio2.Controllers
         // POST: ProfileController/Delete/betty-suarez
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(string id, IFormCollection collection)
+        [Route("Profile/Delete/{id}")]
+        public ActionResult Delete(string id, DeleteProfileViewModel model)
         {
-            try
+            if(string.IsNullOrEmpty(id))
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("NotFound");
             }
-            catch
+
+            string userId = GetUserId();
+            PenProfile? penProfile = db.PenProfiles.Where(i => i.UrlString == id).FirstOrDefault();
+
+            if(penProfile == null)
             {
-                return View();
+                return RedirectToAction("NotFound");
             }
+
+            if(penProfile.UserId != userId)
+            {
+                return RedirectToAction("DeleteAccessDenied");
+            }
+
+            if(ModelState.IsValid)
+            {
+                if(penProfile.ProfileId != model.ProfileId)
+                {
+                    return RedirectToAction("DeleteAccessDenied");
+                }
+
+                //first take care of the main profile stuff
+                if(penProfile.IsMainProfile)
+                {
+                    if(model.NewMainProfile == null)
+                    {
+                        return RedirectToAction("NotFound");
+                    }
+
+                    PenProfile? newMainProfile = db.PenProfiles.Where(i => i.ProfileId == model.NewMainProfile.Value).FirstOrDefault();
+                    newMainProfile.IsMainProfile = true;
+                    db.Entry(newMainProfile).State = EntityState.Modified;
+                    db.SaveChanges();
+
+                    penProfile.IsMainProfile = false;
+                    db.Entry(penProfile).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
+                AccessPermission accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == penProfile.AccessPermissionId).FirstOrDefault();
+
+                List<WritingProfile> writingProfiles = db.WritingProfiles.Where(i => i.ProfileId == model.ProfileId).ToList();
+                List<IndividualAccessRevoke> individualAccessRevokes = db.IndividualAccessRevokes.Where(i => i.RevokeeId == model.ProfileId).ToList(); //revokes for this profile will be deleted when the AccessPermission is
+                List<IndividualAccessGrant> individualAccessGrants = db.IndividualAccessGrants.Where(i => i.GranteeId == model.ProfileId).ToList(); //grants for this profile will be deleted when the AccessPermission is
+                List<Friendship> friendships = db.Friendships.Where(i => i.SecondFriendId == model.ProfileId).ToList(); //cascade happens on firstfriend delete
+                List<FriendRequest> friendRequests = db.FriendRequests.Where(i => i.RequesteeId == model.ProfileId).ToList(); //cascade happens on requestee delete
+                List<AccessRequest> accessRequests = db.AccessRequests.Where(i => i.RequesterId == model.ProfileId).ToList(); //cascade happens on AccessPermission delete
+
+                //CritiqueGiver should cascade on profile delete
+                //Critique should cascade on profile delete
+                List<FollowerFollowing> followerFollowings = db.FollowersFollowing.Where(i => i.FollowerId == model.ProfileId || i.ProfileId == model.ProfileId).ToList();
+                List<Like> likes = db.Likes.Where(i => i.LikerId == model.ProfileId || i.ProfileId == model.ProfileId).ToList();
+                List<Comment> comments = db.Comments.Where(i => i.CommenterId == model.ProfileId || i.ProfileId == model.ProfileId).ToList();
+                List<CommentReply> commentReplies = new List<CommentReply>();
+                List<CommentFlag> commentFlags = new List<CommentFlag>(); //CommentFlags will cascade on FlaggerId delete
+
+                foreach(var comment in comments)
+                {
+                    List<CommentReply> replies = db.CommentReplies.Where(i => i.CommentId == comment.CommentId).ToList();
+                    List<CommentFlag> flags = db.CommentFlags.Where(i => i.CommentId == comment.CommentId).ToList();
+
+                    foreach(var reply in replies)
+                    {
+                        comments.Add(reply.Comment);
+                    }
+
+                    foreach(var flag in flags)
+                    {
+                        commentFlags.Add(flag);
+                    }
+                }
+
+                //SeriesOwner should cascade on profile delete
+                List<FolderOwner> folderOwners = db.FolderOwners.Where(i => i.OwnerId == model.ProfileId).ToList();
+
+                db.Remove(penProfile);
+                db.SaveChanges();
+
+                if (accessPermission != null)
+                {
+                    db.Remove(accessPermission);
+                    db.SaveChanges();
+                }
+
+                //we will know if all of the following works correctly once this other stuff is implemented
+                db.RemoveRange(commentReplies);
+                db.SaveChanges();
+
+                db.RemoveRange(commentFlags);
+                db.SaveChanges();
+
+                db.RemoveRange(comments);
+                db.SaveChanges();
+
+                db.RemoveRange(folderOwners);
+                db.SaveChanges();
+
+                db.RemoveRange(likes); 
+                db.SaveChanges();
+
+                db.RemoveRange(friendships);
+                db.SaveChanges();
+
+                db.RemoveRange(friendRequests);
+                db.SaveChanges();
+
+                db.RemoveRange(followerFollowings);
+                db.SaveChanges();
+
+                db.RemoveRange(individualAccessGrants);
+                db.SaveChanges();
+
+                db.RemoveRange(individualAccessRevokes);
+                db.SaveChanges();
+
+                db.RemoveRange(writingProfiles);
+                db.SaveChanges();
+
+                return RedirectToAction("Index");
+            }
+
+
+            return RedirectToAction("NotFound");
         }
 
         [Route("Profile/AccessDenied/{id}")]
@@ -674,6 +826,14 @@ namespace Penfolio2.Controllers
             return View();
         }
 
+        [Route("Profile/DeleteAccessDenied")]
+        public ActionResult DeleteAccessDenied()
+        {
+            ViewBag.ErrorString = "You are not allowed to delete a profile you are not the owner of.";
+
+            return View();
+        }
+
         [Route("Profile/DeleteAccessDenied/{id}")]
         public ActionResult DeleteAccessDenied(int id)
         {
@@ -698,7 +858,7 @@ namespace Penfolio2.Controllers
         }
 
         [Route("Profile/NotFound")]
-        public ActionResult NotFound()
+        public new ActionResult NotFound()
         {
             return View();
         }

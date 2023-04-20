@@ -1,0 +1,50 @@
+﻿@model Penfolio2.Models.DeleteProfileViewModel
+@{
+    ViewData["Title"] = "Delete Profile";
+}
+
+<h1>@ViewData["Title"]</h1>
+<h4>@ViewBag.ProfileName</h4>
+
+<div class="alert alert-warning" role="alert">
+    <p>
+        <strong>Deleting this profile will permanently remove it from your account, and this cannot be recovered. Any comments, likes, and relationships attached to this profile will be deleted, and you may no longer be able to access some content from other users if it relied on a relationship with this profile.
+            @if(Model.RoleName == "Writer")
+            {
+                <span>Any writings, series, or folders that are only connected to this profile will need to be attached to another profile before they can be viewed again.</span>
+            }
+            @if(Model.IsMainProfile && Model.OtherProfiles.Count > 0)
+            {
+                <span>A new main profile will have to be selected before this profile can be deleted.</span>
+            }
+        </strong>
+    </p>
+</div>
+
+<h5>Would you still like to delete your profile?</h5>
+<div>
+    <form asp-action="Delete" id="delete-user" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+        <div class="collapse visually-hidden">
+            <input asp-for="ProfileId" readonly />
+            <input asp-for="DisplayName" readonly />
+            <input asp-for="RoleName" readonly />
+            <input asp-for="IsMainProfile" readonly />
+        </div>
+        @if(Model.IsMainProfile && Model.OtherProfiles.Count() > 0)
+        {
+            <div class="form-group">
+                <label asp-for="NewMainProfile" class="control-label"></label>
+                <select asp-for="NewMainProfile" class="form-control">
+                    @foreach (var profile in Model.OtherProfiles)
+                    {
+                        <option value="@profile.ProfileId">
+                            @profile.DisplayName (@profile.RoleName)
+                        </option>
+                    }
+                </select>
+            </div>
+        }
+        <button class="w-100 btn btn-lg btn-danger" type="submit">Delete Profile</button>
+    </form>
+</div>

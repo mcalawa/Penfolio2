@@ -38,6 +38,12 @@
                  asp-route-id="@Model.First().UrlString" id="profileEdit">Edit</a>
             </li>
             <li>
+                | 
+                <a asp-controller="Profile"
+                asp-action="Delete"
+                asp-route-id="@Model.First().UrlString" id="profileDelete">Delete</a>
+            </li>
+            <li>
                 | <a asp-controller="Profile"
                      asp-action="Create">Create New Profile</a>
             </li>
