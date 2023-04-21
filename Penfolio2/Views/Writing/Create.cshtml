@@ -1,0 +1,17 @@
+﻿@model Penfolio2.Models.PenUser
+@{
+    ViewBag.Title = "Create New Writing";
+}
+
+<h2>Create New Writing</h2>
+
+<div id="editorContainer">
+    <!-- Create the editor container -->
+    <div class="editor ql-container ql-snow">
+    </div>
+</div>
+
+@section editScripts {
+    <!--Initialize Quill Editor-->
+    <script src="/js/editorScript.js" type="text/javascript"></script>
+}

@@ -1,0 +1,97 @@
+﻿@model Penfolio2.Models.Writing
+
+@{
+    //variable for the byline
+    string author = "";
+    int count = Model.WritingProfiles.Count;
+
+    if(count > 0)
+    {
+        author = "<a href=\"/Profile/" + Model.WritingProfiles.First().PenProfile.UrlString + "\">" + Model.WritingProfiles.First().PenProfile.DisplayName + "</a>";
+    }
+    else if(count >= 1)
+    {
+        author = "<a href=\"/Profile/" + Model.WritingProfiles.First().PenProfile.UrlString + "\">" + Model.WritingProfiles.First().PenProfile.DisplayName + "</a>";
+
+        for(int i = 1; i < count - 1; i++)
+        {
+            author += ", <a href=\"/Profile/" + Model.WritingProfiles.ElementAt(i).PenProfile.UrlString + "\">" + Model.WritingProfiles.ElementAt(i).PenProfile.DisplayName + "</a>";
+        }
+
+        if(count > 2)
+        {
+            author += ",";
+        }
+
+        author += " and <a href=\"/Profile/" + Model.WritingProfiles.ElementAt(count - 1).PenProfile.UrlString + "\">" + Model.WritingProfiles.ElementAt(count - 1).PenProfile.DisplayName + "</a>";
+    }
+
+    //set tagCollapse to empty string
+    string tagCollapse = "";
+
+    //if the writing doesn't have any tags, set tagCollapse to collapse
+    if(Model.WritingFormats.Count <= 0 && Model.WritingGenres.Count <= 0)
+    {
+        tagCollapse = " collapse";
+    }
+
+    //tagCollapse is always placed with the tag scroller's classes,
+    //but because its value is decided based on whether or not there 
+    //are any tags, the tag scroller will only collaps if it is empty
+}
+
+<!--A view component for displaying a summary of a piece of writing; designed to be self contained so that it can easily be sed for search results or profiles or feeds-->
+<div class="writingPreview">
+    @if(Model.EditDate != null)
+    {
+        <div class="addDateTime">Edited @Html.DisplayFor(model => model.EditDate.Value, "DateTime")</div>
+    }
+    else
+    {
+        <div class="addDateTime">Posted @Html.DisplayFor(model => model.AddDate)</div>
+    }
+    <h3>@Model.Title</h3>
+    <h4>By @author</h4>
+    <div class="writingDescription">
+        <div class="descriptionText">
+            <p>@Html.DisplayFor(model => model.Description)</p>
+            <!--Links to view the full writing and to interact with it in other ways such as edit and delete if the writing belongs to the user-->
+            <span class="viewMore"><a href="/Writing/ViewWriting/@Model.WritingId">Read More</a></span>
+            @if (ViewBag.Author)
+            {
+                <span class="forUserWriting"> | <a href="/Writing/Edit/@Model.WritingId">Edit</a> | <a href="/Writing/Delete/@Model.WritingId">Delete</a></span>
+            }
+        </div>
+    </div>
+    <!--A container to hold all of the tags associated with this piece of writing; has arrow buttons on each side that can be used to scroll through tags; each tag is also a link to a view that returns writings that share that tag-->
+    <div class="tagScroller @Model.WritingId@tagCollapse">
+        <button class="scrollLeft scrollArow" data-scroll-modifier="-1" data-parent="@Model.WritingId">◀</button>
+        <button class="scrollRight scrollArrow" data-scroll-modifier="1" data-parent="@Model.WritingId">▸</button>
+        <div class="tagScrollbar" data-parent="@Model.WritingId">
+            @foreach(var format in Model.WritingFormats)
+            {
+                <span class="scrollbarTag">
+                    <a href="/Writing/SearchByFormatTag/@format.FormatId">#@format.FormatTag.FormatName</a>
+                </span>
+                foreach (var altName in format.FormatTag.AltFormatNames)
+                {
+                    <span class="scrollbarTag">
+                        <a href="/Writing/SearchByFormatTag/@format.FormatId">#@altName.AltName</a>
+                    </span>
+                }
+            }
+            @foreach(var genre in Model.WritingGenres)
+            {
+                <span class="scrollbarTag">
+                    <a href="/Writing/SearchByGenreTag/@genre.GenreId">#@genre.GenreTag.GenreName</a>
+                </span>
+                foreach(var altName in genre.GenreTag.AltGenreNames)
+                {
+                    <span class="scrollbarTag">
+                        <a href="/Writing/SearchByGenreTag/@genre.GenreId">#@altName.AltName</a>
+                    </span>
+                }
+            }
+        </div>
+    </div>
+</div>

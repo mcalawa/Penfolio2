@@ -6,7 +6,11 @@
     <title>@ViewData["Title"] - Penfolio</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Penfolio2.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/writingPreviewMin.css" asp-append-version="true" />
+    <!-- Include Quill stylesheet -->
+    <link href="https://cdn.quilljs.com/1.0.0/quill.snow.css" rel="stylesheet" />
+    <!--Styles for overwriting the parts of snow that were messing up my styles-->
+    <link href="~/Content/snowOverwrite.css" rel="stylesheet" />
 </head>
 <body>
     <header>
@@ -49,5 +53,10 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <!-- Include the Quill library -->
+    <script src="https://cdn.quilljs.com/1.0.0/quill.js"></script>
+    @RenderSection("editScripts", required: false)
+    <!-- Scripts for _WritingPreview -->
+    <script src="~/Scripts/writingPreviewScript.js" type="text/javascript"></script>
 </body>
 </html>

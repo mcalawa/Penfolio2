@@ -22,6 +22,7 @@ https://stackoverflow.com/questions/42587428/get-image-from-wwwroot-images-in-as
 
 View Components:
 https://www.davepaquette.com/archive/2016/01/02/goodbye-child-actions-hello-view-components.aspx
+https://www.mattmillican.com/posts/shared-view-components-with-multiple-presentations/ Multiple view components
 
 JavaScript:
 https://www.freecodecamp.org/news/here-is-the-most-popular-ways-to-make-an-http-request-in-javascript-954ce8c95aaa/

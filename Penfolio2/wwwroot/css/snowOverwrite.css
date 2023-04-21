@@ -1,0 +1,44 @@
+﻿/* Overwrite stuff from the snow stylesheet that messes up the display of the editor */
+#editorContainer {
+    display: inline-block;
+    background-color: #fff;
+}
+
+    #editorContainer .ql-container {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+        height: 375px;
+    }
+
+.ql-editor .ql-font-times {
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.ql-editor .ql-font-courier {
+    font-family: Courier New, Courier, monospace;
+}
+
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label[data-value='arial']:not([data-label])::before,
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-item[data-value='arial']::before,
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
+    content: 'Arial';
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label[data-value='times']:not([data-label])::before,
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-item[data-value='times']::before,
+#editorContainer .ql-font-times .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
+    content: 'Times';
+    font-family: 'Times New Roman', Times, serif;
+}
+
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label[data-value='courier']:not([data-label])::before,
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-item[data-value='courier']::before,
+#editorContainer .ql-font-courier .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
+    content: 'Courier New';
+    font-family: Courier New, Courier, monospace;
+}
+
+.ql-snow .ql-picker.ql-font {
+    width: 125px;
+}

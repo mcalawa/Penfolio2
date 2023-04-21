@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Penfolio2.Data;
 using Penfolio2.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Penfolio2.Controllers
 {

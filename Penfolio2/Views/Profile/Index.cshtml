@@ -32,6 +32,10 @@
     @if (Model.RoleId == 1)
     {
         <h4>Writing</h4>
+        @foreach (var writing in Model.ProfileWritings.Select(i => i.Writing).OrderByDescending(i => i.EditDate == null ? i.EditDate : i.AddDate))
+        {
+            @await Component.InvokeAsync("Writing", new { id = writing.WritingId })
+        }
     }
     else
     {
