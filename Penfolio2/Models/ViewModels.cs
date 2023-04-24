@@ -131,4 +131,64 @@ namespace Penfolio2.Models
 
         public virtual ICollection<DeleteProfileViewModel> OtherProfiles { get; set; }
     }
+
+    public class CreateWritingViewModel
+    {
+        public CreateWritingViewModel() 
+        {
+            WritingProfiles = new HashSet<PenProfile>();
+            FormatTags = new HashSet<FormatTag>();
+            GenreTags = new HashSet<GenreTag>();
+        }
+
+        [Required, NotNull]
+        [Display(Name = "Title")]
+        public string Title { get; set; } = string.Empty;
+
+        [AllowNull]
+        [Display(Name = "Description")]
+        public string? Description { get; set; }
+
+        [Required, NotNull]
+        public string EditorContent { get; set; } = string.Empty;
+
+        [Required]
+        [Display(Name = "Allow Public Access")]
+        public bool PublicAccess { get; set; } = false;
+
+        [Required]
+        [Display(Name = "Allow Friend Access")]
+        public bool FriendAccess { get; set; } = false;
+
+        [Required]
+        [Display(Name = "Allow Publisher and Literary Agent Access")]
+        public bool PublisherAccess { get; set; } = false;
+
+        [Required]
+        [Display(Name = "Allow Minor Access")]
+        public bool MinorAccess { get; set; } = false;
+
+        [Required]
+        [Display(Name = "Writing Shows Up in Search")]
+        public bool ShowsUpInSearch { get; set; } = false;
+
+        [Required, NotNull]
+        public string SelectedProfiles { get; set; } = string.Empty;
+
+        [Required, NotNull]
+        public string SelectedFormats { get; set; } = string.Empty;
+
+        [Required, NotNull]
+        public string SelectedGenres { get; set; } = string.Empty;
+
+        public virtual ICollection<PenProfile> WritingProfiles { get; set; }
+
+        public virtual ICollection<FormatTag> FormatTags { get; set; }
+
+        public virtual ICollection<GenreTag> GenreTags { get; set; }
+
+        public virtual ICollection<FormatCategory> FormatCategories { get; set; }
+
+        public virtual ICollection<GenreCategory> GenreCategories { get; set; }
+    }
 }

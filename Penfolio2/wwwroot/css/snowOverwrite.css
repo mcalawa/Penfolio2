@@ -4,11 +4,11 @@
     background-color: #fff;
 }
 
-    #editorContainer .ql-container {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 18px;
-        height: 375px;
-    }
+#editorContainer .ql-container {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    height: 375px;
+}
 
 .ql-editor .ql-font-times {
     font-family: 'Times New Roman', Times, serif;

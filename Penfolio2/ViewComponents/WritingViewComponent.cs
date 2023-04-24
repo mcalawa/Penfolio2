@@ -14,7 +14,7 @@ namespace Penfolio2.ViewComponents
             _db = db;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(string viewName = null)
+        public async Task<IViewComponentResult> InvokeAsync(int? id = null, string viewName = null)
         {
             if(!string.IsNullOrEmpty(viewName))
             {
@@ -32,11 +32,11 @@ namespace Penfolio2.ViewComponents
                 }
             }
 
-            return View();
-        }
+            if(id == null)
+            {
+                return View();
+            }
 
-        public IViewComponentResult Invoke(int id)
-        {
             string username = User?.Identity?.Name;
 
             if (username != null)
@@ -45,16 +45,16 @@ namespace Penfolio2.ViewComponents
             }
 
             PenUser currentUser = _db.PenUsers.Where(i => i.NormalizedUserName == username).FirstOrDefault();
-            Writing writing = _db.Writings.Where(i => i.WritingId == id).FirstOrDefault();
+            Writing writing = _db.Writings.Where(i => i.WritingId == id.Value).FirstOrDefault();
 
-            if(writing == null || currentUser == null)
+            if (writing == null || currentUser == null)
             {
                 return View();
             }
 
             ViewBag.Author = false;
 
-            if(currentUser.Id == writing.UserId)
+            if (currentUser.Id == writing.UserId)
             {
                 ViewBag.Author = true;
             }
@@ -62,14 +62,14 @@ namespace Penfolio2.ViewComponents
             {
                 List<WritingProfile> owners = _db.WritingProfiles.Where(i => i.WritingId == id).ToList();
 
-                foreach(var owner in owners)
+                foreach (var owner in owners)
                 {
-                    if(owner.PenProfile == null)
+                    if (owner.PenProfile == null)
                     {
                         owner.PenProfile = _db.PenProfiles.Where(i => i.ProfileId == owner.ProfileId).First();
                     }
 
-                    if(owner.PenProfile.UserId == currentUser.Id)
+                    if (owner.PenProfile.UserId == currentUser.Id)
                     {
                         ViewBag.Author = true;
                     }

@@ -12,7 +12,7 @@
         var editor = new Quill('#editorContainer .editor', {
             bounds: '#editorContainer .editor',
             modules: {
-                'formula': true,
+                'formula': false,
                 'syntax': true,
                 'toolbar': [
                     [{ 'font': fonts }, { 'size': [] }],

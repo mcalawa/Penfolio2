@@ -61,7 +61,36 @@ namespace Penfolio2.Controllers
                 return RedirectToAction("Create", "Profile");
             }
 
-            return View();
+            var userId = GetUserId();
+
+            if(userId == null)
+            {
+                return View();
+            }
+
+            var writingProfiles = GetWriterProfiles(userId);
+            var formatTags = db.FormatTags.ToList();
+            var genreTags = db.GenreTags.ToList();
+            
+
+
+            ViewBag.Profiles = String.Join(",", writingProfiles.Select(i => i.ProfileId));
+            ViewBag.FormatTags = String.Join(",", formatTags.Select(i => i.FormatId));
+            ViewBag.GenreTags = String.Join(",", genreTags.Select(i => i.GenreId));
+
+var formatCategories = db.FormatCategories.ToList();
+            var genreCategories = db.GenreCategories.ToList();
+            var model = new CreateWritingViewModel
+            {
+                WritingProfiles = writingProfiles,
+                GenreTags = genreTags,
+                FormatTags = formatTags,
+                GenreCategories = genreCategories,
+                FormatCategories = formatCategories,
+                Description = null
+            };
+
+            return View(model);
         }
 
         // POST: WritingController/Create

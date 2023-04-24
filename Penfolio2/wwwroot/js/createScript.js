@@ -1,6 +1,6 @@
 ﻿/**
- * Scripts for the profile create page to give information that 
- * explains all of the various parts of the profile create page.
+ * Scripts for the profile and writing create pages to give information that 
+ * explains all of the various parts of the create pages.
  * */
 
 /**

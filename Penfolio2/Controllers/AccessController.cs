@@ -918,6 +918,11 @@ namespace Penfolio2.Controllers
             return user;
         }
 
+        protected ICollection<FormatTag> GetFormatTags()
+        {
+            return db.FormatTags.ToList();
+        }
+
         private Task<PenUser?> GetCurrentUserAsync()
         {
             return _userManager.GetUserAsync(HttpContext.User);

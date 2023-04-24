@@ -1,17 +1,232 @@
-﻿@model Penfolio2.Models.PenUser
+﻿@model Penfolio2.Models.CreateWritingViewModel
 @{
     ViewBag.Title = "Create New Writing";
+    IEnumerable<Penfolio2.Models.FormatCategory> fc = Model.FormatCategories.Where(i => i.SecondaryParentId == null).ToList();
 }
 
 <h2>Create New Writing</h2>
 
-<div id="editorContainer">
-    <!-- Create the editor container -->
-    <div class="editor ql-container ql-snow">
-    </div>
-</div>
+<div class="editorMenu">
+    <div class="slideshowContainer">
+        <form method="post" id="editorForm">
+            <!--Title, description, and editor-->
+            <div class="slide1">
+                <div class="inputGroup">
+                    <div class="form-group">
+                        <label asp-for="Title" class="control-label"></label>
+                        <input asp-for="Title" class="form-control" id="title" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Description" class="control-label"></label>
+                        <textarea asp-for="Description" class="form-control" id="description"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <div id="editorContainer">
+                            <!-- Create the editor container -->
+                            <div id="editor" class="editor ql-editior ql-container">
+                            </div>
+                        </div>
+                    </div>
+                </div> <!--inputGroup-->
+
+                <!--when you click next, slide1 collapses and slide2 uncollapses-->
+                <div class="buttonGroup">
+                    <a class="nextPage" onclick='loadSlide("slide1", "slide2")'>Next</a>
+                </div>
+            </div> <!--slide1-->
+
+            <!--Author-->
+            <div class="slide2 collapse">
+                <div class="inputGroup">
+                    <h3>Select Profiles for Writing</h3>
+                    <div class="profileSelector">
+                        <div id="profileContainer">
+                            <!--For each profile connected to the current user, create a checkbox for that profile-->
+                            @foreach (var profile in Model.WritingProfiles)
+                            {
+                                <div class="form-group checkItem2">
+                                    <input type="checkbox" class="@profile.ProfileId" value="@profile.ProfileId" /> <span class="profileName @profile.ProfileId">@profile.DisplayName</span>
+                                </div>
+                            }
+                        </div>
+                    </div> 
+                </div> <!--inputGroup-->
+
+                <!--back uncollapses slide1 and next uncollapses slide3; both collapse slide2-->
+                <div class="buttonGroup">
+                    <a class="prevPage" onclick='loadSlide("slide2", "slide1")'>Back</a>
+                    <a class="nextPage" onclick='loadSlide("slide2", "slide3")'>Next</a>
+                </div>
+            </div> <!--slide2-->
+
+            <!--Format Tags-->
+            <div class="slide3 collapse">
+                <div class="inputGroup">
+                    <div class="tagSelector">
+                        <!--The header for this particular section; shows an explanation in the description box at the bottom when you mouse over it-->
+                        <h3 onmouseover='showExplanation("A writing format is the type of writing your piece falls under. Formats include things like essays, poems, and novels and are not decided by the writing&apos;s genre. By selecting writing formats, you will be providing categorizations that will help organize your writing and help others find it more easily should you choose to share it. For more information on what different formats mean, hover over the format names. Selecting higher level formats will load more formats that fall under that category.")'>Select Writing Format</h3>
+                        <!--The container for all of the format tags themselves-->
+                        <div id="formatTagContainer">
+                            <!--For each of the top level formats (aka the formats that don't have any parents)-->
+                            <!--Creates each checkbox and corresponding name in its own span for easy access; function parameters in ftChildren are:
+                            1 the FormatID,
+                            2 an array of its children that don't have a secondary parent,
+                            3 an array of its children that do have a secondary parent,
+                            4 an array of secondary parents for the children in the previous array with matching indexes,
+                            5 an array of children without secondary parents that have alternate possible parents,
+                            6 an array of alternate possible parents for the children in the last array with matching indexes,
+                            7 an array of child genres,
+                            8 a bool for whether or not this format tag is fiction only,
+                            9 a bool for whether or not this format tag is nonfiction only,
+                            10 an array of formats that are fiction only,
+                            11 an array of formats that are nonfiction only-->
+                            @foreach(var tag in Model.FormatTags.Except(Model.FormatTags.Where(t => (Model.FormatTags.SelectMany(u => (u.ChildFormats.Select(v => v.FormatId))).Contains(t.FormatId)))))
+                            {
+                                <span class="@tag.FormatId checkItem" onmouseover='showExplanation("#formatTagDescription", "@tag.Explanation")'>
+                                    <input type="checkbox" value="@tag.FormatId" name="FormatTags" onchange='ftChildren(@tag.FormatId, [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId == null).Select(i => i.FormatId)))], [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.FormatId)))], [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))], [@Html.Raw(String.Join(",", fc.Where(i => i.SecondaryParentId == null).GroupBy(i => i.FormatId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId)))], [@Html.Raw(String.Join(",", fc.GroupBy(i => i.FormatId).Where(j => j.Select(k => k.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId).Select(i => i.ParentId)))], [@Html.Raw(String.Join(",", tag.ChildGenres.Select(i => i.GenreId)))], "@tag.IsFictionOnly.ToString().ToLower()", "@tag.IsNonfictionOnly.ToString().ToLower()", [@Html.Raw(String.Join(",", Model.FormatTags.Where(i => i.IsFictionOnly).Select(i => i.FormatId).ToList()))], [@Html.Raw(String.Join(",", Model.FormatTags.Where(i => i.IsNonfictionOnly).Select(i => i.FormatId).ToList()))])' class="@tag.FormatId" /> <span class="formatName">@tag.FormatName</span>
+                                </span>
+                            } <!--For each of the lower level formats (aka the formats that have at least one parent)-->
+                            @foreach (var tag in Model.FormatTags.Where(t => (Model.FormatTags.SelectMany(u => (u.ChildFormats.Select(v => v.FormatId))).Contains(t.FormatId))))
+                            {
+                                <span class="@tag.FormatId checkItem collapse" onmouseover='showExplanation("#formatTagDescription", "@tag.Explanation")'>
+                                    <input type="checkbox" value="@tag.FormatId" name="FormatTags" onchange='ftChildren(@tag.FormatId,
+                [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId == null).Select(i => i.FormatId)))],
+                [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.FormatId)))],
+                [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))],
+                [@Html.Raw(String.Join(",", fc.GroupBy(i => i.FormatId).Where(j => j.Select(k => k.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId).Select(i => i.FormatId)))],
+                [@Html.Raw(String.Join(",", fc.GroupBy(i => i.FormatId).Where(j => j.Select(k => k.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId).Select(i => i.ParentId)))],
+                [@Html.Raw(String.Join(",", tag.ChildGenres.Select(i => i.GenreId)))],
+                "@tag.IsFictionOnly.ToString().ToLower()",
+                "@tag.IsNonfictionOnly.ToString().ToLower()",
+                [@Html.Raw(String.Join(",", Model.FormatTags.Where(i => i.IsFictionOnly).Select(i => i.FormatId).ToList()))], [@Html.Raw(String.Join(",", Model.FormatTags.Where(i => i.IsNonfictionOnly).Select(i => i.FormatId).ToList()))])' class="@tag.FormatId" /> <span class="formatName">@tag.FormatName</span>
+                                </span>
+                            }
+                        </div> <!--formatTagContainer-->
+
+                        <!--div for holding the description for the format tags-->
+                        <div id="formatTagDescription" class="description">
+                        </div>
+                    </div>
+                </div> <!--inputGroup-->
+
+                <!--back uncollapses slide2 and next uncollapses slide4; both collapse slide3-->
+                <div class="buttonGroup">
+                    <a class="prevPage" onclick='loadSlide("slide3", "slide2")'>Back</a>
+                    <a class="nextPage" onclick='loadSlide("slide3", "slide4")'>Next</a>
+                </div>
+            </div> <!--slide3-->
+
+            <!--Genre Tags-->
+            <div class="slide4 collapse">
+                <div class="inputGroup">
+
+                </div>
+
+                <!--back uncollapses slide3 and next uncollapses slide5; both collapse slide4-->
+                <div class="buttonGroup">
+                    <a class="prevPage" onclick='loadSlide("slide4", "slide3")'>Back</a>
+                    <a class="nextPage" onclick='loadSlide("slide4", "slide5")'>Next</a>
+                </div>
+            </div> <!--slide4-->
+
+            <!--Permissions-->
+            <div class="slide5 collapse">
+                <div class="inputGroup">
+                    <div class="permissionsSelector">
+                        <h3 onmouseover='showExplanation("permissionsDescription", "Who can view a piece of writing. All permissions options can be changed at any time. For more information on what the different options mean, hover over them.")' onfocus='showExplanation("permissionsDescription", "Who can view a piece of writing. All permissions options can be changed at any time. For more information on what the different options mean, focus on them.")'>Select Access Permissions for Writing</h3>
+                        <div id="permissionsContainer">
+                            <div id="accessContainer">
+                                <!--Public Access-->
+                                <div class="form-group form-check" onmouseover='showExplanation("permissionsDescription", "Allowing public access means that anyone can view this piece of writing. By selecting this option, you will automatically allow friends, followers, and publishers alike to view your work.")' id="public-access">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" asp-for="PublicAccess" onfocus='showExplanation("permissionsDescription", "Allowing public access means that anyone can view this piece of writing. By selecting this option, you will automatically allow friends, followers, and publishers alike to view your work.")' onchange='changeAccess("public-access")' /> @Html.DisplayNameFor(model => model.PublicAccess)
+                                    </label>
+                                </div>
+                                <!--Friend Access-->
+                                <div class="form-group form-check" onmouseover='showExplanation("permissionsDescription", "Allowing friend access means that people who are your mutual friends will be able to see this writing. If this option is not unchecked, that means it does not allow public access.")' id="friend-access">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" asp-for="FriendAccess" onfocus='showExpanation("permissionsDescription", "Allowing friend access means that people who are your mutual friends will be able to see this writing. If this option is unchecked, that means it does not allow public access.")' onchange='changeAccess("friend-access")' /> @Html.DisplayNameFor(model => model.FriendAccess)
+                                    </label>
+                                </div>
+                                <!--Publisher Access-->
+                                <div class="form-group form-check" onmouseover='showExplanation("permissionsDescription", "Allowing publisher access means that profiles that are verified as being owned by publishers or literary agents will be able to view your writing. Just selecting publisher access is a great way to limit the number of people who can see your writing, while still allowing it to be found by potential employers. If this option is unchecked, that means it does not allow public access.")' id="publisher-access">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" asp-for="PublisherAccess" onfocus='showExplanation("permissionsDescription", "Allowing publisher access means that profiles that are verified as being owned by publishers or literary agents will be able to view your writing. Just selecting publisher access is a great way to limit the number of people who can see your writing, while still allowing it to be found by potential employers. If this option is unchecked, that means it does not allow public access.")' onchange='changeAccess("publisher-access")' /> @Html.DisplayNameFor(model => model.PublisherAccess)
+                                    </label>
+                                </div>
+                                <!--Minor Access-->
+                                <div class="form-group form-check" onmouseover='showExplanation("permissionsDescription", "One of the goals of Penfolio is to give you as a writer a single place to post all of your writing. This means that some of the pieces you post may not be appropriate for younger readers. By not selecting this option, you are noting that your writing is for more mature audiences and protecting minors from stumbling across material they may not be ready for yet. Examples of things that may not be appropriate for minors include graphic violence or explicit sexual content, strong language, and mature themes such as non-consensual romantic or physical interactions. Ultimately, deciding the age-appropriateness of your writing is up to you, but please use your best judgement.")' id="minor-access">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" asp-for="MinorAccess" onfocus='showExplanation("permissionsDescription", "One of the goals of Penfolio is to give you as a writer a single place to post all of your writing. This means that some of the pieces you post may not be appropriate for younger readers. By not selecting this option, you are noting that your writing is for more mature audiences and protecting minors from stumbling across material they may not be ready for yet. Examples of things that may not be appropriate for minors include graphic violence or explicit sexual content, strong language, and mature themes such as non-consensual romantic or physical interactions. Ultimately, deciding the age-appropriateness of your writing is up to you, but please use your best judgement.")' /> @Html.DisplayNameFor(model => model.MinorAccess)
+                                    </label>
+                                </div>
+                                <!--Shows Up in Search-->
+                                <div class="form-group form-check" onmouseover='showExplanation("permissionDescription", "At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with their work. For this reason, you can choose whether or not your writing will show up in searches. If this option is unselected, other users will only be able to find this pieces of writing through a connected profile or a direct link. If it is selected, this piece of writing will show up in searches and users who do not fall under your chosen access permissions will be  able to request access to it. Please keep in mind that while this option allows you to show up in the search results of people who don&#39;t have access to this piece of writing, this distinction does not apply to minor access. If you do not have the Allow Minor Access box checked, this writing will still not show up in the search results of users under 18 or who have yet to specify their birthday for their account.")' id="shows-up-in-search">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" asp-for="ShowsUpInSearch" onfocus='showExplanation("permissionDescription", "At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with their work. For this reason, you can choose whether or not your writing will show up in searches. If this option is unselected, other users will only be able to find this pieces of writing through a connected profile or a direct link. If it is selected, this piece of writing will show up in searches and users who do not fall under your chosen access permissions will be  able to request access to it. Please keep in mind that while this option allows you to show up in the search results of people who don&#39;t have access to this piece of writing, this distinction does not apply to minor access. If you do not have the Allow Minor Access box checked, this writing will still not show up in the search results of users under 18 or who have yet to specify their birthday for their account.")' /> @Html.DisplayNameFor(model => model.ShowsUpInSearch)
+                                    </label>
+                                </div>
+                            </div> <!--accessContainer-->
+                            <!--This is where permission for things like likes and comments and critique will be able to be selected should those features be implemented-->
+                        </div> <!--permissionsContainer-->
+
+                        <div id="permissionsDescription" class="descriptionText">
+                        </div>
+                    </div> <!--permissionsSelector-->
+                </div> <!--inputGroup-->
+
+                <!--back collapses slide5 and uncollapses slide4; next also collapses slide5, in addition to uncollapsing slide6 and populating the confirmation messages with the current form values-->
+                <div class="buttonGroup">
+                    <a class="prevPage" onclick='loadSlide("slide5", "slide4")'>Back</a>
+                    <a class="nextPage" onclick='loadSlideAndConfirm("slide5", "slide6", [@Html.Raw(ViewBag.Profiles)], [@Html.Raw(ViewBag.FormatTags)], [@Html.Raw(ViewBag.GenreTags)])'>Next</a>
+                </div>
+            </div> <!--slide5-->
+
+            <!--Confirmation-->
+            <div class="slide6 collapse">
+                <div class="inputGroup">
+                    <div class="confirmSelections">
+                        <h3>Is this okay?</h3>
+                        <span class="confirm">Title</span> <span id="confirmTitle"></span><br />
+                        <span class="confirm">Description</span> <span id="confirmDescription"></span><br />
+                        <span class="confirm">Profiles</span> <div id="confirmProfiles"></div><br />
+                        <span class="confirm">Formats</span> <div id="confirmFormats"></div><br />
+                        <span class="confirm">Genres</span> <div id="confirmGenres"></div><br />
+                        <span class="confirm">Allow public access?</span> <span id="confirmPublicAccess"></span><br />
+                        <span class="confirm">Allow friend access?</span> <span id="confirmFriendAccess"></span><br />
+                        <span class="confirm">Allow publisher access?</span> <span id="confirmPublisherAccess"></span><br />
+                        <span class="confirm">Allow minor access?</span> <span id="confirmMinorAccess"></span><br />
+                        <span class="confirm">Shows up in search?</span> <span id="confirmShowsUpInSearch"></span><br />
+                        <div id="confirmText" class="ql-editor"></div>
+                    </div>
+                    <input type="hidden" id="editorContent" name="EditorContent" />
+                    <input type="hidden" id="selectedProfiles" name="SelectedProfiles" />
+                    <input type="hidden" id="selectedFormats" name="SelectedFormats" />
+                    <input type="hidden" id="selectedGenres" name="SelectedGenres" />
+                </div> <!--inputGroup-->
+
+                <div class="buttonGroup">
+                    <!--a div for printing a message if the current input isn't valid-->
+                    <div id="validationMessage"></div>
+                    <!--keeps your current selections and takes you back to the first slide if the user doesn't choose to confirm their current selections-->
+                    <a class="prevPage" onclick='loadSlide("slide6", "slide1")'>No</a>
+                    <!--the save button if they are happy with their selections and the inputs are valid-->
+                    <input type="submit" id="createWriting" value="Save" />
+                </div> <!--buttonGroup-->
+            </div> <!--slide5-->
+        </form>
+    </div> <!--slideshowContainer-->
+</div> <!--editorMenu-->
 
 @section editScripts {
+    <!-- Include the Quill library -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
     <!--Initialize Quill Editor-->
     <script src="/js/editorScript.js" type="text/javascript"></script>
+    <script src="~/js/slides.js" type="text/javascript"></script>
+    <script src="/js/createScript.js" type="text/javascript"></script>
+    <script src="/js/formatTags.js" type="text/javascript"></script>
 }
