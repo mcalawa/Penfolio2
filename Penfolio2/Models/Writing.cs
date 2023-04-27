@@ -44,13 +44,13 @@ namespace Penfolio2.Models
         public DateTime? EditDate { get; set; }
 
         [Required, NotNull]
-        public bool LikesOn { get; set; }
+        public bool LikesOn { get; set; } = false;
 
         [Required, NotNull]
-        public bool CommentsOn { get; set; }
+        public bool CommentsOn { get; set; } = false;
 
-        [Required, NotNull]
-        public bool CritiqueOn { get; set; }
+        [Required, NotNull] 
+        public bool CritiqueOn { get; set; } = false;
 
         [AllowNull]
         public string? Description { get; set; }

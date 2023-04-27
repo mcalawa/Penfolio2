@@ -17,6 +17,22 @@ namespace Penfolio2.Models
             Followers = new HashSet<FollowerFollowing>();
         }
 
+        public FormatTag(int formatId, string formatName, string? explanation, bool isFictionOnly, bool isNonfictionOnly)
+        {
+            FormatId = formatId;
+            FormatName = formatName;
+            Explanation = explanation;
+            IsFictionOnly = isFictionOnly;
+            IsNonfictionOnly = isNonfictionOnly;
+            AltFormatNames = new HashSet<AltFormatName>();
+            ChildFormats = new HashSet<FormatCategory>();
+            ParentFormats = new HashSet<FormatCategory>();
+            ChildGenres = new HashSet<GenreFormat>();
+            FormatWritings = new HashSet<WritingFormat>();
+            FormatFolders = new HashSet<FolderFormat>();
+            Followers = new HashSet<FollowerFollowing>();
+        }
+
         [Required]
         [Key]
         public int FormatId { get; set; }
@@ -83,14 +99,16 @@ namespace Penfolio2.Models
         public int? SecondaryParentId { get; set; }
 
         [ForeignKey("FormatId")]
+        [AllowNull]
         public virtual FormatTag FormatTag { get; set; }
 
         [ForeignKey("ParentId")]
+        [AllowNull]
         public virtual FormatTag ParentFormat { get; set; }
 
         [ForeignKey("SecondaryParentId")]
         [AllowNull]
-        public virtual FormatTag SecondaryParentFormat { get; set; }
+        public virtual FormatTag? SecondaryParentFormat { get; set; }
     }
 
     public class GenreTag
@@ -182,11 +200,11 @@ namespace Penfolio2.Models
 
         [ForeignKey("SecondaryParentId")]
         [AllowNull]
-        public virtual GenreTag SecondaryParentGenre { get; set; }
+        public virtual GenreTag? SecondaryParentGenre { get; set; }
 
         [ForeignKey("TertiaryParentId")]
         [AllowNull]
-        public virtual GenreTag TertiaryParentGenre { get; set; }
+        public virtual GenreTag? TertiaryParentGenre { get; set; }
     }
 
     public class GenreFormat
@@ -212,6 +230,6 @@ namespace Penfolio2.Models
 
         [ForeignKey("ParentGenreId")]
         [AllowNull]
-        public virtual GenreTag ParentGenreTag { get; set; }
+        public virtual GenreTag? ParentGenreTag { get; set; }
     }
 }

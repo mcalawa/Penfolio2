@@ -58,6 +58,8 @@ function loadSlideAndConfirm(current, next, profiles, formatTags, genreTags) {
     $("#confirmProfiles").empty();
     //empty the field for recording selected profiles
     $("#selectedProfiles").empty();
+    //container to hold ids of the selected profiles
+    $("#confirmSelectedProfiles").empty();
     //for each writing profile this user has
     for (var i = 0; i < profiles.length; i++) {
         //if the checkbox for the current profile is checked
@@ -67,20 +69,23 @@ function loadSlideAndConfirm(current, next, profiles, formatTags, genreTags) {
             //append a break so everything is still legible 
             $("#confirmProfiles").append("<br />");
 
-            if (isEmpty($("#selectedProfiles"))) {
-                $("#selectedProfiles").append(profiles[i]);
+            if (isEmpty($("#confirmSelectedProfiles"))) {
+                $("#confirmSelectedProfiles").append(profiles[i]);
             }
             else {
-                $("#selectedProfiles").append(",");
-                $("#selectedProfiles").append(profiles[i]);
+                $("#confirmSelectedProfiles").append(",");
+                $("#confirmSelectedProfiles").append(profiles[i]);
             }
         }
     }
+    $("#selectedProfiles").val($("#confirmSelectedProfiles").html());
 
     //empty the field for format tag confirmation
     $("#confirmFormats").empty();
     //empty the field for recording selected formats
     $("#selectedFormats").empty();
+    //container to hold the selected formats
+    $("#confirmSelectedFormats").empty();
     //for each format tag in the database
     for (i = 0; i < formatTags.length; i++) {
         //if the current format tag has been checked
@@ -90,28 +95,42 @@ function loadSlideAndConfirm(current, next, profiles, formatTags, genreTags) {
             //append a break so everything is still legible 
             $("#confirmFormats").append("<br />");
 
-            if (isEmpty($("#selectedFormats"))) {
-                $("#selectedFormats").append(formatTags[i]);
+            if (isEmpty($("#confirmSelectedFormats"))) {
+                $("#confirmSelectedFormats").append(formatTags[i]);
             }
             else {
-                $("#selectedFormats").append(",");
-                $("#selectedFormats").append(formatTags[i]);
+                $("#confirmSelectedFormats").append(",");
+                $("#confirmSelectedFormats").append(formatTags[i]);
             }
         }
     }
+    $("#selectedFormats").val($("#confirmSelectedFormats").html());
 
-    ////empty the field for genre tag confirmation
-    //$("#confirmGenres").empty();
-    ////for each genre tag in the database
-    //for (i = 0; i < genreTags.length; i++) {
-    //    //if the current genre tag has been checked
-    //    if ($("#genreTagContainer span." + genreTags[i] + " input").is(':checked')) {
-    //        //append the value of the genre tag name that matches this checkbox to the confirmation field
-    //        $("#confirmGenres").append($("#genreTagContainer span." + genreTags[i] + " span").html());
-    //        //append a break so everything is still legible
-    //        $("#confirmGenres").append("<br />");
-    //    }
-    //}
+    //empty the field for genre tag confirmation
+    $("#confirmGenres").empty();
+    //empty the field for recording selected genres
+    $("#selectedGenres").empty();
+    //container to hold the selected genres
+    $("#confirmSelectedGenres").empty();
+    //for each genre tag in the database
+    for (i = 0; i < genreTags.length; i++) {
+        //if the current genre tag has been checked
+        if ($("#genreTagContainer span." + genreTags[i] + " input").is(':checked')) {
+            //append the value of the genre tag name that matches this checkbox to the confirmation field
+            $("#confirmGenres").append($("#genreTagContainer span." + genreTags[i] + " span").html());
+            //append a break so everything is still legible
+            $("#confirmGenres").append("<br />");
+
+            if (isEmpty($("#confirmSelectedGenres"))) {
+                $("#confirmSelectedGenres").append(genreTags[i]);
+            }
+            else {
+                $("#confirmSelectedGenres").append(",");
+                $("#confirmSelectedGenres").append(genreTags[i]);
+            }
+        }
+    }
+    $("#selectedGenres").val($("#confirmSelectedGenres").html());
 
     //empty the field for public access confirmation
     $("#confirmPublicAccess").empty();

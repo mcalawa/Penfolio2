@@ -211,9 +211,9 @@ namespace Penfolio2.Models
         [ForeignKey("FormatTag")]
         public int FormatId { get; set; }
 
-        public virtual Writing Writing { get; set; }
+        public virtual Writing? Writing { get; set; }
 
-        public virtual FormatTag FormatTag { get; set; }
+        public virtual FormatTag? FormatTag { get; set; }
     }
 
     [PrimaryKey(nameof(WritingId), nameof(GenreId))]
@@ -227,9 +227,9 @@ namespace Penfolio2.Models
         [ForeignKey("GenreTag")]
         public int GenreId { get; set; }
 
-        public virtual Writing Writing { get; set; }
+        public virtual Writing? Writing { get; set; }
 
-        public virtual GenreTag GenreTag { get; set; }
+        public virtual GenreTag? GenreTag { get; set; }
     }
 
     [PrimaryKey(nameof(WritingId), nameof(ProfileId))]
@@ -243,9 +243,9 @@ namespace Penfolio2.Models
         [ForeignKey("PenProfile")]
         public int ProfileId { get; set; }
 
-        public virtual PenProfile PenProfile { get; set; }
+        public virtual PenProfile? PenProfile { get; set; }
 
-        public virtual Writing Writing { get; set; }
+        public virtual Writing? Writing { get; set; }
     }
 
     //[PrimaryKey(nameof(WritingId), nameof(SeriesId))]

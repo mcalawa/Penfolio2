@@ -74,6 +74,42 @@ namespace Penfolio2.ViewComponents
                         ViewBag.Author = true;
                     }
                 }
+
+                if (writing.WritingFormats == null || writing.WritingFormats.Count == 0)
+                {
+                    writing.WritingFormats = _db.WritingFormats.Where(i => i.WritingId == writing.WritingId).ToList();
+
+                    foreach (var format in writing.WritingFormats)
+                    {
+                        if (format.FormatTag == null)
+                        {
+                            format.FormatTag = _db.FormatTags.Where(i => i.FormatId == format.FormatId).FirstOrDefault();
+
+                            if (format.FormatTag.AltFormatNames == null || format.FormatTag.AltFormatNames.Count == 0)
+                            {
+                                format.FormatTag.AltFormatNames = _db.AltFormatNames.Where(i => i.FormatId == format.FormatId).ToList();
+                            }
+                        }
+                    }
+                }
+
+                if (writing.WritingGenres == null || writing.WritingGenres.Count == 0)
+                {
+                    writing.WritingGenres = _db.WritingGenres.Where(i => i.WritingId == writing.WritingId).ToList();
+
+                    foreach (var genre in writing.WritingGenres)
+                    {
+                        if (genre.GenreTag == null)
+                        {
+                            genre.GenreTag = _db.GenreTags.Where(i => i.GenreId == genre.GenreId).FirstOrDefault();
+
+                            if (genre.GenreTag.AltGenreNames == null || genre.GenreTag.AltGenreNames.Count == 0)
+                            {
+                                genre.GenreTag.AltGenreNames = _db.AltGenreNames.Where(i => i.GenreId == genre.GenreId).ToList();
+                            }
+                        }
+                    }
+                }
             }
 
             return View(writing);

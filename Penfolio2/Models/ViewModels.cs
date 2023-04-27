@@ -139,6 +139,9 @@ namespace Penfolio2.Models
             WritingProfiles = new HashSet<PenProfile>();
             FormatTags = new HashSet<FormatTag>();
             GenreTags = new HashSet<GenreTag>();
+            FormatCategories = new HashSet<FormatCategory>();
+            GenreCategories = new HashSet<GenreCategory>();
+            GenreFormats = new HashSet<GenreFormat>();
         }
 
         [Required, NotNull]
@@ -190,5 +193,65 @@ namespace Penfolio2.Models
         public virtual ICollection<FormatCategory> FormatCategories { get; set; }
 
         public virtual ICollection<GenreCategory> GenreCategories { get; set; }
+
+        public virtual ICollection<GenreFormat> GenreFormats { get; set; }
+    }
+
+    public class SelectFormatTagViewModel
+    {
+        public SelectFormatTagViewModel()
+        {
+            AltNames = new HashSet<string>();
+            Parents = new HashSet<Tuple<SelectFormatTagViewModel, SelectFormatTagViewModel>>();
+        }
+
+        [Required]
+        public int FormatId { get; set; }
+
+        [Required]
+        public string FormatName { get; set; }
+
+        [Required]
+        public string Explanation { get; set; }
+
+        [Required]
+        public bool IsFictionOnly { get; set; }
+
+        [Required]
+        public bool IsNonfictionOnly { get; set; }
+
+        //[Required]
+        //public int NumberOfParents { get; set; }
+
+        //[Required]
+        //public int SetsOfParents { get; set; }
+
+        //[Required]
+        //public int NumberOfAltNames { get; set; }
+
+        public virtual ICollection<string> AltNames { get; set; }
+
+        public virtual ICollection<Tuple<SelectFormatTagViewModel, SelectFormatTagViewModel>> Parents { get; set; }
+
+    }
+
+    public class SelectGenreTagViewModel
+    {
+        [Required]
+        public int GenreId { get; set; }
+
+        [Required]
+        public string GenreName { get; set; }
+
+        [Required]
+        public string Explanation { get; set; }
+
+        [Required]
+        public bool IsFictionOnly { get; set; }
+
+        [Required]
+        public bool IsNonFictionOnly { get; set; }
+
+
     }
 }
