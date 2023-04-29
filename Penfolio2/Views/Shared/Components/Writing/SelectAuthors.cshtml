@@ -1,0 +1,53 @@
+﻿@model Penfolio2.Models.WritingViewModel
+@{
+}
+<h3>Select Profiles for Writing</h3>
+<div class="profileSelector">
+    <div id="profileContainer">
+        @if(ViewBag.IsCreator)
+        {
+            <!--For each profile connected to the current user or the writing (if an edit is happening), create a checkbox for that profile-->
+            @foreach(var profile in Model.WritingProfiles)
+            {
+                @if(Model.SelectedProfileIds.Contains(profile.ProfileId))
+                {
+                    <div class="form-group checkItem2">
+                        <input type="checkbox" class="@profile.ProfileId" value="@profile.ProfileId" checked /> <span class="profileName @profile.ProfileId">@profile.DisplayName</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group checkItem2">
+                        <input type="checkbox" class="@profile.ProfileId" value="@profile.ProfileId" /> <span class="profileName @profile.ProfileId">@profile.DisplayName</span>
+                    </div>
+                }
+            }
+        }
+        else
+        {
+            <!--For each profile not belonging to the current user, make it a readonly input-->
+            @foreach(var profile in Model.WritingProfiles.Where(i => i.UserId != ViewBag.User))
+            {
+                <div class="form-group checkItem2 collapse visually-hidden">
+                    <input type="checkbox" class="@profile.ProfileId" value="@profile.ProfileId" checked readonly /> <span class="profileName @profile.ProfileId">@profile.DisplayName</span>
+                </div>
+            }
+            <!--For each profile connected to the current user or the writing (if an edit is happening), create a checkbox for that profile-->
+            @foreach (var profile in Model.WritingProfiles.Where(i => i.UserId == ViewBag.User))
+            {
+                @if (Model.SelectedProfileIds.Contains(profile.ProfileId))
+                {
+                    <div class="form-group checkItem2">
+                        <input type="checkbox" class="@profile.ProfileId" value="@profile.ProfileId" checked /> <span class="profileName @profile.ProfileId">@profile.DisplayName</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group checkItem2">
+                        <input type="checkbox" class="@profile.ProfileId" value="@profile.ProfileId" /> <span class="profileName @profile.ProfileId">@profile.DisplayName</span>
+                    </div>
+                }
+            }
+        }
+    </div>
+</div> 

@@ -71,10 +71,10 @@ namespace Penfolio2.Models
         [Required, NotNull]
         public bool Resolved { get; set; }
 
-        public virtual AccessPermission AccessPermission { get; set; }
+        public virtual AccessPermission? AccessPermission { get; set; }
 
         //[ForeignKey("RequesterId")]
-        public virtual PenProfile Requester { get; set; }
+        public virtual PenProfile? Requester { get; set; }
     }
 
     public class IndividualAccessGrant
@@ -97,9 +97,9 @@ namespace Penfolio2.Models
         [Required, NotNull]
         public bool Active { get; set; }
 
-        public virtual AccessPermission AccessPermission { get; set; }
+        public virtual AccessPermission? AccessPermission { get; set; }
 
-        public virtual PenProfile Grantee { get; set; }
+        public virtual PenProfile? Grantee { get; set; }
     }
 
     public class IndividualAccessRevoke
@@ -122,9 +122,9 @@ namespace Penfolio2.Models
         [Required, NotNull]
         public bool Active { get; set; }
 
-        public virtual AccessPermission AccessPermission { get; set; }
+        public virtual AccessPermission? AccessPermission { get; set; }
 
         //[ForeignKey("RevokeeId")]
-        public virtual PenProfile Revokee { get; set; }
+        public virtual PenProfile? Revokee { get; set; }
     }
 }

@@ -41,22 +41,22 @@ namespace Penfolio2.Models
         public int? CommentId { get; set; }
 
         [ForeignKey("LikerId")]
-        public virtual PenProfile Liker { get; set; }
+        public virtual PenProfile? Liker { get; set; }
 
         [ForeignKey("ProfileId")]
         [AllowNull]
-        public virtual PenProfile LikedProfile { get; set; }
+        public virtual PenProfile? LikedProfile { get; set; }
 
         [AllowNull]
-        public virtual Writing LikedWriting { get; set; }
+        public virtual Writing? LikedWriting { get; set; }
 
         [AllowNull]
-        public virtual Folder LikedFolder { get; set; }
+        public virtual Folder? LikedFolder { get; set; }
 
         [AllowNull]
-        public virtual Series LikedSeries { get; set; }
+        public virtual Series? LikedSeries { get; set; }
 
         [AllowNull]
-        public virtual Comment LikedComment { get; set; }
+        public virtual Comment? LikedComment { get; set; }
     }
 }

@@ -334,6 +334,17 @@ namespace Penfolio2.Controllers
                 //get the writing
                 Writing writing = db.Writings.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault();
 
+                //if there's no writing with that AccessPermissionId, return false
+                if (writing == null)
+                {
+                    errors.Add(new IdentityError
+                    {
+                        Description = "Writing not found."
+                    });
+
+                    return false;
+                }
+
                 //if the Writing was created by the user, return true
                 if (writing.UserId == userId)
                 {
@@ -370,6 +381,17 @@ namespace Penfolio2.Controllers
                 //get the folder
                 Folder folder = db.Folders.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault();
 
+                //if there's no folder with that AccessPermissionId, return false
+                if (folder == null)
+                {
+                    errors.Add(new IdentityError
+                    {
+                        Description = "Folder not found."
+                    });
+
+                    return false;
+                }
+
                 //if the user created the folder, return true
                 if (folder.CreatorId == userId)
                 {
@@ -405,6 +427,17 @@ namespace Penfolio2.Controllers
             {
                 //get the series
                 Series series = db.Series.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault();
+
+                //if there's no series with that AccessPermissionId, return false
+                if (series == null)
+                {
+                    errors.Add(new IdentityError
+                    {
+                        Description = "Series not found."
+                    });
+
+                    return false;
+                }
 
                 //if the user is the creator of this series, return true
                 if (series.CreatorId == userId)
@@ -476,6 +509,13 @@ namespace Penfolio2.Controllers
 
                     return false;
                 }
+            }
+
+            //past this point, we know that a user has not been turned away because of being a minor or because they were blocked,
+            //so now we check to see if the action being performed is a search
+            if(action == "search" && accessPermission.ShowsUpInSearch)
+            {
+                return true;
             }
 
             //get a list of individual access grants for this AccessPermissionId where the grant is still active
@@ -691,7 +731,7 @@ namespace Penfolio2.Controllers
 
                 if(accessPermission.PublisherAccess && accessPermission.FriendAccess)
                 {
-                    if(UserHasVerifiedPublisherProfile() && !UserHasVerifiedPublisherProfile())
+                    if(UserHasPublisherProfile() && !UserHasVerifiedPublisherProfile())
                     {
                         errors.Add(new IdentityError
                         {
@@ -708,7 +748,7 @@ namespace Penfolio2.Controllers
                 }
                 else if(accessPermission.PublisherAccess)
                 {
-                    if (UserHasVerifiedPublisherProfile() && !UserHasVerifiedPublisherProfile())
+                    if (UserHasPublisherProfile() && !UserHasVerifiedPublisherProfile())
                     {
                         errors.Add(new IdentityError
                         {
@@ -918,9 +958,106 @@ namespace Penfolio2.Controllers
             return user;
         }
 
-        protected ICollection<FormatTag> GetFormatTags()
+        protected Writing PopulateWriting(Writing writing)
         {
-            return db.FormatTags.ToList();
+            //populate PenUser
+            if(writing.PenUser == null)
+            {
+                writing.PenUser = db.PenUsers.Where(i => i.Id == writing.UserId).FirstOrDefault();
+
+                if(writing.PenUser != null)
+                {
+                    writing.PenUser = PopulatePenUser(writing.PenUser);
+                }
+            }
+
+            //populate AccessPermission
+            if(writing.AccessPermission == null)
+            {
+                writing.AccessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == writing.AccessPermissionId).FirstOrDefault();
+            }
+
+            //populate WritingProfiles
+            if(writing.WritingProfiles.Count == 0)
+            {
+                writing.WritingProfiles = db.WritingProfiles.Where(i => i.WritingId == writing.WritingId).ToList();
+
+                //populate PenProfile for WritingProfiles
+                foreach(var profile in writing.WritingProfiles)
+                {
+                    if(profile.PenProfile == null)
+                    {
+                        profile.PenProfile = db.PenProfiles.Where(i => i.ProfileId == profile.ProfileId).FirstOrDefault();
+
+                        if(profile.PenProfile != null)
+                        {
+                            profile.PenProfile = PopulatePenProfile(profile.PenProfile);
+                        }
+                    }
+                }
+            }
+
+            //populate WritingFormats
+            if(writing.WritingFormats.Count == 0)
+            {
+                writing.WritingFormats = db.WritingFormats.Where(i => i.WritingId == writing.WritingId).ToList();
+
+                //populate each FormatTag in WritingFormats
+                foreach(var format in writing.WritingFormats)
+                {
+                    if(format.FormatTag == null)
+                    {
+                        format.FormatTag = db.FormatTags.Where(i => i.FormatId == format.FormatId).FirstOrDefault();
+
+                        if(format.FormatTag != null)
+                        {
+                            //populate AltFormatNames in FormatTag
+                            if(format.FormatTag.AltFormatNames.Count == 0)
+                            {
+                                format.FormatTag.AltFormatNames = db.AltFormatNames.Where(i => i.FormatId == format.FormatId).ToList();
+                            }
+                        }
+                    }
+                }
+            }
+
+            //populate WritingGenres
+            if(writing.WritingGenres.Count == 0)
+            {
+                writing.WritingGenres = db.WritingGenres.Where(i => i.WritingId == writing.WritingId).ToList();
+
+                //populate each GenreTag in WritingGenres
+                foreach(var genre in writing.WritingGenres)
+                {
+                    if(genre.GenreTag == null)
+                    {
+                        genre.GenreTag = db.GenreTags.Where(i => i.GenreId == genre.GenreId).FirstOrDefault();
+
+                        if(genre.GenreTag != null)
+                        {
+                            //populate AltGenreNames in GenreTag
+                            if(genre.GenreTag.AltGenreNames.Count == 0)
+                            {
+                                genre.GenreTag.AltGenreNames = db.AltGenreNames.Where(i => i.GenreId == genre.GenreId).ToList();
+                            }
+                        }
+                    }
+                }
+            }
+
+            //populate WritingSeries
+
+            //populate WritingFolders
+
+            //populate Comments
+
+            //populate Likes
+
+            //populate Critiques
+
+            //populate CritiqueRequest
+
+            return writing;
         }
 
         private Task<PenUser?> GetCurrentUserAsync()

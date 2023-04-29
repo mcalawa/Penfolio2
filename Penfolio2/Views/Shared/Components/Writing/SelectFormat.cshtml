@@ -1,1 +1,78 @@
-﻿@model IEnumerable<Penfolio2.Models.FormatTag>
+﻿@model Penfolio2.Models.WritingViewModel
+@{
+    IEnumerable<Penfolio2.Models.FormatCategory> fc = Model.FormatCategories.Where(i => i.SecondaryParentId == null).ToList();
+
+    IEnumerable<Penfolio2.Models.FormatTag> fictionFormatOnly = Model.FormatTags.Where(i => i.IsFictionOnly == true).ToList();
+    IEnumerable<Penfolio2.Models.FormatTag> nonfictionFormatOnly = Model.FormatTags.Where(i => i.IsNonfictionOnly == true).ToList();
+}
+<div class="tagSelector">
+    <!--The header for this particular section; shows an explanation in the description box at the bottom when you mouse over it-->
+    <h3 onmouseover='showExplanation("formatTagDescription", "A writing format is the type of writing your piece falls under. Formats include things like essays, poems, and novels and are not decided by the writing&apos;s genre. By selecting writing formats, you will be providing categorizations that will help organize your writing and help others find it more easily should you choose to share it. For more information on what different formats mean, hover over the format names. Selecting higher level formats will load more formats that fall under that category.")'>Select Writing Format</h3>
+    <!--The container for all of the format tags themselves-->
+    <div id="formatTagContainer">
+        <!--For each of the top level formats (aka the formats that don't have any parents)-->
+        <!--Creates each checkbox and corresponding name in its own span for easy access; function parameters in ftChildren are:
+        1 the FormatID,
+        2 an array of its children that don't have a secondary parent,
+        3 an array of its children that do have a secondary parent,
+        4 an array of secondary parents for the children in the previous array with matching indexes,
+        5 an array of children without secondary parents that have alternate possible parents,
+        6 an array of alternate possible parents for the children in the last array with matching indexes,
+        7 an array of child genres,
+        8 a bool for whether or not this format tag is fiction only,
+        9 a bool for whether or not this format tag is nonfiction only,
+        10 an array of formats that are fiction only,
+        11 an array of formats that are nonfiction only-->
+        @foreach (var tag in Model.FormatTags.Except(Model.FormatTags.Where(t => (Model.FormatTags.SelectMany(u => (u.ChildFormats.Select(v => v.FormatId))).Contains(t.FormatId)))))
+        {
+            if(Model.SelectedFormatIds.Contains(tag.FormatId))
+            {
+                <span class="@tag.FormatId checkItem" onmouseover='showExplanation("formatTagDescription", "@tag.Explanation")'>
+                    <input type="checkbox" value="@tag.FormatId" name="FormatTags" onfocus='showExplanation("formatTagDescription", "@tag.Explanation")' onchange='ftChildren(@tag.FormatId, [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId == null).Select(i => i.FormatId)))], [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.FormatId)))], [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))], [@Html.Raw(String.Join(",", fc.Where(i => i.SecondaryParentId == null).GroupBy(i => i.FormatId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId)))], [@Html.Raw(String.Join(",", fc.GroupBy(i => i.FormatId).Where(j => j.Select(k => k.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId).Select(i => i.ParentId)))], [@Html.Raw(String.Join(",", tag.ChildGenres.Select(i => i.GenreId)))], "@tag.IsFictionOnly.ToString().ToLower()", "@tag.IsNonfictionOnly.ToString().ToLower()", [@Html.Raw(String.Join(",", fictionFormatOnly.Select(i => i.FormatId).ToList()))], [@Html.Raw(String.Join(",", nonfictionFormatOnly.Select(i => i.FormatId).ToList()))])' class="@tag.FormatId" checked /> <span class="formatName">@tag.FormatName</span>
+                </span>
+            }
+            else
+            {
+                <span class="@tag.FormatId checkItem" onmouseover='showExplanation("formatTagDescription", "@tag.Explanation")'>
+                    <input type="checkbox" value="@tag.FormatId" name="FormatTags" onfocus='showExplanation("formatTagDescription", "@tag.Explanation")' onchange='ftChildren(@tag.FormatId, [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId == null).Select(i => i.FormatId)))], [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.FormatId)))], [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))], [@Html.Raw(String.Join(",", fc.Where(i => i.SecondaryParentId == null).GroupBy(i => i.FormatId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId)))], [@Html.Raw(String.Join(",", fc.GroupBy(i => i.FormatId).Where(j => j.Select(k => k.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId).Select(i => i.ParentId)))], [@Html.Raw(String.Join(",", tag.ChildGenres.Select(i => i.GenreId)))], "@tag.IsFictionOnly.ToString().ToLower()", "@tag.IsNonfictionOnly.ToString().ToLower()", [@Html.Raw(String.Join(",", fictionFormatOnly.Select(i => i.FormatId).ToList()))], [@Html.Raw(String.Join(",", nonfictionFormatOnly.Select(i => i.FormatId).ToList()))])' class="@tag.FormatId" /> <span class="formatName">@tag.FormatName</span>
+                </span>
+            }
+        } <!--For each of the lower level formats (aka the formats that have at least one parent)-->
+        @foreach (var tag in Model.FormatTags.Where(t => (Model.FormatTags.SelectMany(u => (u.ChildFormats.Select(v => v.FormatId))).Contains(t.FormatId))))
+        {
+            if(Model.SelectedFormatIds.Contains(tag.FormatId))
+            {
+                <span class="@tag.FormatId checkItem collapse" onmouseover='showExplanation("formatTagDescription", "@tag.Explanation")'>
+                    <input type="checkbox" value="@tag.FormatId" name="FormatTags" onfocus='showExplanation("formatTagDescription", "@tag.Explanation")' onchange='ftChildren(@tag.FormatId,
+                [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId == null).Select(i => i.FormatId)))],
+                [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.FormatId)))],
+                [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))],
+                [@Html.Raw(String.Join(",", fc.GroupBy(i => i.FormatId).Where(j => j.Select(k => k.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId).Select(i => i.FormatId)))],
+                [@Html.Raw(String.Join(",", fc.GroupBy(i => i.FormatId).Where(j => j.Select(k => k.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId).Select(i => i.ParentId)))],
+                [@Html.Raw(String.Join(",", tag.ChildGenres.Select(i => i.GenreId)))],
+                "@tag.IsFictionOnly.ToString().ToLower()",
+                "@tag.IsNonfictionOnly.ToString().ToLower()",
+                [@Html.Raw(String.Join(",", fictionFormatOnly.Select(i => i.FormatId).ToList()))], [@Html.Raw(String.Join(",", nonfictionFormatOnly.Select(i => i.FormatId).ToList()))])' class="@tag.FormatId" checked /> <span class="formatName">@tag.FormatName</span>
+                </span>
+            }
+            else
+            {
+                <span class="@tag.FormatId checkItem collapse" onmouseover='showExplanation("formatTagDescription", "@tag.Explanation")'>
+                    <input type="checkbox" value="@tag.FormatId" name="FormatTags" onfocus='showExplanation("formatTagDescription", "@tag.Explanation")' onchange='ftChildren(@tag.FormatId,
+                    [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId == null).Select(i => i.FormatId)))],
+                    [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.FormatId)))],
+                    [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))],
+                    [@Html.Raw(String.Join(",", fc.GroupBy(i => i.FormatId).Where(j => j.Select(k => k.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId).Select(i => i.FormatId)))],
+                    [@Html.Raw(String.Join(",", fc.GroupBy(i => i.FormatId).Where(j => j.Select(k => k.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId).Select(i => i.ParentId)))],
+                    [@Html.Raw(String.Join(",", tag.ChildGenres.Select(i => i.GenreId)))],
+                    "@tag.IsFictionOnly.ToString().ToLower()",
+                    "@tag.IsNonfictionOnly.ToString().ToLower()",
+                    [@Html.Raw(String.Join(",", fictionFormatOnly.Select(i => i.FormatId).ToList()))], [@Html.Raw(String.Join(",", nonfictionFormatOnly.Select(i => i.FormatId).ToList()))])' class="@tag.FormatId" /> <span class="formatName">@tag.FormatName</span>
+                </span>
+            }
+        }
+    </div> <!--formatTagContainer-->
+    <!--div for holding the description for the format tags-->
+    <div id="formatTagDescription" class="description">
+    </div>
+</div>

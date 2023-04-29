@@ -132,9 +132,9 @@ namespace Penfolio2.Models
         public virtual ICollection<DeleteProfileViewModel> OtherProfiles { get; set; }
     }
 
-    public class CreateWritingViewModel
+    public class WritingViewModel
     {
-        public CreateWritingViewModel() 
+        public WritingViewModel() 
         {
             WritingProfiles = new HashSet<PenProfile>();
             FormatTags = new HashSet<FormatTag>();
@@ -142,6 +142,9 @@ namespace Penfolio2.Models
             FormatCategories = new HashSet<FormatCategory>();
             GenreCategories = new HashSet<GenreCategory>();
             GenreFormats = new HashSet<GenreFormat>();
+            SelectedProfileIds = new HashSet<int>();
+            SelectedFormatIds = new HashSet<int>();
+            SelectedGenreIds = new HashSet<int>();
         }
 
         [Required, NotNull]
@@ -150,7 +153,7 @@ namespace Penfolio2.Models
 
         [AllowNull]
         [Display(Name = "Description")]
-        public string? Description { get; set; }
+        public string? Description { get; set; } = null;
 
         [Required, NotNull]
         public string EditorContent { get; set; } = string.Empty;
@@ -195,63 +198,23 @@ namespace Penfolio2.Models
         public virtual ICollection<GenreCategory> GenreCategories { get; set; }
 
         public virtual ICollection<GenreFormat> GenreFormats { get; set; }
+
+        public virtual ICollection<int> SelectedProfileIds { get; set; }
+
+        public virtual ICollection<int> SelectedFormatIds { get; set; }
+
+        public virtual ICollection<int> SelectedGenreIds { get; set; }
     }
 
-    public class SelectFormatTagViewModel
-    {
-        public SelectFormatTagViewModel()
-        {
-            AltNames = new HashSet<string>();
-            Parents = new HashSet<Tuple<SelectFormatTagViewModel, SelectFormatTagViewModel>>();
-        }
-
-        [Required]
-        public int FormatId { get; set; }
-
-        [Required]
-        public string FormatName { get; set; }
-
-        [Required]
-        public string Explanation { get; set; }
-
-        [Required]
-        public bool IsFictionOnly { get; set; }
-
-        [Required]
-        public bool IsNonfictionOnly { get; set; }
-
-        //[Required]
-        //public int NumberOfParents { get; set; }
-
-        //[Required]
-        //public int SetsOfParents { get; set; }
-
-        //[Required]
-        //public int NumberOfAltNames { get; set; }
-
-        public virtual ICollection<string> AltNames { get; set; }
-
-        public virtual ICollection<Tuple<SelectFormatTagViewModel, SelectFormatTagViewModel>> Parents { get; set; }
-
-    }
-
-    public class SelectGenreTagViewModel
+    public class AuthorViewModel
     {
         [Required]
-        public int GenreId { get; set; }
+        public string DisplayName { get; set; }
+
+        [AllowNull]
+        public string? UrlString { get; set; }
 
         [Required]
-        public string GenreName { get; set; }
-
-        [Required]
-        public string Explanation { get; set; }
-
-        [Required]
-        public bool IsFictionOnly { get; set; }
-
-        [Required]
-        public bool IsNonFictionOnly { get; set; }
-
-
+        public bool IsAnonymous { get; set; }
     }
 }

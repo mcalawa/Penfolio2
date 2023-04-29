@@ -16,9 +16,9 @@ namespace Penfolio2.Models
         [ForeignKey("FormatTag")]
         public int FormatId { get; set; }
 
-        public virtual Folder Folder { get; set; }
+        public virtual Folder? Folder { get; set; }
 
-        public virtual FormatTag FormatTag { get; set; }
+        public virtual FormatTag? FormatTag { get; set; }
     }
 
     [PrimaryKey(nameof(FolderId), nameof(GenreId))]
@@ -32,9 +32,9 @@ namespace Penfolio2.Models
         [ForeignKey("GenreTag")]
         public int GenreId { get; set; }
 
-        public virtual Folder Folder { get; set; }
+        public virtual Folder? Folder { get; set; }
 
-        public virtual GenreTag GenreTag { get; set; }
+        public virtual GenreTag? GenreTag { get; set; }
     }
 
     [PrimaryKey(nameof(FolderId), nameof(OwnerId))]
@@ -48,9 +48,9 @@ namespace Penfolio2.Models
         [ForeignKey("PenProfile")]
         public int OwnerId { get; set; }
 
-        public virtual Folder Folder { get; set; }
+        public virtual Folder? Folder { get; set; }
 
-        public virtual PenProfile Owner { get; set; }
+        public virtual PenProfile? Owner { get; set; }
     }
 
     [PrimaryKey(nameof(FolderId), nameof(SubfolderId))]
@@ -63,10 +63,10 @@ namespace Penfolio2.Models
         public int SubfolderId { get; set; }
 
         [ForeignKey("FolderId")]
-        public virtual Folder Folder { get; set; }
+        public virtual Folder? Folder { get; set; }
 
         [ForeignKey("SubfolderId")]
-        public virtual Folder Subfolder { get; set; }
+        public virtual Folder? Subfolder { get; set; }
     }
 
     public class FollowerFollowing
@@ -98,23 +98,23 @@ namespace Penfolio2.Models
         public int? SeriesId { get; set; }
 
         [ForeignKey(nameof(FollowerId))]
-        public virtual PenProfile Follower { get; set; }
+        public virtual PenProfile? Follower { get; set; }
 
         [ForeignKey("ProfileId")]
         [AllowNull]
-        public virtual PenProfile FollowingProfile { get; set; }
+        public virtual PenProfile? FollowingProfile { get; set; }
 
         [AllowNull]
-        public virtual Folder Folder { get; set; }
+        public virtual Folder? Folder { get; set; }
 
         [AllowNull]
-        public virtual Series Series { get; set; }
+        public virtual Series? Series { get; set; }
 
         [AllowNull]
-        public virtual FormatTag FormatTag { get; set; }
+        public virtual FormatTag? FormatTag { get; set; }
 
         [AllowNull]
-        public virtual GenreTag GenreTag { get; set; }
+        public virtual GenreTag? GenreTag { get; set; }
     }
 
     [PrimaryKey(nameof(SeriesId), nameof(FormatId))]
@@ -128,9 +128,9 @@ namespace Penfolio2.Models
         [ForeignKey("FormatTag")]
         public int FormatId { get; set; }
 
-        public virtual Series Series { get; set; }
+        public virtual Series? Series { get; set; }
 
-        public virtual FormatTag FormatTag { get; set; }
+        public virtual FormatTag? FormatTag { get; set; }
     }
 
     [PrimaryKey(nameof(SeriesId), nameof(GenreId))]
@@ -144,9 +144,9 @@ namespace Penfolio2.Models
         [ForeignKey("GenreTag")]
         public int GenreId { get; set; }
 
-        public virtual Series Series { get; set; }
+        public virtual Series? Series { get; set; }
 
-        public virtual GenreTag GenreTag { get; set; }
+        public virtual GenreTag? GenreTag { get; set; }
     }
 
     [PrimaryKey(nameof(SeriesId), nameof(OwnerId))]
@@ -160,9 +160,9 @@ namespace Penfolio2.Models
         [ForeignKey("PenProfile")]
         public int OwnerId { get; set; }
 
-        public virtual Series Series { get; set; }
+        public virtual Series? Series { get; set; }
 
-        public virtual PenProfile Owner { get; set; }
+        public virtual PenProfile? Owner { get; set; }
     }
 
     [PrimaryKey(nameof(OverarchingSeriesId), nameof(SeriesMemberId))]
@@ -178,10 +178,10 @@ namespace Penfolio2.Models
         public bool IsStandAlone { get; set; }
 
         [ForeignKey("OverarchingSeriesId")]
-        public virtual Series OverarchingSeries { get; set; }
+        public virtual Series? OverarchingSeries { get; set; }
 
         [ForeignKey("SeriesMemberId")]
-        public virtual Series SeriesMember { get; set; }
+        public virtual Series? SeriesMember { get; set; }
     }
 
     [PrimaryKey(nameof(WritingId), nameof(FolderId))]
@@ -195,9 +195,9 @@ namespace Penfolio2.Models
         [ForeignKey("Folder")]
         public int FolderId { get; set; }
 
-        public virtual Writing Writing { get; set; }
+        public virtual Writing? Writing { get; set; }
 
-        public virtual Folder Folder { get; set; }
+        public virtual Folder? Folder { get; set; }
     }
 
     [PrimaryKey(nameof(WritingId), nameof(FormatId))]
@@ -268,17 +268,17 @@ namespace Penfolio2.Models
         [AllowNull]
         public int? NextWritingId { get; set; }
 
-        public virtual Series Series { get; set; }
+        public virtual Series? Series { get; set; }
 
         [ForeignKey("WritingId")]
-        public virtual Writing Writing { get; set; }
+        public virtual Writing? Writing { get; set; }
 
         [ForeignKey(nameof(PreviousWritingId))]
         [AllowNull]
-        public virtual Writing PreviousWriting { get; set; }
+        public virtual Writing? PreviousWriting { get; set; }
 
         [ForeignKey(nameof(NextWritingId))]
         [AllowNull]
-        public virtual Writing NextWriting { get; set; }
+        public virtual Writing? NextWriting { get; set; }
     }
 }

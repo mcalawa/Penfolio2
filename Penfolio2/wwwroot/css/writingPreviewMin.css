@@ -22,12 +22,12 @@
     display: inline-block; /*required*/
 }
 
-    .descriptionText p {
-        text-align: justify; /*required*/
-    }
+.descriptionText p {
+    text-align: justify; /*required*/
+}
 
 .tagScroller {
-    overflow: hidden; /*required*/
+    overflow: hidden !important; /*required*/
 }
 
 .scrollArrow {
@@ -40,22 +40,25 @@
 .scrollLeft {
     float: left; /*required*/
     padding-right: 2px; /*can change*/
+    padding-left: 2px;
+    border: none;
 }
 
 .scrollRight {
     float: right; /*required*/
     padding-left: 2px; /*can change*/
+    border: none;
 }
 
 .tagScrollbar {
     background-color: #ccc;
-    padding: 2.5px 3px 2.5px 3px; /*can be changed but may require some changing of other values in order to still be the same height as the buttons*/
-    overflow-x: scroll; /*required*/
-    overflow-y: hidden; /*required*/
+    padding: 2px 3px 2.5px 3px; /*can be changed but may require some changing of other values in order to still be the same height as the buttons*/
+    overflow-x: scroll !important; /*required*/
+    overflow-y: hidden !important; /*required*/
     margin-right: 18px; /*needs to be at least as many pixels as the width of the button*/
     margin-left: 18px; /*needs to be at least as many pixels as the width of the button*/
-    margin-bottom: -17px; /*required*/
-    white-space: pre; /*required*/
+    margin-bottom: -19px; /*required*/
+    white-space: nowrap;
 }
 
 .scrollbarTag {

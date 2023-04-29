@@ -35,9 +35,9 @@ namespace Penfolio2.Models
         [AllowNull]
         public string? FolderDescription { get; set; }
 
-        public virtual AccessPermission AccessPermission { get; set; }
+        public virtual AccessPermission? AccessPermission { get; set; }
 
-        public virtual PenUser Creator { get; set; }
+        public virtual PenUser? Creator { get; set; }
 
         public virtual ICollection<FolderOwner> Owners { get; set; }
 

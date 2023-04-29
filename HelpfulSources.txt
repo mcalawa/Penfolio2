@@ -28,6 +28,7 @@ JavaScript:
 https://www.freecodecamp.org/news/here-is-the-most-popular-ways-to-make-an-http-request-in-javascript-954ce8c95aaa/
 https://stackoverflow.com/questions/43176647/how-to-call-a-action-name-on-dropdown-change-in-mvc
 https://stackoverflow.com/questions/60127942/how-to-pass-current-selection-value-to-route-id-in-mvc-core-view
+https://www.freecodecamp.org/news/javascript-keycode-list-keypress-event-key-codes/ Key codes 
 
 General: 
 https://learn.microsoft.com/en-us/aspnet/core/introduction-to-aspnet-core?view=aspnetcore-7.0#recommended-learning-path Documentation for ASP.NET Core 7.0

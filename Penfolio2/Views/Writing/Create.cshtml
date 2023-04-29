@@ -1,37 +1,6 @@
-﻿@model Penfolio2.Models.CreateWritingViewModel
+﻿@model Penfolio2.Models.WritingViewModel
 @{
     ViewBag.Title = "Create New Writing";
-    IEnumerable<Penfolio2.Models.FormatCategory> fc = Model.FormatCategories.Where(i => i.SecondaryParentId == null).ToList();
-    
-    IEnumerable<Penfolio2.Models.FormatTag> fictionFormatOnly = Model.FormatTags.Where(i => i.IsFictionOnly == true).ToList();
-    IEnumerable<Penfolio2.Models.FormatTag> nonfictionFormatOnly = Model.FormatTags.Where(i => i.IsNonfictionOnly == true).ToList();
-    IEnumerable<Penfolio2.Models.GenreCategory> gc = Model.GenreCategories.Where(i => i.TertiaryParentId == null).ToList();
-    IEnumerable<Penfolio2.Models.GenreCategory> fictionOrNonfictionOnly = Model.GenreCategories.GroupBy(i => i.GenreId).Where(j =>
-        (j.Select(k => k.TertiaryParentId).ToList().Contains(1) == false && j.Select(k => k.TertiaryParentId).ToList().Contains(2) == true)
-        || (j.Select(k => k.SecondaryParentId).ToList().Contains(2) == false && j.Select(k => k.SecondaryParentId).ToList().Contains(1) == true)
-        || (j.Select(k => k.SecondaryParentId).ToList().Contains(1) == false && j.Select(k => k.SecondaryParentId).ToList().Contains(2) == true)
-        || (j.Select(k => k.ParentId).ToList().Contains(1) == false && j.Select(k => k.ParentId).ToList().Contains(2) == true)
-        || (j.Select(k => k.ParentId).ToList().Contains(2) == false && j.Select(k => k.ParentId).ToList().Contains(1) == true))
-        .SelectMany(r => r)
-        .Where(r => r.ParentId == 1 || r.ParentId == 2 || r.SecondaryParentId == 1 || r.SecondaryParentId == 2 || r.TertiaryParentId == 1 || r.TertiaryParentId == 2)
-        .ToList();
-    IEnumerable<int> fictionOnly = Model.GenreFormats.Where(i => i.GenreId == 1).Select(i => i.ParentFormatId).ToList();
-    IEnumerable<int> nonfictionOnly = Model.GenreFormats.Where(i => i.GenreId == 2).Select(i => i.ParentFormatId).ToList();
-    IEnumerable<Penfolio2.Models.GenreCategory> fictionGenreOnly = Model.GenreCategories.GroupBy(i => i.GenreId)
-        .Where(j => j.Select(k => k.TertiaryParentId).ToList().Contains(2) == false)
-        .Where(j => j.Select(k => k.SecondaryParentId).ToList().Contains(2) == false)
-        .Where(j => j.Select(k => k.ParentId).ToList().Contains(2) == false)
-        .SelectMany(r => r)
-        .Where(r => r.ParentId == 1 || r.SecondaryParentId == 1 || r.TertiaryParentId == 1)
-        .ToList();
-    IEnumerable<Penfolio2.Models.GenreCategory> nonfictionGenreOnly = Model.GenreCategories
-        .GroupBy(i => i.GenreId)
-        .Where(j => j.Select(k => k.TertiaryParentId).ToList().Contains(1) == false)
-        .Where(j => j.Select(k => k.SecondaryParentId).ToList().Contains(1) == false)
-        .Where(j => j.Select(k => k.ParentId).ToList().Contains(1) == false)
-        .SelectMany(r => r)
-        .Where(r => r.ParentId == 2 || r.SecondaryParentId == 2 || r.TertiaryParentId == 2)
-        .ToList();
 }
 
 <h2>Create New Writing</h2>
@@ -70,18 +39,7 @@
             <!--Author-->
             <div class="slide2 collapse">
                 <div class="inputGroup">
-                    <h3>Select Profiles for Writing</h3>
-                    <div class="profileSelector">
-                        <div id="profileContainer">
-                            <!--For each profile connected to the current user, create a checkbox for that profile-->
-                            @foreach (var profile in Model.WritingProfiles)
-                            {
-                                <div class="form-group checkItem2">
-                                    <input type="checkbox" class="@profile.ProfileId" value="@profile.ProfileId" /> <span class="profileName @profile.ProfileId">@profile.DisplayName</span>
-                                </div>
-                            }
-                        </div>
-                    </div> 
+                    @await Component.InvokeAsync("Writing", new { viewName = "SelectAuthors" })
                 </div> <!--inputGroup-->
 
                 <!--back uncollapses slide1 and next uncollapses slide3; both collapse slide2-->
@@ -94,52 +52,7 @@
             <!--Format Tags-->
             <div class="slide3 collapse">
                 <div class="inputGroup">
-                    <div class="tagSelector">
-                        <!--The header for this particular section; shows an explanation in the description box at the bottom when you mouse over it-->
-                        <h3 onmouseover='showExplanation("formatTagDescription", "A writing format is the type of writing your piece falls under. Formats include things like essays, poems, and novels and are not decided by the writing&apos;s genre. By selecting writing formats, you will be providing categorizations that will help organize your writing and help others find it more easily should you choose to share it. For more information on what different formats mean, hover over the format names. Selecting higher level formats will load more formats that fall under that category.")'>Select Writing Format</h3>
-                        <!--The container for all of the format tags themselves-->
-                        <div id="formatTagContainer">
-                            <!--For each of the top level formats (aka the formats that don't have any parents)-->
-                            <!--Creates each checkbox and corresponding name in its own span for easy access; function parameters in ftChildren are:
-                            1 the FormatID,
-                            2 an array of its children that don't have a secondary parent,
-                            3 an array of its children that do have a secondary parent,
-                            4 an array of secondary parents for the children in the previous array with matching indexes,
-                            5 an array of children without secondary parents that have alternate possible parents,
-                            6 an array of alternate possible parents for the children in the last array with matching indexes,
-                            7 an array of child genres,
-                            8 a bool for whether or not this format tag is fiction only,
-                            9 a bool for whether or not this format tag is nonfiction only,
-                            10 an array of formats that are fiction only,
-                            11 an array of formats that are nonfiction only-->
-                            @foreach(var tag in Model.FormatTags.Except(Model.FormatTags.Where(t => (Model.FormatTags.SelectMany(u => (u.ChildFormats.Select(v => v.FormatId))).Contains(t.FormatId)))))
-                            {
-                                <span class="@tag.FormatId checkItem" onmouseover='showExplanation("formatTagDescription", "@tag.Explanation")' >
-                                    <input type="checkbox" value="@tag.FormatId" name="FormatTags" onfocus='showExplanation("formatTagDescription", "@tag.Explanation")' onchange='ftChildren(@tag.FormatId, [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId == null).Select(i => i.FormatId)))], [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.FormatId)))], [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))], [@Html.Raw(String.Join(",", fc.Where(i => i.SecondaryParentId == null).GroupBy(i => i.FormatId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId)))], [@Html.Raw(String.Join(",", fc.GroupBy(i => i.FormatId).Where(j => j.Select(k => k.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId).Select(i => i.ParentId)))], [@Html.Raw(String.Join(",", tag.ChildGenres.Select(i => i.GenreId)))], "@tag.IsFictionOnly.ToString().ToLower()", "@tag.IsNonfictionOnly.ToString().ToLower()", [@Html.Raw(String.Join(",", fictionFormatOnly.Select(i => i.FormatId).ToList()))], [@Html.Raw(String.Join(",", nonfictionFormatOnly.Select(i => i.FormatId).ToList()))])' class="@tag.FormatId" /> <span class="formatName">@tag.FormatName</span>
-                                </span>
-                            } <!--For each of the lower level formats (aka the formats that have at least one parent)-->
-                            @foreach (var tag in Model.FormatTags.Where(t => (Model.FormatTags.SelectMany(u => (u.ChildFormats.Select(v => v.FormatId))).Contains(t.FormatId))))
-                            {
-                                <span class="@tag.FormatId checkItem collapse" onmouseover='showExplanation("formatTagDescription", "@tag.Explanation")'>
-                                    <input type="checkbox" value="@tag.FormatId" name="FormatTags" onfocus='showExplanation("formatTagDescription", "@tag.Explanation")' onchange='ftChildren(@tag.FormatId,
-                [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId == null).Select(i => i.FormatId)))],
-                [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.FormatId)))],
-                [@Html.Raw(String.Join(",", tag.ChildFormats.Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))],
-                [@Html.Raw(String.Join(",", fc.GroupBy(i => i.FormatId).Where(j => j.Select(k => k.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId).Select(i => i.FormatId)))],
-                [@Html.Raw(String.Join(",", fc.GroupBy(i => i.FormatId).Where(j => j.Select(k => k.ParentId).ToList().Contains(tag.FormatId)).SelectMany(r => r).Where(r => r.ParentId != tag.FormatId).Select(i => i.ParentId)))],
-                [@Html.Raw(String.Join(",", tag.ChildGenres.Select(i => i.GenreId)))],
-                "@tag.IsFictionOnly.ToString().ToLower()",
-                "@tag.IsNonfictionOnly.ToString().ToLower()",
-                [@Html.Raw(String.Join(",", fictionFormatOnly.Select(i => i.FormatId).ToList()))], [@Html.Raw(String.Join(",", nonfictionFormatOnly.Select(i => i.FormatId).ToList()))])' class="@tag.FormatId" /> <span class="formatName">@tag.FormatName</span>
-                                </span>
-                            }
-                        </div> <!--formatTagContainer-->
-
-                        <!--div for holding the description for the format tags-->
-                        <div id="formatTagDescription" class="description">
-
-                        </div>
-                    </div>
+                    @await Component.InvokeAsync("Writing", new { viewName = "SelectFormat" })
                 </div> <!--inputGroup-->
 
                 <!--back uncollapses slide2 and next uncollapses slide4; both collapse slide3-->
@@ -152,93 +65,7 @@
             <!--Genre Tags-->
             <div class="slide4 collapse">
                 <div class="inputGroup">
-                    <!--The div class for the genre tag container-->
-                    <div id="genreTagContainer">
-                        <!--The header of this particular section; shows an explanation in the description box at the bottom when you mouse over it-->
-                        <h3 onmouseover='showExplanation("genreTagDescription", "A writing genre is the style or subject matter your piece of writing falls under. Examples include fantasy, travel, and thriller. By selecting writing genres, you will be providing categorizations that will help organize your writing and help others find it more easily should you choose to share it. For more information on what each of the genres mean, hover over the genre names. Selecting higher level genres will load more genres that fall under that category.")'>Select Writing Genre</h3>
-                        <!--The container for all of the genre tags themselves-->
-                        <div class="fictionOrNonfiction">
-                            <h4 onmouseover='showExplanation("genreTagDescription", "While some genres are available no matter what, whether your writing is fiction or nonfiction affects many of the genres that it can potentially be. Some writing formats are by definition fiction or nonfiction, so if one of the options has already been selected, feel free ignore this part of the options and continue to select genres for your writing below.")'>Is your writing fiction or nonfiction?</h4>
-                            <!--Creates the radiobuttons for fiction and nonfiction in their own spans for easy access; function parameters in fictionOrNonfiction are the GenreName, an array of genre tags that can only be the opposite of this genre, an array of child genres for this genre, and an array of FormatIds that have the opposite required GenreId-->
-                            @foreach (var tag in Model.GenreTags.Where(i => i.GenreId < 3))
-                            {
-                                <span class="@tag.GenreId" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'><input type="radio" value="@tag.GenreId" name="FictionOrNonfiction" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='fictionOrNonfiction("@tag.GenreName", [@Html.Raw(String.Join(",", fictionOrNonfictionOnly.Where(i => i.ParentId != tag.GenreId && i.SecondaryParentId != tag.GenreId && i.TertiaryParentId != tag.GenreId).Select(i => i.GenreId).Distinct()))], [@Html.Raw(String.Join(",", tag.ChildGenres.Select(i => i.GenreId)))], [@Html.Raw(String.Join(",", tag.GenreId == 1 ? nonfictionOnly : fictionOnly))])' /> <span class="genreName">@tag.GenreName</span></span>
-
-                                <br />
-                            }
-                        </div> <!--fictionOrNonfiction-->
-                        <div class="genreTagsThreePlus">
-                            <!--The header for the rest of the genre tags-->
-                            <h4>Genres</h4>
-                            <!--Creates each checkbox and corresponding name in its own span for easy access; function parameters in gtChildren are
-                                1 the GenreId
-                                2 an array of its children that don't have any dependencies (meaning no secondary parent)
-                                3 an array of its children that do have a secondary parent but don't have a tertiary parent (single dependency)
-                                4 an array of secondary parents for the children in the previous array with matching indexes
-                                5 an array of children with a tertiary parent (multiple dependencies)
-                                6 an array of the secondary parents of the previous array with matching indexes
-                                7 an array of tertiary parents for the same array as the last one with matching indexes
-                                8 an array of children without secondary parents (meaning no dependencies) that have alternate possible parents
-                                9 an array of alternate possible parents for the children in the last array with matching indexes
-                                10 an array of children with a secondary parent and no tertiary parent (single dependency) that have alternate parents
-                                11 an array of possible alternate parents for the children in the last array with matching indexes
-                                12 an array of dependencies for the last two arrays with matching indexes
-                                13 a bool that states whether or not this tag is fiction only,
-                                14 a bool that states whether or not this tag is nonfiction only,
-                                15 an array of genres that are fiction only,
-                                16 an array of genres that are nonfiction only,
-                                17 an array of parent formats-->
-                            <!--Top level tags that can be either fiction or nonfiction-->
-                            @foreach (var tag in Model.GenreTags.Where(i => i.ParentGenres.Select(j => j.ParentId).ToList().Contains(1) && i.ParentGenres.Select(j => j.ParentId).ToList().Contains(2)))
-                            {
-                                <span class="@tag.GenreId checkItem" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'>
-                                    <input type="checkbox" value="@tag.GenreId" name="GenreTags" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='gtChildren(@tag.GenreId,
-                    [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.SecondaryParentId == null).Select(i => i.GenreId)))],
-                    [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.GenreId)))],
-                    [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))],
-                    [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId != null).Select(i => i.GenreId)))],
-                    [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId != null).Select(i => i.SecondaryParentId)))],
-                    [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId != null).Select(i => i.TertiaryParentId)))],
-                    [@Html.Raw(String.Join(",", gc.Where(i => i.SecondaryParentId == null).GroupBy(i => i.GenreId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.GenreId)).SelectMany(r => r).Where(r => r.ParentId != tag.GenreId).Select(s => s.GenreId)))],
-                    [@Html.Raw(String.Join(",", gc.Where(i => i.SecondaryParentId == null).GroupBy(i => i.GenreId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.GenreId)).SelectMany(r => r).Where(r => r.ParentId != tag.GenreId).Select(s => s.ParentId)))],
-                    [@Html.Raw(String.Join(",", gc.Where(i => i.SecondaryParentId != null).GroupBy(i => i.GenreId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.GenreId)).SelectMany(r => r).Where(r => r.ParentId != tag.GenreId).Select(s => s.GenreId)))],
-                    [@Html.Raw(String.Join(",", gc.Where(i => i.SecondaryParentId != null).GroupBy(i => i.GenreId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.GenreId)).SelectMany(r => r).Where(r => r.ParentId != tag.GenreId).Select(s => s.ParentId)))],
-                    [@Html.Raw(String.Join(",", gc.Where(i => i.SecondaryParentId != null).GroupBy(i => i.GenreId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.GenreId)).SelectMany(r => r).Where(r => r.ParentId != tag.GenreId).Select(s => s.SecondaryParentId)))],
-                    "false",
-                    "false",
-                    [@Html.Raw(String.Join(",", fictionGenreOnly.Select(i => i.GenreId)))],
-                    [@Html.Raw(String.Join(",", nonfictionGenreOnly.Select(i => i.GenreId)))]],
-                    [@Html.Raw(String.Join(",", tag.GenreFormats.Select(i => i.ParentFormatId)))])' /> <span class="genreName">@tag.GenreName</span>
-                                </span>
-                            }
-                            <!--Tags that are below the top level or which are nonfiction only or fiction only-->@foreach (var tag in Model.GenreTags.Where(i => i.GenreId > 2).Except(Model.GenreTags.Where(i => (i.ParentGenres.Select(j => j.ParentId).ToList().Contains(1) && i.ParentGenres.Select(j => j.ParentId).ToList().Contains(2)))))
-                            {
-                                <span class="@tag.GenreId checkItem collapse" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'>
-                                    <input type="checkbox" value="@tag.GenreId" name="GenreTags" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='gtChildren(@tag.GenreId,
-                    [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.SecondaryParentId == null).Select(i => i.GenreId)))],
-                    [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.GenreId)))],
-                    [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))],
-                    [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId != null).Select(i => i.GenreId)))],
-                    [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId != null).Select(i => i.SecondaryParentId)))],
-                    [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId != null).Select(i => i.TertiaryParentId)))],
-                    [@Html.Raw(String.Join(",", gc.Where(i => i.SecondaryParentId == null).GroupBy(i => i.GenreId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.GenreId)).SelectMany(r => r).Where(r => r.ParentId != tag.GenreId).Select(s => s.GenreId)))],
-                    [@Html.Raw(String.Join(",", gc.Where(i => i.SecondaryParentId == null).GroupBy(i => i.GenreId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.GenreId)).SelectMany(r => r).Where(r => r.ParentId != tag.GenreId).Select(s => s.ParentId)))],
-                    [@Html.Raw(String.Join(",", gc.Where(i => i.SecondaryParentId != null).GroupBy(i => i.GenreId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.GenreId)).SelectMany(r => r).Where(r => r.ParentId != tag.GenreId).Select(s => s.GenreId)))],
-                    [@Html.Raw(String.Join(",", gc.Where(i => i.SecondaryParentId != null).GroupBy(i => i.GenreId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.GenreId)).SelectMany(r => r).Where(r => r.ParentId != tag.GenreId).Select(s => s.ParentId)))],
-                    [@Html.Raw(String.Join(",", gc.Where(i => i.SecondaryParentId != null).GroupBy(i => i.GenreId).Where(j => j.Count() > 1).Where(k => k.Select(l => l.ParentId).ToList().Contains(tag.GenreId)).SelectMany(r => r).Where(r => r.ParentId != tag.GenreId).Select(s => s.SecondaryParentId)))],
-                    "@tag.IsFictionOnly.ToString().ToLower()",
-                    "@tag.IsNonfictionOnly.ToString().ToLower()",
-                    [@Html.Raw(String.Join(",", fictionGenreOnly.Select(i => i.GenreId)))]],
-                    [@Html.Raw(String.Join(",", nonfictionGenreOnly.Select(i => i.GenreId)))]],
-                    [@Html.Raw(String.Join(",", tag.GenreFormats.Select(i => i.ParentFormatId)))])' /> <span class="genreName">@tag.GenreName</span>
-                                </span>
-                            }
-                        </div>
-
-                        <!--div for holding the description for the genre tags-->
-                        <div id="genreTagDescription" class="description">
-                        </div>
-                    </div> <!--genreTagContainer-->
+                    @await Component.InvokeAsync("Writing", new { viewName = "SelectGenre" })
                 </div> <!--inputGroup-->
 
                 <!--back uncollapses slide3 and next uncollapses slide5; both collapse slide4-->
@@ -251,47 +78,7 @@
             <!--Permissions-->
             <div class="slide5 collapse">
                 <div class="inputGroup">
-                    <div class="permissionsSelector">
-                        <h3 onmouseover='showExplanation("permissionsDescription", "Who can view a piece of writing. All permissions options can be changed at any time. For more information on what the different options mean, hover over them.")'>Select Access Permissions for Writing</h3>
-                        <div id="permissionsContainer">
-                            <div id="accessContainer">
-                                <!--Public Access-->
-                                <div class="form-group form-check" onmouseover='showExplanation("permissionsDescription", "Allowing public access means that anyone can view this piece of writing. By selecting this option, you will automatically allow friends, followers, and publishers alike to view your work.")' id="public-access">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" asp-for="PublicAccess" onfocus='showExplanation("permissionsDescription", "Allowing public access means that anyone can view this piece of writing. By selecting this option, you will automatically allow friends, followers, and publishers alike to view your work.")' onchange='changeAccess("public-access")' /> @Html.DisplayNameFor(model => model.PublicAccess)
-                                    </label>
-                                </div>
-                                <!--Friend Access-->
-                                <div class="form-group form-check" onmouseover='showExplanation("permissionsDescription", "Allowing friend access means that people who are your mutual friends will be able to see this writing. If this option is not unchecked, that means it does not allow public access.")' id="friend-access">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" asp-for="FriendAccess" onfocus='showExpanation("permissionsDescription", "Allowing friend access means that people who are your mutual friends will be able to see this writing. If this option is unchecked, that means it does not allow public access.")' onchange='changeAccess("friend-access")' /> @Html.DisplayNameFor(model => model.FriendAccess)
-                                    </label>
-                                </div>
-                                <!--Publisher Access-->
-                                <div class="form-group form-check" onmouseover='showExplanation("permissionsDescription", "Allowing publisher access means that profiles that are verified as being owned by publishers or literary agents will be able to view your writing. Just selecting publisher access is a great way to limit the number of people who can see your writing, while still allowing it to be found by potential employers. If this option is unchecked, that means it does not allow public access.")' id="publisher-access">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" asp-for="PublisherAccess" onfocus='showExplanation("permissionsDescription", "Allowing publisher access means that profiles that are verified as being owned by publishers or literary agents will be able to view your writing. Just selecting publisher access is a great way to limit the number of people who can see your writing, while still allowing it to be found by potential employers. If this option is unchecked, that means it does not allow public access.")' onchange='changeAccess("publisher-access")' /> @Html.DisplayNameFor(model => model.PublisherAccess)
-                                    </label>
-                                </div>
-                                <!--Minor Access-->
-                                <div class="form-group form-check" onmouseover='showExplanation("permissionsDescription", "One of the goals of Penfolio is to give you as a writer a single place to post all of your writing. This means that some of the pieces you post may not be appropriate for younger readers. By not selecting this option, you are noting that your writing is for more mature audiences and protecting minors from stumbling across material they may not be ready for yet. Examples of things that may not be appropriate for minors include graphic violence or explicit sexual content, strong language, and mature themes such as non-consensual romantic or physical interactions. Ultimately, deciding the age-appropriateness of your writing is up to you, but please use your best judgement.")' id="minor-access">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" asp-for="MinorAccess" onfocus='showExplanation("permissionsDescription", "One of the goals of Penfolio is to give you as a writer a single place to post all of your writing. This means that some of the pieces you post may not be appropriate for younger readers. By not selecting this option, you are noting that your writing is for more mature audiences and protecting minors from stumbling across material they may not be ready for yet. Examples of things that may not be appropriate for minors include graphic violence or explicit sexual content, strong language, and mature themes such as non-consensual romantic or physical interactions. Ultimately, deciding the age-appropriateness of your writing is up to you, but please use your best judgement.")' /> @Html.DisplayNameFor(model => model.MinorAccess)
-                                    </label>
-                                </div>
-                                <!--Shows Up in Search-->
-                                <div class="form-group form-check" onmouseover='showExplanation("permissionDescription", "At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with their work. For this reason, you can choose whether or not your writing will show up in searches. If this option is unselected, other users will only be able to find this pieces of writing through a connected profile or a direct link. If it is selected, this piece of writing will show up in searches and users who do not fall under your chosen access permissions will be  able to request access to it. Please keep in mind that while this option allows you to show up in the search results of people who don&#39;t have access to this piece of writing, this distinction does not apply to minor access. If you do not have the Allow Minor Access box checked, this writing will still not show up in the search results of users under 18 or who have yet to specify their birthday for their account.")' id="shows-up-in-search">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" asp-for="ShowsUpInSearch" onfocus='showExplanation("permissionDescription", "At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with their work. For this reason, you can choose whether or not your writing will show up in searches. If this option is unselected, other users will only be able to find this pieces of writing through a connected profile or a direct link. If it is selected, this piece of writing will show up in searches and users who do not fall under your chosen access permissions will be  able to request access to it. Please keep in mind that while this option allows you to show up in the search results of people who don&#39;t have access to this piece of writing, this distinction does not apply to minor access. If you do not have the Allow Minor Access box checked, this writing will still not show up in the search results of users under 18 or who have yet to specify their birthday for their account.")' /> @Html.DisplayNameFor(model => model.ShowsUpInSearch)
-                                    </label>
-                                </div>
-                            </div> <!--accessContainer-->
-                            <!--This is where permission for things like likes and comments and critique will be able to be selected should those features be implemented-->
-                        </div> <!--permissionsContainer-->
-
-                        <div id="permissionsDescription" class="descriptionText">
-                        </div>
-                    </div> <!--permissionsSelector-->
+                    @await Component.InvokeAsync("Writing", new { viewName = "SelectPermissions" })
                 </div> <!--inputGroup-->
 
                 <!--back collapses slide5 and uncollapses slide4; next also collapses slide5, in addition to uncollapsing slide6 and populating the confirmation messages with the current form values-->

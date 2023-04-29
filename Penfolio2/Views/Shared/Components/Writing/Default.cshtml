@@ -28,22 +28,7 @@
         <div class="addDateTime">Posted @Html.DisplayFor(model => model.AddDate)</div>
     }
     <h3>@Model.Title</h3>
-    <h4>By @for(int i = 0; i < Model.WritingProfiles.Count; i++)
-        {
-            if(i == 0)
-            {
-                <span><a href="/Profile/@Model.WritingProfiles.ElementAt(i).PenProfile.UrlString">@Model.WritingProfiles.ElementAt(i).PenProfile.DisplayName</a></span>
-            }
-            else if(Model.WritingProfiles.Count - 1 == i)
-            {
-                <span> and <a href="/Profile/@Model.WritingProfiles.ElementAt(i).PenProfile.UrlString">@Model.WritingProfiles.ElementAt(i).PenProfile.DisplayName</a></span>
-            }
-            else
-            {
-                <span>, <a href="/Profile/@Model.WritingProfiles.ElementAt(i).PenProfile.UrlString">@Model.WritingProfiles.ElementAt(i).PenProfile.DisplayName</a></span>
-            }
-        }
-    </h4>
+    @await Component.InvokeAsync("Writing", new { id = Model.WritingId, viewName = "Author" })
     <div class="writingDescription">
         <div class="descriptionText">
             <p>@Html.DisplayFor(model => model.Description)</p>
@@ -57,30 +42,30 @@
     </div>
     <!--A container to hold all of the tags associated with this piece of writing; has arrow buttons on each side that can be used to scroll through tags; each tag is also a link to a view that returns writings that share that tag-->
     <div class="tagScroller @Model.WritingId@tagCollapse">
-        <button class="scrollLeft scrollArow" data-scroll-modifier="-1" data-parent="@Model.WritingId">◀</button>
+        <button class="scrollLeft scrollArrow" data-scroll-modifier="-1" data-parent="@Model.WritingId">◂</button>
         <button class="scrollRight scrollArrow" data-scroll-modifier="1" data-parent="@Model.WritingId">▸</button>
         <div class="tagScrollbar" data-parent="@Model.WritingId">
             @foreach(var format in Model.WritingFormats)
             {
                 <span class="scrollbarTag">
-                    <a href="/Writing/SearchByFormatTag/@format.FormatId">#@format.FormatTag.FormatName</a>
+                    <a href="/Writing/SearchByFormatTag/@format.FormatId" data-parent="@Model.WritingId">#@format.FormatTag.FormatName</a>
                 </span>
                 foreach (var altName in format.FormatTag.AltFormatNames)
                 {
                     <span class="scrollbarTag">
-                        <a href="/Writing/SearchByFormatTag/@format.FormatId">#@altName.AltName</a>
+                        <a href="/Writing/SearchByFormatTag/@format.FormatId" data-parent="@Model.WritingId">#@altName.AltName</a>
                     </span>
                 }
             }
             @foreach(var genre in Model.WritingGenres)
             {
                 <span class="scrollbarTag">
-                    <a href="/Writing/SearchByGenreTag/@genre.GenreId">#@genre.GenreTag.GenreName</a>
+                    <a href="/Writing/SearchByGenreTag/@genre.GenreId" data-parent="@Model.WritingId">#@genre.GenreTag.GenreName</a>
                 </span>
                 foreach(var altName in genre.GenreTag.AltGenreNames)
                 {
                     <span class="scrollbarTag">
-                        <a href="/Writing/SearchByGenreTag/@genre.GenreId">#@altName.AltName</a>
+                        <a href="/Writing/SearchByGenreTag/@genre.GenreId" data-parent="@Model.WritingId">#@altName.AltName</a>
                     </span>
                 }
             }

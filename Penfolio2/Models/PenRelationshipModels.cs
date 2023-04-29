@@ -23,10 +23,10 @@ namespace Penfolio2.Models
         public bool Active { get; set; }
 
         [ForeignKey("FirstFriendId")]
-        public virtual PenProfile FirstFriend { get; set; }
+        public virtual PenProfile? FirstFriend { get; set; }
 
         [ForeignKey("SecondFriendId")]
-        public virtual PenProfile SecondFriend { get; set; }
+        public virtual PenProfile? SecondFriend { get; set; }
     }
 
     public class FriendRequest
@@ -48,10 +48,10 @@ namespace Penfolio2.Models
         public bool Resolved { get; set; }
 
         [ForeignKey("RequesterId")]
-        public virtual PenProfile Requester { get; set; }
+        public virtual PenProfile? Requester { get; set; }
 
         [ForeignKey("RequesteeId")]
-        public virtual PenProfile Requestee { get; set; }
+        public virtual PenProfile? Requestee { get; set; }
     }
 
     public class UserBlock
@@ -83,9 +83,9 @@ namespace Penfolio2.Models
         public bool Active { get; set; } = true;
 
         [ForeignKey("BlockingUserId")]
-        public virtual PenUser BlockingUser { get; set; }
+        public virtual PenUser? BlockingUser { get; set; }
 
         [ForeignKey("BlockedUserId")]
-        public virtual PenUser BlockedUser { get; set; }
+        public virtual PenUser? BlockedUser { get; set; }
     }
 }

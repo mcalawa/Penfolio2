@@ -27,9 +27,9 @@ namespace Penfolio2.Models
         public byte[] EditedDocument { get; set; }
 
         //[ForeignKey("CriticId")]
-        public virtual PenProfile Critic { get; set; }
+        public virtual PenProfile? Critic { get; set; }
 
-        public virtual Writing Writing { get; set; }
+        public virtual Writing? Writing { get; set; }
     }
 
     public class CritiqueRequest
@@ -48,7 +48,7 @@ namespace Penfolio2.Models
         [Required, NotNull]
         public bool Active { get; set; }
 
-        public virtual Writing Writing { get; set; }
+        public virtual Writing? Writing { get; set; }
     }
 
     public class CritiqueGiver
@@ -89,6 +89,6 @@ namespace Penfolio2.Models
         public bool ForMatureWriting { get; set; } = false;
 
         //[ForeignKey("CriticId")]
-        public virtual PenProfile Critic { get; set; }
+        public virtual PenProfile? Critic { get; set; }
     }
 }

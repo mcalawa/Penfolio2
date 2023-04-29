@@ -32,7 +32,23 @@ namespace Penfolio2.Controllers
 
         public List<Writing> OrderByNewest(List<Writing> writings)
         {
-            return writings.OrderByDescending(i => i.EditDate == null ? i.EditDate : i.AddDate).ToList();
+            return writings.OrderByDescending(i => i.EditDate == null ? i.AddDate : i.EditDate).ToList();
+        }
+
+        public List<Writing> GetAllWritingAvailableForSearch()
+        {
+            var writings = db.Writings.ToList();
+
+            foreach (var writing in writings)
+            {
+                List<IdentityError> errors = new List<IdentityError>();
+                if (!IsAccessableByUser(writing.AccessPermissionId, ref errors, "search"))
+                {
+                    writings.Remove(writing);
+                }
+            }
+
+            return OrderByNewest(writings);
         }
 
         public List<Writing> GetAllWritingAvailable()
@@ -51,10 +67,37 @@ namespace Penfolio2.Controllers
             return OrderByNewest(writings);
         }
 
-        // GET: WritingController/Details/5
-        public ActionResult Details(int id)
+        // GET: WritingController/ViewWriting/5
+        [Route("Writing/ViewWriting/{id}")]
+        public ActionResult ViewWriting(int id)
         {
-            return View();
+            Writing writing = db.Writings.Where(i => i.WritingId == id).FirstOrDefault();
+
+            if(writing != null)
+            {
+                writing = PopulateWriting(writing);
+            }
+
+            List<IdentityError> errors = new List<IdentityError>();
+
+            //if the user is not allowed to access this, redirect to error (TBD)
+            if(!IsAccessableByUser(writing.AccessPermissionId, ref errors))
+            {
+                return View();
+            }
+
+            ViewBag.Author = false;
+
+            if(IsAccessableByUser(writing.AccessPermissionId, ref errors, "edit"))
+            {
+                ViewBag.Author = true;
+            }
+
+            string document = HTMLByteArrayToString(writing.Document);
+
+            ViewBag.Document = document;
+
+            return View(writing);
         }
 
         // GET: WritingController/Create
@@ -84,7 +127,7 @@ namespace Penfolio2.Controllers
             ViewBag.FormatTags = String.Join(",", formatTags.Select(i => i.FormatId));
             ViewBag.GenreTags = String.Join(",", genreTags.Select(i => i.GenreId));
 
-            var model = new CreateWritingViewModel
+            var model = new WritingViewModel
             {
                 WritingProfiles = writingProfiles,
                 GenreTags = genreTags,
@@ -101,7 +144,7 @@ namespace Penfolio2.Controllers
         // POST: WritingController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(CreateWritingViewModel model)
+        public ActionResult Create(WritingViewModel model)
         {
             var userId = GetUserId();
 
@@ -301,62 +344,17 @@ namespace Penfolio2.Controllers
             }
         }
 
-        public List<SelectFormatTagViewModel> PopulateFormatTags()
+        public string HTMLByteArrayToString(byte[] input)
         {
-            List<SelectFormatTagViewModel> formatTagsForView = new List<SelectFormatTagViewModel>();
-            List<FormatTag> formatTags = db.FormatTags.ToList();
-
-            foreach(var tag in formatTags)
+            if (input == null)
             {
-                var formatTagViewModel = PopulateSingleFormatTag(tag);
-
-                formatTagsForView.Add( formatTagViewModel );
+                return null;
             }
 
-            return formatTagsForView;
-        }
+            string output = Encoding.Unicode.GetString(input);
+            output = output.Replace("&lt;", "<").Replace("&gt;", ">").Replace("'", "&#39;");
 
-        public SelectFormatTagViewModel PopulateSingleFormatTag(FormatTag tag)
-        {
-            var formatTagViewModel = new SelectFormatTagViewModel
-            {
-                FormatId = tag.FormatId,
-                FormatName = tag.FormatName,
-                Explanation = tag.Explanation == null ? "" : tag.Explanation,
-                IsFictionOnly = tag.IsFictionOnly,
-                IsNonfictionOnly = tag.IsNonfictionOnly,
-                AltNames = new List<string>(),
-                Parents = new List<Tuple<SelectFormatTagViewModel, SelectFormatTagViewModel>>()
-            };
-
-            if (db.AltFormatNames.Any(i => i.FormatId == tag.FormatId))
-            {
-                var altFormatNames = db.AltFormatNames.Where(i => i.FormatId == tag.FormatId).ToList();
-
-                foreach (var name in altFormatNames)
-                {
-                    formatTagViewModel.AltNames.Add(name.AltName);
-                }
-            }
-
-            if (db.FormatCategories.Any(i => i.FormatId == tag.FormatId))
-            {
-                var formatCategories = db.FormatCategories.Where(i => i.FormatId == tag.FormatId).ToList();
-
-                foreach (var category in formatCategories)
-                {
-                    var firstParent = db.FormatTags.Where(i => i.FormatId == category.ParentId).FirstOrDefault();
-                    var secondParent = category.SecondaryParentId == null ? null : db.FormatTags.Where(i => i.FormatId == category.SecondaryParentId).FirstOrDefault();
-                    var fp = PopulateSingleFormatTag(firstParent);
-                    var sp = secondParent == null ? null : PopulateSingleFormatTag(secondParent);
-
-                    var setOfParents = Tuple.Create(fp, sp);
-
-                    formatTagViewModel.Parents.Add(setOfParents);
-                }
-            }
-
-            return formatTagViewModel;
+            return output;
         }
     }
 }

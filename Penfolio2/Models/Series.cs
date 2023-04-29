@@ -47,9 +47,9 @@ namespace Penfolio2.Models
         [AllowNull]
         public int? NextSeriesId { get; set; }
 
-        public virtual AccessPermission AccessPermission { get; set; }
+        public virtual AccessPermission? AccessPermission { get; set; }
 
-        public virtual PenUser Creator { get; set; }
+        public virtual PenUser? Creator { get; set; }
 
         [ForeignKey("SeriesId")]
         public virtual ICollection<WritingSeries> SeriesWritings { get; set; }
@@ -69,9 +69,9 @@ namespace Penfolio2.Models
         public virtual ICollection<FollowerFollowing> Followers { get; set; }
 
         [AllowNull]
-        public virtual Series PreviousSeries { get; set; }
+        public virtual Series? PreviousSeries { get; set; }
 
         [AllowNull]
-        public virtual Series NextSeries { get; set; }
+        public virtual Series? NextSeries { get; set; }
     }
 }

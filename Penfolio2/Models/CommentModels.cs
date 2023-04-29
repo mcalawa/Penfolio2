@@ -44,16 +44,16 @@ namespace Penfolio2.Models
         public int? SeriesId { get; set; }
 
         [ForeignKey("CommenterId")]
-        public virtual PenProfile Commenter { get; set; }
+        public virtual PenProfile? Commenter { get; set; }
 
         [ForeignKey("ProfileId")]
-        public virtual PenProfile CommentProfile { get; set; }
+        public virtual PenProfile? CommentProfile { get; set; }
 
-        public virtual Writing Writing { get; set; }
+        public virtual Writing? Writing { get; set; }
 
-        public virtual Folder Folder { get; set; }
+        public virtual Folder? Folder { get; set; }
 
-        public virtual Series Series { get; set; }
+        public virtual Series? Series { get; set; }
 
         public virtual ICollection<CommentFlag> CommentFlags { get; set; }
 
@@ -63,7 +63,7 @@ namespace Penfolio2.Models
         public virtual ICollection<CommentReply> CommentReplies { get; set; }
 
         //[ForeignKey("ReplyId")]
-        public virtual CommentReply ReplyTo { get; set; }
+        public virtual CommentReply? ReplyTo { get; set; }
     }
 
     public class CommentFlag
@@ -85,10 +85,10 @@ namespace Penfolio2.Models
 
         public string? FlagReason { get; set; }
 
-        public virtual Comment Comment { get; set; }
+        public virtual Comment? Comment { get; set; }
 
         //[ForeignKey("FlaggerId")]
-        public virtual PenProfile Flagger { get; set; }
+        public virtual PenProfile? Flagger { get; set; }
     }
 
     [PrimaryKey(nameof(CommentId), nameof(ReplyId))]
@@ -101,9 +101,9 @@ namespace Penfolio2.Models
         public int ReplyId { get; set; }
 
         [ForeignKey("CommentId")]
-        public virtual Comment Comment { get; set; }
+        public virtual Comment? Comment { get; set; }
 
         [ForeignKey("ReplyId")]
-        public virtual Comment Reply { get; set; }
+        public virtual Comment? Reply { get; set; }
     }
 }

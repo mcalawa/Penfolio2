@@ -18,7 +18,11 @@
         wId;
 
     //Start the scrolling process
-    $(".scrollArrow").on("mousedown", function () {
+    $(".scrollArrow").on("mousedown keydown", function (event) {
+        if (event.key === "Tab" || event.shiftKey === true) {
+            return;
+        }
+
         var data = $(this).data('scrollModifier'),
             direction = parseInt(data, 10),
             wData = $(this).data('parent');
@@ -32,7 +36,11 @@
     });
 
     //Kill the scrolling
-    $(".scrollArrow").on("mouseup", function () {
+    $(".scrollArrow").on("mouseup keyup", function (event) {
+        if (event.key === "Tab" || event.shiftKey === true) {
+            return;
+        }
+
         stopScrolling();
         $(this).removeClass('active');
     });

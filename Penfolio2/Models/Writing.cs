@@ -59,9 +59,9 @@ namespace Penfolio2.Models
         public bool IsStandAlone { get; set; } = true;
 
         //[ForeignKey("UserId")]
-        public virtual PenUser PenUser { get; set; }
+        public virtual PenUser? PenUser { get; set; }
 
-        public virtual AccessPermission AccessPermission { get; set; }
+        public virtual AccessPermission? AccessPermission { get; set; }
 
         public virtual ICollection<WritingProfile> WritingProfiles { get; set; }
 
@@ -79,6 +79,6 @@ namespace Penfolio2.Models
 
         public virtual ICollection<Critique> Critiques { get; set; }
 
-        public virtual CritiqueRequest CritiqueRequest { get; set; }
+        public virtual CritiqueRequest? CritiqueRequest { get; set; }
     }
 }

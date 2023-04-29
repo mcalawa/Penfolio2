@@ -17,22 +17,6 @@ namespace Penfolio2.Models
             Followers = new HashSet<FollowerFollowing>();
         }
 
-        public FormatTag(int formatId, string formatName, string? explanation, bool isFictionOnly, bool isNonfictionOnly)
-        {
-            FormatId = formatId;
-            FormatName = formatName;
-            Explanation = explanation;
-            IsFictionOnly = isFictionOnly;
-            IsNonfictionOnly = isNonfictionOnly;
-            AltFormatNames = new HashSet<AltFormatName>();
-            ChildFormats = new HashSet<FormatCategory>();
-            ParentFormats = new HashSet<FormatCategory>();
-            ChildGenres = new HashSet<GenreFormat>();
-            FormatWritings = new HashSet<WritingFormat>();
-            FormatFolders = new HashSet<FolderFormat>();
-            Followers = new HashSet<FollowerFollowing>();
-        }
-
         [Required]
         [Key]
         public int FormatId { get; set; }
@@ -80,7 +64,7 @@ namespace Penfolio2.Models
         [Required, NotNull]
         public string AltName { get; set; }
 
-        public virtual FormatTag FormatTag { get; set; }
+        public virtual FormatTag? FormatTag { get; set; }
     }
 
     public class FormatCategory
@@ -171,7 +155,7 @@ namespace Penfolio2.Models
         [Required, NotNull]
         public string AltName { get; set; }
 
-        public virtual GenreTag GenreTag { get; set; }
+        public virtual GenreTag? GenreTag { get; set; }
     }
 
     public class GenreCategory

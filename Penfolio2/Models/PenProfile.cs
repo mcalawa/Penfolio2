@@ -62,11 +62,11 @@ namespace Penfolio2.Models
         public bool Verified { get; set; } = false;
 
         //[ForeignKey("UserId")]
-        public virtual PenUser PenUser { get; set; }
+        public virtual PenUser? PenUser { get; set; }
 
-        public virtual PenRole PenRole { get; set; }
+        public virtual PenRole? PenRole { get; set; }
 
-        public virtual AccessPermission AccessPermission { get; set; }
+        public virtual AccessPermission? AccessPermission { get; set; }
 
         public virtual ICollection<WritingProfile> ProfileWritings { get; set; }
 
@@ -80,7 +80,7 @@ namespace Penfolio2.Models
         public virtual ICollection<Critique> CritiqueGiven { get; set; }
 
         //[ForeignKey("CriticId")]
-        public virtual CritiqueGiver CritiqueNotificationSettings { get; set; }
+        public virtual CritiqueGiver? CritiqueNotificationSettings { get; set; }
 
         [ForeignKey("FirstFriendId")]
         public virtual ICollection<Friendship> Friends { get; set; }
