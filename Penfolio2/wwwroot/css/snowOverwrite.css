@@ -18,6 +18,38 @@
     font-family: Courier New, Courier, monospace;
 }
 
+.ql-editor .ql-font-comic {
+    font-family: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Comic Neue', cursive;
+}
+
+.ql-editor .ql-font-la-belle-aurore {
+    font-family: 'La Belle Aurore', cursive;
+}
+
+.ql-editor .ql-font-caveat {
+    font-family: 'Caveat', cursive;
+}
+
+.ql-editor .ql-font-bruno-ace {
+    font-family: 'Bruno Ace', monospace;
+}
+
+.ql-editor .ql-font-creepster {
+    font-family: 'Creepster', cursive;
+}
+
+.ql-editor .ql-font-spectral-sc {
+    font-family: 'Spectral SC', serif;
+}
+
+.ql-editor .ql-font-quintessential {
+    font-family: 'Quintessential', fantasy;
+}
+
+.ql-editor .ql-font-impact {
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+}
+
 #editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label[data-value='arial']:not([data-label])::before,
 #editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-item[data-value='arial']::before,
 #editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
@@ -37,6 +69,64 @@
 #editorContainer .ql-font-courier .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
     content: 'Courier New';
     font-family: Courier New, Courier, monospace;
+}
+
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label[data-value='comic']:not([data-label])::before,
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-item[data-value='comic']::before,
+#editorContainer .ql-font-courier .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
+    content: 'Comic Sans MS';
+    font-family: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Comic Neue', cursive;
+}
+
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label[data-value='la-belle-aurore']:not([data-label])::before,
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-item[data-value='la-belle-aurore']::before,
+#editorContainer .ql-font-courier .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
+    content: 'La Belle Aurore';
+    font-family: 'La Belle Aurore', cursive;
+}
+
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label[data-value='caveat']:not([data-label])::before,
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-item[data-value='caveat']::before,
+#editorContainer .ql-font-courier .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
+    content: 'Caveat';
+    font-family: 'Caveat', cursive;
+    font-size: 16px;
+}
+
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label[data-value='bruno-ace']:not([data-label])::before,
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-item[data-value='bruno-ace']::before,
+#editorContainer .ql-font-courier .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
+    content: 'Bruno Ace';
+    font-family: 'Bruno Ace', monospace;
+    font-size: 12px;
+}
+
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label[data-value='creepster']:not([data-label])::before,
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-item[data-value='creepster']::before,
+#editorContainer .ql-font-courier .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
+    content: 'Creepster';
+    font-family: 'Creepster', cursive;
+}
+
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label[data-value='spectral-sc']:not([data-label])::before,
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-item[data-value='spectral-sc']::before,
+#editorContainer .ql-font-courier .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
+    content: 'Spectral SC';
+    font-family: 'Spectral SC', serif;
+}
+
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label[data-value='quintessential']:not([data-label])::before,
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-item[data-value='quintessential']::before,
+#editorContainer .ql-font-courier .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
+    content: 'Quintessential';
+    font-family: 'Quintessential', fantasy;
+}
+
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label[data-value='impact']:not([data-label])::before,
+#editorContainer .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-item[data-value='impact']::before,
+#editorContainer .ql-font-courier .ql-toolbar.ql-snow .ql-formats .ql-font.ql-picker .ql-picker-label::before {
+    content: 'Impact';
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 }
 
 .ql-snow .ql-picker.ql-font {

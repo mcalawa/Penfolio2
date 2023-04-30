@@ -32,7 +32,7 @@
 
                 <!--when you click next, slide1 collapses and slide2 uncollapses-->
                 <div class="buttonGroup">
-                    <a class="nextPage" onclick='loadSlide("slide1", "slide2")'>Next</a>
+                    <button class="nextPage" onclick='loadSlide("slide1", "slide2")'>Next</button>
                 </div>
             </div> <!--slide1-->
 
@@ -44,8 +44,8 @@
 
                 <!--back uncollapses slide1 and next uncollapses slide3; both collapse slide2-->
                 <div class="buttonGroup">
-                    <a class="prevPage" onclick='loadSlide("slide2", "slide1")'>Back</a>
-                    <a class="nextPage" onclick='loadSlide("slide2", "slide3")'>Next</a>
+                    <button class="prevPage" onclick='loadSlide("slide2", "slide1")'>Back</button>
+                    <button class="nextPage" onclick='loadSlide("slide2", "slide3")'>Next</button>
                 </div>
             </div> <!--slide2-->
 
@@ -57,8 +57,8 @@
 
                 <!--back uncollapses slide2 and next uncollapses slide4; both collapse slide3-->
                 <div class="buttonGroup">
-                    <a class="prevPage" onclick='loadSlide("slide3", "slide2")'>Back</a>
-                    <a class="nextPage" onclick='loadSlide("slide3", "slide4")'>Next</a>
+                    <button class="prevPage" onclick='loadSlide("slide3", "slide2")'>Back</button>
+                    <button class="nextPage" onclick='loadSlide("slide3", "slide4")'>Next</button>
                 </div>
             </div> <!--slide3-->
 
@@ -70,8 +70,8 @@
 
                 <!--back uncollapses slide3 and next uncollapses slide5; both collapse slide4-->
                 <div class="buttonGroup">
-                    <a class="prevPage" onclick='loadSlide("slide4", "slide3")'>Back</a>
-                    <a class="nextPage" onclick='loadSlide("slide4", "slide5")'>Next</a>
+                    <button class="prevPage" onclick='loadSlide("slide4", "slide3")'>Back</button>
+                    <button class="nextPage" onclick='loadSlide("slide4", "slide5")'>Next</button>
                 </div>
             </div> <!--slide4-->
 
@@ -83,8 +83,8 @@
 
                 <!--back collapses slide5 and uncollapses slide4; next also collapses slide5, in addition to uncollapsing slide6 and populating the confirmation messages with the current form values-->
                 <div class="buttonGroup">
-                    <a class="prevPage" onclick='loadSlide("slide5", "slide4")'>Back</a>
-                    <a class="nextPage" onclick='loadSlideAndConfirm("slide5", "slide6", [@Html.Raw(ViewBag.Profiles)], [@Html.Raw(ViewBag.FormatTags)], [@Html.Raw(ViewBag.GenreTags)])'>Next</a>
+                    <button class="prevPage" onclick='loadSlide("slide5", "slide4")'>Back</button>
+                    <button class="nextPage" onclick='loadSlideAndConfirm("slide5", "slide6", [@Html.Raw(ViewBag.Profiles)], [@Html.Raw(ViewBag.FormatTags)], [@Html.Raw(ViewBag.GenreTags)])'>Next</button>
                 </div>
             </div> <!--slide5-->
 
@@ -118,7 +118,7 @@
                     <!--a div for printing a message if the current input isn't valid-->
                     <div id="validationMessage"></div>
                     <!--keeps your current selections and takes you back to the first slide if the user doesn't choose to confirm their current selections-->
-                    <a class="prevPage" onclick='loadSlide("slide6", "slide1")'>No</a>
+                    <button class="prevPage" onclick='loadSlide("slide6", "slide1")'>No</button>
                     <!--the save button if they are happy with their selections and the inputs are valid-->
                     <input type="submit" id="createWriting" value="Save" />
                 </div> <!--buttonGroup-->
