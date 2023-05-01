@@ -120,6 +120,7 @@ namespace Penfolio2.ViewComponents
                     var genreCategories = _db.GenreCategories.ToList();
                     var genreFormats = _db.GenreFormats.ToList();
                     List<int> selectedGenreIds = new List<int>();
+                    List<int> selectedFormatIds = new List<int>();
 
                     if (id != null)
                     {
@@ -136,6 +137,16 @@ namespace Penfolio2.ViewComponents
                             {
                                 selectedGenreIds.Add(genre.GenreId);
                             }
+
+                            if(writing.WritingFormats.Count == 0)
+                            {
+                                writing.WritingFormats = _db.WritingFormats.Where(i => i.WritingId == id.Value).ToList();
+                            }
+
+                            foreach(var format in writing.WritingFormats)
+                            {
+                                selectedFormatIds.Add(format.FormatId);
+                            }
                         }
                     }
 
@@ -144,7 +155,8 @@ namespace Penfolio2.ViewComponents
                         GenreTags = genreTags,
                         GenreCategories = genreCategories,
                         GenreFormats = genreFormats,
-                        SelectedGenreIds = selectedGenreIds
+                        SelectedGenreIds = selectedGenreIds,
+                        SelectedFormatIds = selectedFormatIds
                     };
 
                     return View(viewName, model);
@@ -159,7 +171,13 @@ namespace Penfolio2.ViewComponents
 
                     if(id != null)
                     {
-                        var accessPermission = _db.AccessPermissions.Where(i => i.AccessPermissionId == id.Value).FirstOrDefault();
+                        writing = _db.Writings.Where(i => i.WritingId == id.Value).FirstOrDefault();
+                        AccessPermission accessPermission = null;
+
+                        if(writing != null)
+                        {
+                            accessPermission = _db.AccessPermissions.Where(i => i.AccessPermissionId == writing.AccessPermissionId).FirstOrDefault();
+                        }
                         
                         if(accessPermission != null)
                         {

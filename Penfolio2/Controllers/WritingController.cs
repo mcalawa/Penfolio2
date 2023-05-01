@@ -73,6 +73,11 @@ namespace Penfolio2.Controllers
         {
             Writing writing = db.Writings.Where(i => i.WritingId == id).FirstOrDefault();
 
+            if(writing == null)
+            {
+                return RedirectToAction("NotFound");
+            }
+
             if(writing != null)
             {
                 writing = PopulateWriting(writing);
@@ -83,7 +88,7 @@ namespace Penfolio2.Controllers
             //if the user is not allowed to access this, redirect to error (TBD)
             if(!IsAccessableByUser(writing.AccessPermissionId, ref errors))
             {
-                return View();
+                return RedirectToAction("AccessDenied");
             }
 
             ViewBag.Author = false;
@@ -101,6 +106,7 @@ namespace Penfolio2.Controllers
         }
 
         // GET: WritingController/Create
+        [Route("Writing/Create")]
         public ActionResult Create()
         {
             if(!UserHasWriterProfile())
@@ -112,7 +118,7 @@ namespace Penfolio2.Controllers
 
             if(userId == null)
             {
-                return View();
+                return RedirectToAction("Index", "Home");
             }
 
             var writingProfiles = GetWriterProfiles(userId);
@@ -122,10 +128,10 @@ namespace Penfolio2.Controllers
             var genreCategories = db.GenreCategories.ToList();
             var genreFormats = db.GenreFormats.ToList();
 
-
             ViewBag.Profiles = String.Join(",", writingProfiles.Select(i => i.ProfileId));
             ViewBag.FormatTags = String.Join(",", formatTags.Select(i => i.FormatId));
             ViewBag.GenreTags = String.Join(",", genreTags.Select(i => i.GenreId));
+            ViewBag.IsCreator = true;
 
             var model = new WritingViewModel
             {
@@ -142,6 +148,7 @@ namespace Penfolio2.Controllers
         }
 
         // POST: WritingController/Create
+        [Route("Writing/Create")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(WritingViewModel model)
@@ -150,7 +157,7 @@ namespace Penfolio2.Controllers
 
             if(userId == null)
             {
-                return View(model);
+                return RedirectToAction("Index", "Home");
             }
 
             if(ModelState.IsValid)
@@ -303,16 +310,222 @@ namespace Penfolio2.Controllers
         }
 
         // GET: WritingController/Edit/5
+        [Route("Writing/Edit/{id}")]
         public ActionResult Edit(int id)
         {
-            return View();
+            var userId = GetUserId();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            Writing writing = db.Writings.Where(i => i.WritingId ==  id).FirstOrDefault();
+
+            if(writing == null)
+            {
+                return RedirectToAction("NotFound");
+            }
+            else
+            {
+                writing = PopulateWriting(writing);
+            }
+
+            List<IdentityError> errors = new List<IdentityError>();
+            if(!IsAccessableByUser(writing.AccessPermissionId, ref errors, "edit"))
+            {
+                return RedirectToAction("EditAccessDenied", new { id = writing.AccessPermissionId });
+            }
+
+            var writingProfiles = GetWriterProfiles(userId);
+
+            foreach(var wp in writing.WritingProfiles.Select(i => i.PenProfile).Where(i => i.UserId != userId).ToList())
+            {
+                writingProfiles.Add(wp);
+            }
+
+            var formatTags = db.FormatTags.ToList();
+            var genreTags = db.GenreTags.ToList();
+            var formatCategories = db.FormatCategories.ToList();
+            var genreCategories = db.GenreCategories.ToList();
+            var genreFormats = db.GenreFormats.ToList();
+
+            ViewBag.Profiles = String.Join(",", writingProfiles.Select(i => i.ProfileId));
+            ViewBag.FormatTags = String.Join(",", formatTags.Select(i => i.FormatId));
+            ViewBag.GenreTags = String.Join(",", genreTags.Select(i => i.GenreId));
+
+            List<int> selectedProfileIds = new List<int>();
+
+            foreach(var wp in writing.WritingProfiles.ToList())
+            {
+                selectedProfileIds.Add(wp.ProfileId);
+            }
+
+            List<int> selectedFormatIds = new List<int>();
+
+            foreach(var wf in writing.WritingFormats.ToList())
+            {
+                selectedFormatIds.Add(wf.FormatId);
+            }
+
+            List<int> selectedGenreIds = new List<int>();
+
+            foreach(var wg in writing.WritingGenres.ToList())
+            {
+                selectedGenreIds.Add(wg.GenreId);
+            }
+
+            var model = new WritingViewModel
+            {
+                Title = writing.Title,
+                Description = writing.Description,
+                EditorContent = HTMLByteArrayToString(writing.Document),
+                PublicAccess = writing.AccessPermission.PublicAccess,
+                FriendAccess = writing.AccessPermission.FriendAccess,
+                PublisherAccess = writing.AccessPermission.PublisherAccess,
+                MinorAccess = writing.AccessPermission.MinorAccess,
+                ShowsUpInSearch = writing.AccessPermission.ShowsUpInSearch,
+                WritingProfiles = writingProfiles,
+                FormatTags = formatTags,
+                GenreTags = genreTags,
+                FormatCategories = formatCategories,
+                GenreCategories = genreCategories,
+                GenreFormats = genreFormats,
+                SelectedProfileIds = selectedProfileIds,
+                SelectedFormatIds = selectedFormatIds,
+                SelectedGenreIds = selectedGenreIds
+            };
+
+            ViewBag.WritingId = writing.WritingId;
+
+            return View(model);
         }
 
         // POST: WritingController/Edit/5
+        [Route("Writing/Edit/{id}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, WritingViewModel model)
         {
+            var userId = GetUserId();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            Writing writing = db.Writings.Where(i => i.WritingId == id).FirstOrDefault();
+
+            if (writing == null)
+            {
+                return RedirectToAction("NotFound");
+            }
+            else
+            {
+                writing = PopulateWriting(writing);
+            }
+
+            List<IdentityError> errors = new List<IdentityError>();
+            if (!IsAccessableByUser(writing.AccessPermissionId, ref errors, "edit"))
+            {
+                return RedirectToAction("EditAccessDenied", new { id = writing.AccessPermissionId });
+            }
+
+            if(ModelState.IsValid)
+            {
+                //format the string of selected profiles
+                string[] profiles = model.SelectedProfiles.Split(",");
+
+                //if none have been selected, return to the view with an error (TBD)
+                if (profiles.Length < 1 || (profiles.Length == 1 && (profiles[0] == "" || profiles[0] == String.Empty)))
+                {
+                    return View(model);
+                }
+
+                //now we need to create a list for the ProfileIds that SelectedProfiles represents
+                List<int> selectedProfileIds = new List<int>();
+
+                //for each of the selected profiles
+                foreach (var profile in profiles)
+                {
+                    //if the string can be changed into an int
+                    if (Int32.TryParse(profile, out int profileId))
+                    {
+                        var p = db.PenProfiles.Where(i => i.ProfileId == profileId).FirstOrDefault();
+
+                        //if there's not profile connected to that profileId, return the view with an error (TBD)
+                        if(p == null)
+                        {
+                            return View(model);
+                        } //if there is a connected profile
+                        else
+                        {
+                            //populate the profile
+                            p = PopulatePenProfile(p);
+
+                            //if it's not a writing profile, return with an error (TBD)
+                            if(p.RoleId != 1)
+                            {
+                                return View(model);
+                            } //if the writing wasn't created by the user and the profile isn't among the current selected profiles, return with an error (TBD)
+                            else if(writing.UserId != userId && !writing.WritingProfiles.Select(i => i.ProfileId).ToList().Contains(profileId))
+                            {
+                                return View(model);
+                            }
+
+                            selectedProfileIds.Add(profileId);
+                        }
+                    } //if it can't, return the view with an error (TBD)
+                    else
+                    {
+                        return View(model);
+                    }
+                } //for each of the selected profiles
+
+                //create a list of the profiles that are being added
+                List<int> profileIdsToAdd = new List<int>();
+
+                foreach (var profileId in selectedProfileIds)
+                {
+                    if(!writing.WritingProfiles.Select(i => i.ProfileId).ToList().Contains(profileId))
+                    {
+                        profileIdsToAdd.Add(profileId);
+                    }
+                } //for each of the selected profiles
+
+                //create a list for the profiles that are being removed
+                List<int> profileIdsToRemove = new List<int>();
+
+                foreach(var profile in writing.WritingProfiles)
+                {
+                    //if this is a profile that's being removed
+                    if(!selectedProfileIds.Contains(profile.ProfileId))
+                    {
+                        var p = db.PenProfiles.Where(i => i.ProfileId == profile.ProfileId).FirstOrDefault();
+
+                        //if the profile doesn't exist, return the view with an error (TBD)
+                        if(p == null)
+                        {
+                            return View(model);
+                        }
+                        else
+                        {
+                            p = PopulatePenProfile(p);
+                        }
+
+                        //if the writing wasn't created by the user and the profile they are trying to remove doesn't belong to them, return the view with an error (TBD)
+                        if(writing.UserId != userId && p.UserId != userId)
+                        {
+                            return View(model);
+                        }
+
+                        profileIdsToRemove.Add(profile.ProfileId);
+                    }
+                } //for each of the current writing profiles
+
+                //we have the profiles to remove and the profiles that need to be added, and they are all valid, so we can now move on to the other parts of the edit
+            } //if the model state is valid
+
             try
             {
                 return RedirectToAction(nameof(Index));
@@ -325,6 +538,97 @@ namespace Penfolio2.Controllers
 
         // GET: WritingController/Delete/5
         public ActionResult Delete(int id)
+        {
+            return View();
+        }
+
+        [Route("Writing/AccessDenied/{id}")]
+        public ActionResult AccessDenied(int id)
+        {
+            List<IdentityError> errors = new List<IdentityError>();
+            IsAccessableByUser(id, ref errors);
+
+            if (errors.Any(i => i.Description == "Request not found."))
+            {
+                return RedirectToAction("NotFound");
+            }
+
+            string errorString = "";
+
+            foreach (IdentityError error in errors)
+            {
+                errorString += error.Description + " ";
+            }
+
+            ViewBag.ErrorString = errorString;
+
+            return View();
+        }
+
+        [Route("Writing/EditAccessDenied")]
+        public ActionResult EditAccessDenied()
+        {
+            ViewBag.ErrorString = "You are not allowed to edit a writing you are not the owner of or a collaborator on.";
+
+            return View();
+        }
+
+        [Route("Writing/EditAccessDenied/{id}")]
+        public ActionResult EditAccessDenied(int id)
+        {
+            List<IdentityError> errors = new List<IdentityError>();
+            IsAccessableByUser(id, ref errors, "edit");
+
+            if (errors.Any(i => i.Description == "Request not found."))
+            {
+                return RedirectToAction("NotFound");
+            }
+
+            string errorString = "";
+
+            foreach (IdentityError error in errors)
+            {
+                errorString += error.Description + " ";
+            }
+
+            ViewBag.ErrorString = errorString;
+
+            return View();
+        }
+
+        [Route("Writing/DeleteAccessDenied")]
+        public ActionResult DeleteAccessDenied()
+        {
+            ViewBag.ErrorString = "You are not allowed to delete a writing you are not the owner of.";
+
+            return View();
+        }
+
+        [Route("Writing/DeleteAccessDenied/{id}")]
+        public ActionResult DeleteAccessDenied(int id)
+        {
+            List<IdentityError> errors = new List<IdentityError>();
+            IsAccessableByUser(id, ref errors, "delete");
+
+            if (errors.Any(i => i.Description == "Request not found."))
+            {
+                return RedirectToAction("NotFound");
+            }
+
+            string errorString = "";
+
+            foreach (IdentityError error in errors)
+            {
+                errorString += error.Description + " ";
+            }
+
+            ViewBag.ErrorString = errorString;
+
+            return View();
+        }
+
+        [Route("Writing/NotFound")]
+        public new ActionResult NotFound()
         {
             return View();
         }

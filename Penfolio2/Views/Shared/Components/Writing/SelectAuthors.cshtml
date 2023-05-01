@@ -35,16 +35,11 @@
             <!--For each profile connected to the current user or the writing (if an edit is happening), create a checkbox for that profile-->
             @foreach (var profile in Model.WritingProfiles.Where(i => i.UserId == ViewBag.User))
             {
+                <!--Users who don't own a piece of writing, can remove their own profile, but they can't add a new one one-->
                 @if (Model.SelectedProfileIds.Contains(profile.ProfileId))
                 {
                     <div class="form-group checkItem2">
                         <input type="checkbox" class="@profile.ProfileId" value="@profile.ProfileId" checked /> <span class="profileName @profile.ProfileId">@profile.DisplayName</span>
-                    </div>
-                }
-                else
-                {
-                    <div class="form-group checkItem2">
-                        <input type="checkbox" class="@profile.ProfileId" value="@profile.ProfileId" /> <span class="profileName @profile.ProfileId">@profile.DisplayName</span>
                     </div>
                 }
             }

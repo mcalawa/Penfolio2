@@ -1,9 +1,9 @@
 ﻿@model Penfolio2.Models.WritingViewModel
 @{
-    ViewBag.Title = "Create New Writing";
+    ViewBag.Title = "Edit Writing";
 }
 
-<h2>Create New Writing</h2>
+<h2>Edit Writing</h2>
 
 <div class="editorMenu">
     <div class="slideshowContainer">
@@ -25,69 +25,60 @@
                         <div id="editorContainer">
                             <!-- Create the editor container -->
                             <div id="editor" class="editor ql-editior ql-container">
+                                @Html.Raw(Model.EditorContent)
                             </div>
                         </div>
                     </div>
                 </div> <!--inputGroup-->
-
                 <!--when you click next, slide1 collapses and slide2 uncollapses-->
                 <div class="buttonGroup">
                     <button type="button" class="nextPage" onclick='loadSlide("slide1", "slide2")'>Next</button>
                 </div>
             </div> <!--slide1-->
-
             <!--Author-->
             <div class="slide2 collapse">
                 <div class="inputGroup">
-                    @await Component.InvokeAsync("Writing", new { viewName = "SelectAuthors" })
+                    @await Component.InvokeAsync("Writing", new { id = ViewBag.WritingId, viewName = "SelectAuthors" })
                 </div> <!--inputGroup-->
-
                 <!--back uncollapses slide1 and next uncollapses slide3; both collapse slide2-->
                 <div class="buttonGroup">
                     <button type="button" class="prevPage" onclick='loadSlide("slide2", "slide1")'>Back</button>
                     <button type="button" class="nextPage" onclick='loadSlide("slide2", "slide3")'>Next</button>
                 </div>
             </div> <!--slide2-->
-
             <!--Format Tags-->
             <div class="slide3 collapse">
                 <div class="inputGroup">
-                    @await Component.InvokeAsync("Writing", new { viewName = "SelectFormat" })
+                    @await Component.InvokeAsync("Writing", new { id = ViewBag.WritingId, viewName = "SelectFormat" })
                 </div> <!--inputGroup-->
-
                 <!--back uncollapses slide2 and next uncollapses slide4; both collapse slide3-->
                 <div class="buttonGroup">
                     <button type="button" class="prevPage" onclick='loadSlide("slide3", "slide2")'>Back</button>
                     <button type="button" class="nextPage" onclick='loadSlide("slide3", "slide4")'>Next</button>
                 </div>
             </div> <!--slide3-->
-
             <!--Genre Tags-->
             <div class="slide4 collapse">
                 <div class="inputGroup">
-                    @await Component.InvokeAsync("Writing", new { viewName = "SelectGenre" })
+                    @await Component.InvokeAsync("Writing", new { id = ViewBag.WritingId, viewName = "SelectGenre" })
                 </div> <!--inputGroup-->
-
                 <!--back uncollapses slide3 and next uncollapses slide5; both collapse slide4-->
                 <div class="buttonGroup">
                     <button type="button" class="prevPage" onclick='loadSlide("slide4", "slide3")'>Back</button>
                     <button type="button" class="nextPage" onclick='loadSlide("slide4", "slide5")'>Next</button>
                 </div>
             </div> <!--slide4-->
-
             <!--Permissions-->
             <div class="slide5 collapse">
                 <div class="inputGroup">
-                    @await Component.InvokeAsync("Writing", new { viewName = "SelectPermissions" })
+                    @await Component.InvokeAsync("Writing", new { id = ViewBag.WritingId, viewName = "SelectPermissions" })
                 </div> <!--inputGroup-->
-
                 <!--back collapses slide5 and uncollapses slide4; next also collapses slide5, in addition to uncollapsing slide6 and populating the confirmation messages with the current form values-->
                 <div class="buttonGroup">
                     <button type="button" class="prevPage" onclick='loadSlide("slide5", "slide4")'>Back</button>
                     <button type="button" class="nextPage" onclick='loadSlideAndConfirm("slide5", "slide6", [@Html.Raw(ViewBag.Profiles)], [@Html.Raw(ViewBag.FormatTags)], [@Html.Raw(ViewBag.GenreTags)])'>Next</button>
                 </div>
             </div> <!--slide5-->
-
             <!--Confirmation-->
             <div class="slide6 collapse">
                 <div class="inputGroup">
@@ -134,9 +125,9 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
     <!--Initialize Quill Editor-->
-    <script src="~/js/editorScript.js" type="text/javascript"></script>
+    <script src="/js/editorScript.js" type="text/javascript"></script>
     <script src="~/js/slides.js" type="text/javascript"></script>
-    <script src="~/js/createScript.js" type="text/javascript"></script>
-    <script src="~/js/formatTags.js" type="text/javascript"></script>
-    <script src="~/js/genreTags.js" type="text/javascript"></script>
+    <script src="/js/createScript.js" type="text/javascript"></script>
+    <script src="/js/formatTags.js" type="text/javascript"></script>
+    <script src="/js/genreTags.js" type="text/javascript"></script>
 }

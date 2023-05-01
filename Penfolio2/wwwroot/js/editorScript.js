@@ -4,22 +4,6 @@
 //Quill can also be found on GitHub here: https://github.com/quilljs/quill
 (function () {
     $(document).ready(function () {
-        //var bindings = {
-        //    // This will overwrite the default binding also named 'tab'
-        //    tab: {
-        //        key: 9,
-        //        handler: function () {
-        //            // Handle tab
-        //        }
-        //    },
-        //    disablefocus: {
-        //        key: 'M',
-        //        shortKey: true,
-        //        handler: function () {
-
-        //        }
-        //    }
-        //};
         var fonts = ['arial', 'bruno-ace', 'caveat', 'comic', 'courier', 'creepster', 'impact', 'la-belle-aurore', 'spectral-sc', 'quintessential', 'times'];
         var Font = Quill.import('formats/font');
         Font.whitelist = fonts;
@@ -40,31 +24,14 @@
                     [{ 'align': [] }],
                     ['link', 'image'],
                     ['clean']
-                ],
-                keyboard: {
-                    bindings: bindings
-                }
+                ]
             },
             placeholder: 'Write your own destiny...',
             name: 'EditorContent',
             theme: 'snow'
         });
 
-        //editor.keyboard.addBinding({
-        //    key: 'M',
-        //    shortKey: true
-        //}, function());
-
         loadFonts();
-    });
-
-
-
-    //keyboard-friendly way to progress to the next element
-    $("#editor div.ql-editor").on("keydown", function (event) {
-        if ((event.key === "Tab" && event.ctrlKey) || (event.key === "Tab" && event.altKey)) {
-            $("div.slide1 div.buttonGroup button.nextPage").focus();
-        }
     });
 
     //function for loading the fonts from the Google fonts api
