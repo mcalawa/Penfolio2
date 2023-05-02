@@ -15,7 +15,7 @@ namespace Penfolio2.ViewComponents
             _db = db;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(int? id = null, string viewName = null)
+        public async Task<IViewComponentResult> InvokeAsync(int? id = null, string? viewName = null)
         {
             Writing writing;
             string userId = GetUserId();
@@ -269,11 +269,12 @@ namespace Penfolio2.ViewComponents
                 return View();
             }
 
-            ViewBag.Author = false;
+            ViewBag.IsCreator = false;
+            ViewBag.IsCollaborator = false;
 
             if (userId == writing.UserId)
             {
-                ViewBag.Author = true;
+                ViewBag.IsCreator = true;
             }
 
             List<WritingProfile> owners = _db.WritingProfiles.Where(i => i.WritingId == id).ToList();
@@ -287,7 +288,7 @@ namespace Penfolio2.ViewComponents
 
                 if (owner.PenProfile.UserId == userId)
                 {
-                    ViewBag.Author = true;
+                    ViewBag.IsCollaborator = true;
                 }
             }
 
@@ -398,9 +399,21 @@ namespace Penfolio2.ViewComponents
             return penProfile;
         }
 
-        protected string GetUserId()
+        public string? GetUserName()
         {
-            return _db.PenUsers.Where(i => i.NormalizedUserName == User.Identity.Name.ToUpper()).FirstOrDefault().Id;
+            return User?.Identity?.Name;
+        }
+
+        protected string? GetUserId()
+        {
+            var username = GetUserName();
+
+            if (username == null)
+            {
+                return null;
+            }
+
+            return _db.PenUsers.Where(i => i.NormalizedUserName == username.ToUpper()).FirstOrDefault()?.Id;
         }
 
         protected bool UserHasPublisherProfile()
@@ -433,7 +446,7 @@ namespace Penfolio2.ViewComponents
             return IsAccessableByUser(accessPermissionId, ref errors, null);
         }
 
-        protected bool IsAccessableByUser(int accessPermissionId, ref List<IdentityError> errors, string action)
+        protected bool IsAccessableByUser(int accessPermissionId, ref List<IdentityError> errors, string? action)
         {
             if (action == null)
             {
@@ -448,8 +461,19 @@ namespace Penfolio2.ViewComponents
                 errors = new List<IdentityError>();
             }
 
-            string userId = GetUserId();
-            PenUser user = _db.PenUsers.Where(i => i.Id == userId).FirstOrDefault();
+            string? userId = GetUserId();
+
+            if (userId == null)
+            {
+                errors.Add(new IdentityError
+                {
+                    Description = "User not found."
+                });
+
+                return false;
+            }
+
+            PenUser user = _db.PenUsers.Where(i => i.Id == userId).First();
 
             //get a list of all of this user's profiles
             List<int> userProfileIds = user.PenProfiles.ToList().Select(i => i.ProfileId).ToList();
@@ -516,6 +540,16 @@ namespace Penfolio2.ViewComponents
                 if (writing.UserId == userId)
                 {
                     return true;
+                } //if the writing was not created by the user and the action is delete
+                else if (action == "delete")
+                {
+                    //writing may be edited by collaborators, but it can only be deleted by its owners
+                    errors.Add(new IdentityError
+                    {
+                        Description = "You may not " + action + " a piece of writing that you do not own."
+                    });
+
+                    return false;
                 } //if the writing was not created by the user
                 else
                 {
@@ -533,7 +567,7 @@ namespace Penfolio2.ViewComponents
                 } //if the writing was not created by the user
 
                 //if they have reached this point, they are not an owner or collaborator, so create an error message and return false
-                if (action == "edit" || action == "delete")
+                if (action == "edit")
                 {
                     errors.Add(new IdentityError
                     {
@@ -563,6 +597,16 @@ namespace Penfolio2.ViewComponents
                 if (folder.CreatorId == userId)
                 {
                     return true;
+                } //if the folder was not created by the user and the action is delete
+                else if (action == "delete")
+                {
+                    //folders may be edited by collaborators, but they can only be deleted by their owners
+                    errors.Add(new IdentityError
+                    {
+                        Description = "You may not " + action + " a folder that you do not own."
+                    });
+
+                    return false;
                 } //if the folder was not created by the user
                 else
                 {
@@ -580,7 +624,7 @@ namespace Penfolio2.ViewComponents
                 } //if the folder was not created by the user
 
                 //if they have reached this point, they are not an owner or a contributor, so create an error message and return false
-                if (action == "edit" || action == "delete")
+                if (action == "edit")
                 {
                     errors.Add(new IdentityError
                     {
@@ -610,6 +654,16 @@ namespace Penfolio2.ViewComponents
                 if (series.CreatorId == userId)
                 {
                     return true;
+                } //if the series was not created by the user and the action is delete
+                else if (action == "delete")
+                {
+                    //series may be edited by collaborators, but they can only be deleted by their owners
+                    errors.Add(new IdentityError
+                    {
+                        Description = "You may not " + action + " a series that you do not own."
+                    });
+
+                    return false;
                 } //if the user is not the creator of the series
                 else
                 {
@@ -627,7 +681,7 @@ namespace Penfolio2.ViewComponents
                 } // if the user is not the creator of the series
 
                 //if they have reached this point, they are not an owner or contributor, so create an error message and return false
-                if (action == "edit" || action == "delete")
+                if (action == "edit")
                 {
                     errors.Add(new IdentityError
                     {

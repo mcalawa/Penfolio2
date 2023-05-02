@@ -12,28 +12,6 @@ namespace Penfolio2.Controllers
     [Authorize]
     public class AccessController : Controller
     {
-        private readonly ApplicationUserManager _userManager;
-        private readonly SignInManager<PenUser> _signInManager;
-        private readonly IEmailSender _emailSender;
-        private readonly ILogger _logger;
-
-        public AccessController(
-        ApplicationUserManager userManager,
-        SignInManager<PenUser> signInManager,
-        IEmailSender emailSender,
-        ILoggerFactory loggerFactory)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _emailSender = emailSender;
-            _logger = loggerFactory.CreateLogger<AccessController>();
-        }
-
-        public AccessController(ApplicationUserManager userManager)
-        {
-            _userManager = userManager;
-        }
-
         public AccessController()
         {
 
@@ -58,9 +36,16 @@ namespace Penfolio2.Controllers
             }
         }
 
-        protected string GetUserId()
+        protected string? GetUserId()
         {
-            return db.PenUsers.Where(i => i.NormalizedUserName == User.Identity.Name.ToUpper()).FirstOrDefault().Id;
+            var username = GetUserName();
+
+            if(username == null)
+            {
+                return null;
+            }
+
+            return db.PenUsers.Where(i => i.NormalizedUserName == username.ToUpper()).FirstOrDefault()?.Id;
         }
 
         public string? GetUserName()
@@ -161,12 +146,18 @@ namespace Penfolio2.Controllers
         protected int GetProfileIdFromUrlString(string urlString)
         {
             urlString = urlString.ToLower();
-            return ProfileExistsAtUrlString(urlString) ? db.PenProfiles.Where(i => i.UrlString == urlString).FirstOrDefault().ProfileId : 0;
+            return ProfileExistsAtUrlString(urlString) ? db.PenProfiles.Where(i => i.UrlString == urlString).First().ProfileId : 0;
         }
 
         protected bool UserHasEnteredBirthdate()
         {
-            string userId = GetUserId();
+            string? userId = GetUserId();
+
+            if(userId == null)
+            {
+                return false;
+            }
+
             PenUser user = GetUserById(userId);
 
             if(user.Birthdate == null)
@@ -201,7 +192,13 @@ namespace Penfolio2.Controllers
 
         protected bool UserIsMinor()
         {
-            string userId = GetUserId();
+            string? userId = GetUserId();
+
+            if(userId == null)
+            {
+                return true;
+            }
+
             PenUser user = GetUserById(userId);
             DateTime now = DateTime.Today;
 
@@ -282,7 +279,18 @@ namespace Penfolio2.Controllers
                 errors = new List<IdentityError>();
             }
 
-            string userId = GetUserId();
+            string? userId = GetUserId();
+
+            if(userId == null)
+            {
+                errors.Add(new IdentityError
+                {
+                    Description = "User not found."
+                });
+
+                return false;
+            }
+
             PenUser user = GetUserById(userId);
             //get a list of all of this user's profiles
             List<int> userProfileIds = user.PenProfiles.ToList().Select(i => i.ProfileId).ToList();
@@ -349,7 +357,17 @@ namespace Penfolio2.Controllers
                 if (writing.UserId == userId)
                 {
                     return true;
-                } //if the writing was not created by the user
+                } //if the writing was not created by the user and the action is delete
+                else if(action == "delete")
+                {
+                    //writing may be edited by collaborators, but it can only be deleted by its owners
+                    errors.Add(new IdentityError
+                    {
+                        Description = "You may not " + action + " a piece of writing that you do not own."
+                    });
+
+                    return false;
+                }//if the writing was not created by the user
                 else
                 {
                     //get a list of all profiles that are connected to this piece of writing
@@ -366,7 +384,7 @@ namespace Penfolio2.Controllers
                 } //if the writing was not created by the user
 
                 //if they have reached this point, they are not an owner or collaborator, so create an error message and return false
-                if(action == "edit" || action == "delete")
+                if(action == "edit")
                 {
                     errors.Add(new IdentityError
                     {
@@ -379,7 +397,9 @@ namespace Penfolio2.Controllers
             else if (db.Folders.Any(i => i.AccessPermissionId == accessPermissionId))
             {
                 //get the folder
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 Folder folder = db.Folders.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault();
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
                 //if there's no folder with that AccessPermissionId, return false
                 if (folder == null)
@@ -396,6 +416,16 @@ namespace Penfolio2.Controllers
                 if (folder.CreatorId == userId)
                 {
                     return true;
+                } //if the folder was not created by the user and the action is delete
+                else if (action == "delete")
+                {
+                    //folders may be edited by collaborators, but they can only be deleted by their owners
+                    errors.Add(new IdentityError
+                    {
+                        Description = "You may not " + action + " a folder that you do not own."
+                    });
+
+                    return false;
                 } //if the folder was not created by the user
                 else
                 {
@@ -413,7 +443,7 @@ namespace Penfolio2.Controllers
                 } //if the folder was not created by the user
 
                 //if they have reached this point, they are not an owner or a contributor, so create an error message and return false
-                if (action == "edit" || action == "delete")
+                if (action == "edit")
                 {
                     errors.Add(new IdentityError
                     {
@@ -443,6 +473,16 @@ namespace Penfolio2.Controllers
                 if (series.CreatorId == userId)
                 {
                     return true;
+                } //if the series was not created by the user and the action is delete
+                else if (action == "delete")
+                {
+                    //series may be edited by collaborators, but they can only be deleted by their owners
+                    errors.Add(new IdentityError
+                    {
+                        Description = "You may not " + action + " a series that you do not own."
+                    });
+
+                    return false;
                 } //if the user is not the creator of the series
                 else
                 {
@@ -460,7 +500,7 @@ namespace Penfolio2.Controllers
                 } // if the user is not the creator of the series
 
                 //if they have reached this point, they are not an owner or contributor, so create an error message and return false
-                if (action == "edit" || action == "delete")
+                if (action == "edit")
                 {
                     errors.Add(new IdentityError
                     {
@@ -562,9 +602,9 @@ namespace Penfolio2.Controllers
                 //get all the individual access revokes for this ProfileId where the revoke is active
                 List<IndividualAccessRevoke> revokes = individualAccessRevokes.Where(i => i.RevokeeId == item && i.Active).ToList();
                 //get the most recent grant
-                mostRecentGrant = grants.OrderByDescending(i => i.GrantDate).FirstOrDefault();
+                mostRecentGrant = grants.OrderByDescending(i => i.GrantDate).First();
                 //get the most recent revoke
-                mostRecentRevoke = revokes.OrderByDescending(i => i.RevokeDate).FirstOrDefault();
+                mostRecentRevoke = revokes.OrderByDescending(i => i.RevokeDate).First();
 
                 //if there is more than one active grant in the list, our first objective is to find the most recent grant and make all of the older grants inactive
                 if (grants.Count > 1)
@@ -622,8 +662,8 @@ namespace Penfolio2.Controllers
 
             //there should no longer be any overlapping profile IDs, and the individualAccessGrants and individualAccessRevokes should only contain relevant information now
             //let's update the mostRecentGrant and mostRecentRevoke
-            mostRecentGrant = individualAccessGrants.OrderByDescending(i => i.GrantDate).FirstOrDefault();
-            mostRecentRevoke = individualAccessRevokes.OrderByDescending(i => i.RevokeDate).FirstOrDefault();
+            mostRecentGrant = individualAccessGrants.OrderByDescending(i => i.GrantDate).First();
+            mostRecentRevoke = individualAccessRevokes.OrderByDescending(i => i.RevokeDate).First();
 
             //if they have individual access revokes but no grants, return false
             if (individualAccessRevokes.Count > 0 && individualAccessGrants.Count == 0)
@@ -693,7 +733,8 @@ namespace Penfolio2.Controllers
                     } //if the AccessPermission is for a piece of Writing
                     else if (accessPermission.WritingId != null)
                     {
-                        List<PenProfile> writerProfiles = db.Writings.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault().PenUser.PenProfiles.ToList();
+
+                        List<PenProfile> writerProfiles = db.Writings.Where(i => i.AccessPermissionId == accessPermissionId).First().PenUser.PenProfiles.ToList();
 
                         foreach (var friendship in friendships)
                         {
@@ -935,6 +976,20 @@ namespace Penfolio2.Controllers
                 penProfile.PenRole = db.ProfileRoles.Where(i => i.RoleId == penProfile.RoleId).FirstOrDefault();
             }
 
+            //populate Profile Writings
+            if(penProfile.ProfileWritings.Count == 0)
+            {
+                penProfile.ProfileWritings = db.WritingProfiles.Where(i => i.ProfileId ==  penProfile.ProfileId).ToList();
+
+                foreach(var writing in  penProfile.ProfileWritings)
+                {
+                    if(writing.Writing == null)
+                    {
+                        writing.Writing = db.Writings.Where(i => i.WritingId == writing.WritingId).FirstOrDefault();
+                    }
+                }
+            }
+
             return penProfile;
         }
 
@@ -1058,11 +1113,6 @@ namespace Penfolio2.Controllers
             //populate CritiqueRequest
 
             return writing;
-        }
-
-        private Task<PenUser?> GetCurrentUserAsync()
-        {
-            return _userManager.GetUserAsync(HttpContext.User);
         }
     }
 }

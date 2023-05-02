@@ -21,7 +21,7 @@
 <div class="writingPreview">
     @if(Model.EditDate != null)
     {
-        <div class="addDateTime">Edited @Html.DisplayFor(model => model.EditDate.Value, "DateTime")</div>
+        <div class="addDateTime">Edited @Html.DisplayFor(model => model.EditDate)</div>
     }
     else
     {
@@ -34,9 +34,13 @@
             <p>@Html.DisplayFor(model => model.Description)</p>
             <!--Links to view the full writing and to interact with it in other ways such as edit and delete if the writing belongs to the user-->
             <span class="viewMore"><a href="/Writing/ViewWriting/@Model.WritingId">Read More</a></span>
-            @if (ViewBag.Author)
+            @if (ViewBag.IsCreator)
             {
                 <span class="forUserWriting"> | <a href="/Writing/Edit/@Model.WritingId">Edit</a> | <a href="/Writing/Delete/@Model.WritingId">Delete</a></span>
+            }
+            else if(ViewBag.IsCollaborator)
+            {
+                <span class="forUserWriting"> | <a href="/Writing/Edit/@Model.WritingId">Edit</a></span>
             }
         </div>
     </div>

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SqlServer.Server;
+using Mono.TextTemplating;
 using Penfolio2.Data;
 using Penfolio2.Models;
 using System.Text;
@@ -25,7 +26,7 @@ namespace Penfolio2.Controllers
         [Route("Writing/Index")]
         public ActionResult Index()
         {
-            var writings = GetAllWritingAvailable();
+            var writings = GetAllWritingAvailableForSearch();
 
             return View(writings);
         }
@@ -38,33 +39,35 @@ namespace Penfolio2.Controllers
         public List<Writing> GetAllWritingAvailableForSearch()
         {
             var writings = db.Writings.ToList();
+            List<Writing> availableWritings = new List<Writing>();
 
             foreach (var writing in writings)
             {
                 List<IdentityError> errors = new List<IdentityError>();
-                if (!IsAccessableByUser(writing.AccessPermissionId, ref errors, "search"))
+                if (IsAccessableByUser(writing.AccessPermissionId, ref errors, "search"))
                 {
-                    writings.Remove(writing);
+                    availableWritings.Add(writing);
                 }
             }
 
-            return OrderByNewest(writings);
+            return OrderByNewest(availableWritings);
         }
 
         public List<Writing> GetAllWritingAvailable()
         {
             var writings = db.Writings.ToList();
+            List<Writing> availableWritings = new List<Writing>();
 
             foreach(var writing in writings)
             {
                 List<IdentityError> errors = new List<IdentityError>();
-                if(!IsAccessableByUser(writing.AccessPermissionId, ref errors))
+                if(IsAccessableByUser(writing.AccessPermissionId, ref errors))
                 {
-                    writings.Remove(writing);
+                    availableWritings.Add(writing);
                 }
             }
 
-            return OrderByNewest(writings);
+            return OrderByNewest(availableWritings);
         }
 
         // GET: WritingController/ViewWriting/5
@@ -414,7 +417,8 @@ namespace Penfolio2.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            Writing writing = db.Writings.Where(i => i.WritingId == id).FirstOrDefault();
+            Writing? writing = db.Writings.Where(i => i.WritingId == id).FirstOrDefault();
+            AccessPermission? accessPermission = null;
 
             if (writing == null)
             {
@@ -422,7 +426,30 @@ namespace Penfolio2.Controllers
             }
             else
             {
-                writing = PopulateWriting(writing);
+                //WritingProfiles
+                if(writing.WritingProfiles.Count == 0)
+                {
+                    writing.WritingProfiles = db.WritingProfiles.Where(i => i.WritingId == id).ToList();
+                }
+                
+                //WritingFormats
+                if(writing.WritingFormats.Count == 0)
+                {
+                    writing.WritingFormats = db.WritingFormats.Where(i => i.WritingId == id).ToList();
+                }
+
+                //WritingGenres
+                if(writing.WritingGenres.Count == 0)
+                {
+                    writing.WritingGenres = db.WritingGenres.Where(i => i.WritingId == id).ToList();
+                }
+
+                accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == writing.AccessPermissionId && i.WritingId != null && i.WritingId.Value == id).FirstOrDefault();
+            }
+
+            if(accessPermission == null)
+            {
+                return RedirectToAction("NotFound");
             }
 
             List<IdentityError> errors = new List<IdentityError>();
@@ -444,6 +471,7 @@ namespace Penfolio2.Controllers
 
                 //now we need to create a list for the ProfileIds that SelectedProfiles represents
                 List<int> selectedProfileIds = new List<int>();
+                List<PenProfile> selectedPenProfiles = new List<PenProfile>();
 
                 //for each of the selected profiles
                 foreach (var profile in profiles)
@@ -460,9 +488,6 @@ namespace Penfolio2.Controllers
                         } //if there is a connected profile
                         else
                         {
-                            //populate the profile
-                            p = PopulatePenProfile(p);
-
                             //if it's not a writing profile, return with an error (TBD)
                             if(p.RoleId != 1)
                             {
@@ -474,6 +499,7 @@ namespace Penfolio2.Controllers
                             }
 
                             selectedProfileIds.Add(profileId);
+                            selectedPenProfiles.Add(p);
                         }
                     } //if it can't, return the view with an error (TBD)
                     else
@@ -481,6 +507,13 @@ namespace Penfolio2.Controllers
                         return View(model);
                     }
                 } //for each of the selected profiles
+
+                //if they are the creator of the writing and they are removing all of their profiles as authors, 
+                //return to the view with an error saying they need to transfer ownership first (TBD)
+                if(writing.UserId == userId && !selectedPenProfiles.Select(i => i.UserId).ToList().Contains(userId))
+                {
+                    return View(model);
+                }
 
                 //create a list of the profiles that are being added
                 List<int> profileIdsToAdd = new List<int>();
@@ -507,14 +540,8 @@ namespace Penfolio2.Controllers
                         if(p == null)
                         {
                             return View(model);
-                        }
-                        else
-                        {
-                            p = PopulatePenProfile(p);
-                        }
-
-                        //if the writing wasn't created by the user and the profile they are trying to remove doesn't belong to them, return the view with an error (TBD)
-                        if(writing.UserId != userId && p.UserId != userId)
+                        } //if the writing wasn't created by the user and the profile they are trying to remove doesn't belong to them, return the view with an error (TBD)
+                        else if(writing.UserId != userId && p.UserId != userId)
                         {
                             return View(model);
                         }
@@ -524,21 +551,286 @@ namespace Penfolio2.Controllers
                 } //for each of the current writing profiles
 
                 //we have the profiles to remove and the profiles that need to be added, and they are all valid, so we can now move on to the other parts of the edit
+                //format the string of selected format tags
+                string[] formatTags = model.SelectedFormats.Split(",");
+
+                //create a list for the FormatIds that SelectedFormats represents
+                List<int> selectedFormatIds = new List<int>();
+
+                //for each of the selected formats
+                foreach(var format in formatTags)
+                {
+                    //if the string can be changed into an int
+                    if (Int32.TryParse(format, out int formatId))
+                    {
+                        var tag = db.FormatTags.Where(i => i.FormatId == formatId).FirstOrDefault();
+
+                        //if there's not a format tag connected to that formatId, return the view with an error (TBD)
+                        if (tag == null)
+                        {
+                            return View(model);
+                        } //if there is a connected format tag
+                        else
+                        {
+                            selectedFormatIds.Add(formatId);
+                        }
+                    } //if it can't, return the view with an error (TBD)
+                    else
+                    {
+                        return View(model);
+                    }
+                }
+
+                //create a list of the format tags that are being added
+                List<int> formatIdsToAdd = new List<int>();
+
+                foreach (var formatId in selectedFormatIds)
+                {
+                    if (!writing.WritingFormats.Select(i => i.FormatId).ToList().Contains(formatId))
+                    {
+                        formatIdsToAdd.Add(formatId);
+                    }
+                } //for each of the selected format tags
+
+                //create a list for each of the FormatIds being removed
+                List<int> formatIdsToRemove = new List<int>();
+
+                foreach(var format in writing.WritingFormats)
+                {
+                    //if this is a format tag that's being removed
+                    if (!selectedFormatIds.Contains(format.FormatId))
+                    {
+                        var tag = db.FormatTags.Where(i => i.FormatId == format.FormatId).FirstOrDefault();
+
+                        //if the format tag doesn't exist, return the view with an error (TBD)
+                        if (tag == null)
+                        {
+                            return View(model);
+                        }
+
+                        formatIdsToRemove.Add(format.FormatId);
+                    }
+                } //for each of the current format tags
+
+                //format the string of selected genre tags
+                string[] genreTags = model.SelectedGenres.Split(",");
+
+                //create a list for the GenreIds that SelectedGenres represents
+                List<int> selectedGenreIds = new List<int>();
+
+                //for each of the selected genres
+                foreach (var genre in genreTags)
+                {
+                    //if the string can be changed into an int
+                    if (Int32.TryParse(genre, out int genreId))
+                    {
+                        var tag = db.GenreTags.Where(i => i.GenreId == genreId).FirstOrDefault();
+
+                        //if there's not a genre tag connected to that genreId, return the view with an error (TBD)
+                        if (tag == null)
+                        {
+                            return View(model);
+                        } //if there is a connected genre tag
+                        else
+                        {
+                            selectedGenreIds.Add(genreId);
+                        }
+                    } //if it can't, return the view with an error (TBD)
+                    else
+                    {
+                        return View(model);
+                    }
+                }
+
+                //create a list of the genre tags that are being added
+                List<int> genreIdsToAdd = new List<int>();
+
+                foreach (var genreId in selectedGenreIds)
+                {
+                    if (!writing.WritingGenres.Select(i => i.GenreId).ToList().Contains(genreId))
+                    {
+                        genreIdsToAdd.Add(genreId);
+                    }
+                } //for each of the selected genre tags
+
+                //create a list for each of the GenreIds being removed
+                List<int> genreIdsToRemove = new List<int>();
+
+                foreach (var genre in writing.WritingGenres)
+                {
+                    //if this is a genre tag that's being removed
+                    if (!selectedGenreIds.Contains(genre.GenreId))
+                    {
+                        var tag = db.GenreTags.Where(i => i.GenreId == genre.GenreId).FirstOrDefault();
+
+                        //if the genre tag doesn't exist, return the view with an error (TBD)
+                        if (tag == null)
+                        {
+                            return View(model);
+                        }
+
+                        genreIdsToRemove.Add(genre.GenreId);
+                    }
+                } //for each of the current genre tags
+
+                //now we can actually start making the changes
+
+                //update public access
+                if(accessPermission.PublicAccess != model.PublicAccess)
+                {
+                    accessPermission.PublicAccess = model.PublicAccess;
+                    db.Entry(accessPermission).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
+                //update friend access
+                if(accessPermission.FriendAccess != model.FriendAccess)
+                {
+                    accessPermission.FriendAccess = model.FriendAccess;
+                    db.Entry(accessPermission).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
+                //update publisher access
+                if(accessPermission.PublisherAccess != model.PublisherAccess)
+                {
+                    accessPermission.PublisherAccess = model.PublisherAccess;
+                    db.Entry(accessPermission).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
+                //update minor access
+                if(accessPermission.MinorAccess != model.MinorAccess)
+                {
+                    accessPermission.MinorAccess = model.MinorAccess;
+                    db.Entry(accessPermission).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
+                //update shows up in search
+                if(accessPermission.ShowsUpInSearch != model.ShowsUpInSearch)
+                {
+                    accessPermission.ShowsUpInSearch = model.ShowsUpInSearch;
+                    db.Entry(accessPermission).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
+                //add new writing profiles
+                foreach(var profileId in profileIdsToAdd)
+                {
+                    WritingProfile writingProfile = new WritingProfile
+                    {
+                        WritingId = id,
+                        ProfileId = profileId
+                    };
+
+                    db.WritingProfiles.Add(writingProfile);
+                    db.SaveChanges();
+                }
+
+                //remove old writing profiles
+                foreach(var profileId in profileIdsToRemove)
+                {
+                    WritingProfile? writingProfile = db.WritingProfiles.Where(i => i.WritingId == id && i.ProfileId == profileId).FirstOrDefault();
+
+                    if(writingProfile != null)
+                    {
+                        db.WritingProfiles.Remove(writingProfile);
+                        db.SaveChanges();
+                    }
+                }
+
+                //add new writing formats
+                foreach(var formatId in formatIdsToAdd)
+                {
+                    WritingFormat writingFormat = new WritingFormat
+                    {
+                        WritingId = id,
+                        FormatId = formatId
+                    };
+
+                    db.WritingFormats.Add(writingFormat);
+                    db.SaveChanges();
+                }
+
+                //remove old writing formats
+                foreach(var formatId in formatIdsToRemove)
+                {
+                    WritingFormat? writingFormat = db.WritingFormats.Where(i => i.WritingId == id && i.FormatId == formatId).FirstOrDefault();
+
+                    if(writingFormat != null)
+                    {
+                        db.WritingFormats.Remove(writingFormat);
+                        db.SaveChanges();
+                    }
+                }
+
+                //add new writing genres
+                foreach(var genreId in genreIdsToAdd)
+                {
+                    WritingGenre writingGenre = new WritingGenre
+                    {
+                        WritingId = id,
+                        GenreId = genreId,
+                    };
+
+                    db.WritingGenres.Add(writingGenre);
+                    db.SaveChanges();
+                }
+
+                //remove old writing genres
+                foreach(var genreId in genreIdsToRemove)
+                {
+                    WritingGenre? writingGenre = db.WritingGenres.Where(i => i.WritingId == id && i.GenreId == genreId).FirstOrDefault();
+
+                    if(writingGenre != null)
+                    {
+                        db.WritingGenres.Remove(writingGenre);
+                        db.SaveChanges();
+                    }
+                }
+
+                //update title
+                if(writing.Title != model.Title)
+                {
+                    writing.Title = model.Title;
+                    db.Entry(writing).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
+                //update description
+                if(writing.Description != model.Description)
+                {
+                    writing.Description = model.Description;
+                    db.Entry(writing).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
+                //update document
+                if(writing.Document != Encoding.Unicode.GetBytes(model.EditorContent))
+                {
+                    writing.Document = Encoding.Unicode.GetBytes(model.EditorContent);
+                    db.Entry(writing).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
+                //update edit date
+                writing.EditDate = DateTime.Now;
+                db.Entry(writing).State = EntityState.Modified;
+                db.SaveChanges();
+
+                return RedirectToAction("ViewWriting", new { id = id });
             } //if the model state is valid
 
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            return View(model);
         }
 
         // GET: WritingController/Delete/5
+        [Route("Writing/Delete/{id}")]
         public ActionResult Delete(int id)
         {
+            
+
             return View();
         }
 
