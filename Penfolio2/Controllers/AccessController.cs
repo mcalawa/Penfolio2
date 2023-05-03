@@ -662,8 +662,8 @@ namespace Penfolio2.Controllers
 
             //there should no longer be any overlapping profile IDs, and the individualAccessGrants and individualAccessRevokes should only contain relevant information now
             //let's update the mostRecentGrant and mostRecentRevoke
-            mostRecentGrant = individualAccessGrants.OrderByDescending(i => i.GrantDate).First();
-            mostRecentRevoke = individualAccessRevokes.OrderByDescending(i => i.RevokeDate).First();
+            mostRecentGrant = individualAccessGrants.OrderByDescending(i => i.GrantDate).FirstOrDefault();
+            mostRecentRevoke = individualAccessRevokes.OrderByDescending(i => i.RevokeDate).FirstOrDefault();
 
             //if they have individual access revokes but no grants, return false
             if (individualAccessRevokes.Count > 0 && individualAccessGrants.Count == 0)

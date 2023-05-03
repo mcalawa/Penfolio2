@@ -91,7 +91,7 @@ namespace Penfolio2.Controllers
             //if the user is not allowed to access this, redirect to error (TBD)
             if(!IsAccessableByUser(writing.AccessPermissionId, ref errors))
             {
-                return RedirectToAction("AccessDenied");
+                return RedirectToAction("AccessDenied", new { id = writing.AccessPermissionId });
             }
 
             ViewBag.Author = false;
@@ -856,7 +856,7 @@ namespace Penfolio2.Controllers
             List<IdentityError> errors = new List<IdentityError>();
             if(!IsAccessableByUser(accessPermission.AccessPermissionId, ref errors, "delete"))
             {
-                return RedirectToAction("DeleteAccessDenied");
+                return RedirectToAction("DeleteAccessDenied", new { id = accessPermission.AccessPermissionId });
             }
 
             ViewBag.WritingId = id;
@@ -897,7 +897,7 @@ namespace Penfolio2.Controllers
             List<IdentityError> errors = new List<IdentityError>();
             if (!IsAccessableByUser(accessPermission.AccessPermissionId, ref errors, "delete"))
             {
-                return RedirectToAction("DeleteAccessDenied");
+                return RedirectToAction("DeleteAccessDenied", new { id = accessPermission.AccessPermissionId });
             }
 
             //WritingFormat, WritingGenre, and WritingProfile all cascade on Writing delete
