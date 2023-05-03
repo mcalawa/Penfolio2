@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Delete Writing";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="alert alert-warning" role="alert">
+    <p>
+        <strong>
+            Deleting this piece of writing will permanently remove it from your account and the accounts of anyone who may have been added as a collaborator. This cannot be recovered. Any comments, likes, or critiques attached to this writing will be deleted.
+        </strong>
+    </p>
+</div>
+
+<h5>Would you still like to delete this piece of writing?</h5>
+<div>
+    <form asp-action="Delete" id="delete-user" method="post">
+        @await Component.InvokeAsync("Writing", new { id = ViewBag.WritingId, viewName = "Delete" })
+        <button class="w-100 btn btn-lg btn-danger" type="submit">Delete Writing</button>
+    </form>
+</div>

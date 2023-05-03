@@ -829,9 +829,241 @@ namespace Penfolio2.Controllers
         [Route("Writing/Delete/{id}")]
         public ActionResult Delete(int id)
         {
-            
+            var userId = GetUserId();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            Writing? writing = db.Writings.Where(i => i.WritingId == id).FirstOrDefault();
+            AccessPermission? accessPermission = null;
+
+            if (writing == null)
+            {
+                return RedirectToAction("NotFound");
+            }
+            else
+            {
+                accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == writing.AccessPermissionId && i.WritingId == id).FirstOrDefault();
+            }
+
+            if(accessPermission == null)
+            {
+                return RedirectToAction("NotFound");
+            }
+
+            List<IdentityError> errors = new List<IdentityError>();
+            if(!IsAccessableByUser(accessPermission.AccessPermissionId, ref errors, "delete"))
+            {
+                return RedirectToAction("DeleteAccessDenied");
+            }
+
+            ViewBag.WritingId = id;
 
             return View();
+        }
+
+        // POST: WritingController/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("Writing/Delete/{id}")]
+        public ActionResult Delete(int id, IFormCollection collection)
+        {
+            var userId = GetUserId();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            Writing? writing = db.Writings.Where(i => i.WritingId == id).FirstOrDefault();
+            AccessPermission? accessPermission = null;
+
+            if (writing == null)
+            {
+                return RedirectToAction("NotFound");
+            }
+            else
+            {
+                accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == writing.AccessPermissionId && i.WritingId == id).FirstOrDefault();
+            }
+
+            if (accessPermission == null)
+            {
+                return RedirectToAction("NotFound");
+            }
+
+            List<IdentityError> errors = new List<IdentityError>();
+            if (!IsAccessableByUser(accessPermission.AccessPermissionId, ref errors, "delete"))
+            {
+                return RedirectToAction("DeleteAccessDenied");
+            }
+
+            //WritingFormat, WritingGenre, and WritingProfile all cascade on Writing delete
+            //Writing, IndividualAccessGrant, and IndividualAccessRevoke cascade on AccessPermission delete
+            //Critiques, CritiqueRequest, Comments, CommentFlags, CommentReplies, Likes, WritingFolder, and WritingSeries need to be handled seperately 
+
+            //handle Critiques
+            List<int> critiqueIds = db.Critiques.Where(i => i.WritingId == id).ToList().Select(i => i.CritiqueId).ToList();
+
+            foreach(var critiqueId in critiqueIds)
+            {
+                var critique = db.Critiques.Where(i => i.CritiqueId == critiqueId).FirstOrDefault();
+
+                if(critique != null)
+                {
+                    db.Critiques.Remove(critique);
+                    db.SaveChanges();
+                }
+            }
+
+            //handle CritiqueRequest
+            var critiqueRequest = db.CritiqueRequests.Where(i => i.WritingId == id).FirstOrDefault();
+
+            if(critiqueRequest != null)
+            {
+                db.CritiqueRequests.Remove(critiqueRequest);
+                db.SaveChanges();
+            }
+
+            //handle Comments, CommentFlags, and CommentReplies
+            List<int> commentIds = db.Comments.Where(i => i.WritingId == id).ToList().Select(i => i.CommentId).ToList();
+            List<int> commentFlagIds = new List<int>();
+            List<int> commentReplyIds = new List<int>();
+
+            //populate
+            foreach(var commentId in commentIds)
+            {
+                List<int> replyIds = db.CommentReplies.Where(i => i.CommentId == commentId).ToList().Select(i => i.ReplyId).ToList();
+                List<int> flagIds = db.CommentFlags.Where(i => i.CommentId == commentId).ToList().Select(i => i.CommentFlagId).ToList();
+
+                foreach(var replyId in replyIds)
+                {
+                    if (!commentReplyIds.Contains(replyId))
+                    {
+                        commentReplyIds.Add(replyId);
+                    }
+                    
+                    if(!commentIds.Contains(replyId))
+                    {
+                        commentIds.Add(replyId);
+                    }
+                }
+
+                foreach(var flagId in flagIds)
+                {
+                    commentFlagIds.Add(flagId);
+                }
+            }
+
+            //now, do the actual deleting
+            //remove comment replies for comments connected to this writing
+            foreach (var commentReplyId in commentReplyIds)
+            {
+                var commentReply = db.CommentReplies.Where(i => i.ReplyId == commentReplyId).FirstOrDefault();
+
+                if (commentReply != null)
+                {
+                    db.CommentReplies.Remove(commentReply);
+                    db.SaveChanges();
+                }
+            }
+
+            //remove comment flags for comments connected to this writing
+            foreach (var commentFlagId in commentFlagIds)
+            {
+                var commentFlag = db.CommentFlags.Where(i => i.CommentFlagId == commentFlagId).FirstOrDefault();
+
+                if (commentFlag != null)
+                {
+                    db.CommentFlags.Remove(commentFlag);
+                    db.SaveChanges();
+                }
+            }
+
+            //remove comments connected to this writing
+            foreach (var commentId in commentIds)
+            {
+                var comment = db.Comments.Where(i => i.CommentId == commentId).FirstOrDefault();
+
+                if (comment != null)
+                {
+                    db.Comments.Remove(comment);
+                    db.SaveChanges();
+                }
+            }
+
+            //handle Likes
+            List<int> likeIds = db.Likes.Where(i => i.WritingId == id).ToList().Select(i => i.LikeId).ToList();
+
+            foreach(var likeId in likeIds)
+            {
+                var like = db.Likes.Where(i => i.LikeId == likeId).FirstOrDefault();
+
+                if(like != null)
+                {
+                    db.Likes.Remove(like);
+                    db.SaveChanges();
+                }
+            }
+
+            //handle WritingFolders
+            List<int> writingFolderIds = db.WritingFolders.Where(i => i.WritingId == id).ToList().Select(i => i.FolderId).ToList();
+
+            //delete writing folders connected to this writing
+            foreach(var writingFolderId in writingFolderIds)
+            {
+                var  writingFolder = db.WritingFolders.Where(i => i.WritingId == id && i.FolderId == writingFolderId).FirstOrDefault();
+
+                if(writingFolder !=  null)
+                {
+                    db.WritingFolders.Remove(writingFolder);
+                    db.SaveChanges();
+                }
+            }
+
+            //handle WritingSeries
+            List<int> writingSeriesIds = db.WritingSeries.Where(i => i.WritingId == id).ToList().Select(i => i.WritingSeriesId).ToList();
+            List<WritingSeries> nextWritingSeries = db.WritingSeries.Where(i => i.NextWritingId == id).ToList();
+            List<WritingSeries> previousWritingSeries = db.WritingSeries.Where(i => i.PreviousWritingId == id).ToList();
+
+            //update the writing series where this is the next writing
+            foreach(var writingSeries in nextWritingSeries)
+            {
+                var nextWriting = db.WritingSeries.Where(i => i.SeriesId == writingSeries.SeriesId && i.WritingId == writing.WritingId).FirstOrDefault();
+
+                writingSeries.NextWritingId = nextWriting != null ? nextWriting.NextWritingId : null;
+                db.Entry(writingSeries).State = EntityState.Modified;
+                db.SaveChanges();
+            }
+
+            //update the writing series where this is the previous writing
+            foreach(var writingSeries in previousWritingSeries)
+            {
+                var previousWriting = db.WritingSeries.Where(i => i.SeriesId == writingSeries.SeriesId && i.WritingId == writing.WritingId).FirstOrDefault();
+
+                writingSeries.PreviousWritingId = previousWriting != null ? previousWriting.PreviousWritingId : null;
+                db.Entry(writingSeries).State = EntityState.Modified;
+                db.SaveChanges();
+            }
+
+            //delete writing series connected to this writing
+            foreach(var writingSeriesId in writingSeriesIds)
+            {
+                var writingSeries = db.WritingSeries.Where(i => i.WritingSeriesId == writingSeriesId).FirstOrDefault();
+
+                if(writingSeries != null)
+                {
+                    db.WritingSeries.Remove(writingSeries);
+                    db.SaveChanges();
+                }
+            }
+
+            db.AccessPermissions.Remove(accessPermission);
+            db.SaveChanges();
+
+            return RedirectToAction("Index");
         }
 
         [Route("Writing/AccessDenied/{id}")]
@@ -923,21 +1155,6 @@ namespace Penfolio2.Controllers
         public new ActionResult NotFound()
         {
             return View();
-        }
-
-        // POST: WritingController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
         }
 
         public string HTMLByteArrayToString(byte[] input)

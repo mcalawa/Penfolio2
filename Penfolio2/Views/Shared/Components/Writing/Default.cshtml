@@ -33,16 +33,23 @@
         <div class="descriptionText">
             <p>@Html.DisplayFor(model => model.Description)</p>
             <!--Links to view the full writing and to interact with it in other ways such as edit and delete if the writing belongs to the user-->
-            <span class="viewMore"><a href="/Writing/ViewWriting/@Model.WritingId">Read More</a></span>
-            @if (ViewBag.IsCreator)
+            @if (!ViewBag.Delete)
+            {
+                <span class="viewMore"><a href="/Writing/ViewWriting/@Model.WritingId">Read More</a></span>
+            }
+            @if (ViewBag.IsCreator && !ViewBag.Delete)
             {
                 <span class="forUserWriting"> | <a href="/Writing/Edit/@Model.WritingId">Edit</a> | <a href="/Writing/Delete/@Model.WritingId">Delete</a></span>
             }
-            else if(ViewBag.IsCollaborator)
+            else if(ViewBag.IsCollaborator && !ViewBag.Delete)
             {
                 <span class="forUserWriting"> | <a href="/Writing/Edit/@Model.WritingId">Edit</a></span>
             }
         </div>
+        @if(ViewBag.Delete)
+        {
+            <div id="content" class="ql-editor">@Html.Raw(ViewBag.Document)</div>
+        }
     </div>
     <!--A container to hold all of the tags associated with this piece of writing; has arrow buttons on each side that can be used to scroll through tags; each tag is also a link to a view that returns writings that share that tag-->
     <div class="tagScroller @Model.WritingId@tagCollapse">

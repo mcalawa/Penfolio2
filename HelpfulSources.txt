@@ -16,6 +16,7 @@ https://www.entityframeworktutorial.net/code-first/foreignkey-dataannotations-at
 
 View:
 https://stackoverflow.com/questions/60127942/how-to-pass-current-selection-value-to-route-id-in-mvc-core-view Passing currently selected option to asp-route-id attribute of a link
+https://stackoverflow.com/questions/16908910/displayformat-not-working-with-nullabledatetime Display templates
 
 Controller:
 https://stackoverflow.com/questions/42587428/get-image-from-wwwroot-images-in-asp-net-core Get image from wwwroot/images

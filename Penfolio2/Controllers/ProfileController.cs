@@ -642,7 +642,7 @@ namespace Penfolio2.Controllers
         [Route("Profile/Delete/{id}")]
         public ActionResult Delete(string id, DeleteProfileViewModel model)
         {
-            if(string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id))
             {
                 return RedirectToAction("NotFound");
             }
@@ -650,27 +650,27 @@ namespace Penfolio2.Controllers
             string userId = GetUserId();
             PenProfile? penProfile = db.PenProfiles.Where(i => i.UrlString == id).FirstOrDefault();
 
-            if(penProfile == null)
+            if (penProfile == null)
             {
                 return RedirectToAction("NotFound");
             }
 
-            if(penProfile.UserId != userId)
+            if (penProfile.UserId != userId)
             {
                 return RedirectToAction("DeleteAccessDenied");
             }
 
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                if(penProfile.ProfileId != model.ProfileId)
+                if (penProfile.ProfileId != model.ProfileId)
                 {
                     return RedirectToAction("DeleteAccessDenied");
                 }
 
                 //first take care of the main profile stuff
-                if(penProfile.IsMainProfile)
+                if (penProfile.IsMainProfile)
                 {
-                    if(model.NewMainProfile == null)
+                    if (model.NewMainProfile == null)
                     {
                         return RedirectToAction("NotFound");
                     }
@@ -687,39 +687,40 @@ namespace Penfolio2.Controllers
 
                 AccessPermission accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == penProfile.AccessPermissionId).FirstOrDefault();
 
-                List<WritingProfile> writingProfiles = db.WritingProfiles.Where(i => i.ProfileId == model.ProfileId).ToList();
-                List<IndividualAccessRevoke> individualAccessRevokes = db.IndividualAccessRevokes.Where(i => i.RevokeeId == model.ProfileId).ToList(); //revokes for this profile will be deleted when the AccessPermission is
-                List<IndividualAccessGrant> individualAccessGrants = db.IndividualAccessGrants.Where(i => i.GranteeId == model.ProfileId).ToList(); //grants for this profile will be deleted when the AccessPermission is
-                List<Friendship> friendships = db.Friendships.Where(i => i.SecondFriendId == model.ProfileId).ToList(); //cascade happens on firstfriend delete
-                List<FriendRequest> friendRequests = db.FriendRequests.Where(i => i.RequesteeId == model.ProfileId).ToList(); //cascade happens on requestee delete
-                List<AccessRequest> accessRequests = db.AccessRequests.Where(i => i.RequesterId == model.ProfileId).ToList(); //cascade happens on AccessPermission delete
+                List<int> writingProfileIds = db.WritingProfiles.Where(i => i.ProfileId == model.ProfileId).ToList().Select(i => i.WritingId).ToList();
+                List<int> indvidualAccessRevokeIds = db.IndividualAccessRevokes.Where(i => i.RevokeeId == model.ProfileId).ToList().Select(i => i.IndividualAccessRevokeId).ToList(); //revokes for this profile will be deleted when the AccessPermission is
+                List<int> individualAccessGrantIds = db.IndividualAccessGrants.Where(i => i.GranteeId == model.ProfileId).ToList().Select(i => i.IndividualAccessGrantId).ToList(); //grants for this profile will be deleted when the AccessPermission is
+                List<int> friendshipIds = db.Friendships.Where(i => i.SecondFriendId == model.ProfileId).ToList().Select(i => i.FriendshipId).ToList(); //cascade happens on firstfriend delete
+                List<int> friendRequestIds = db.FriendRequests.Where(i => i.RequesterId == model.ProfileId).ToList().Select(i => i.FriendRequestId).ToList(); //cascade happens on requestee delete
+                List<int> accessRequestIds = db.AccessRequests.Where(i => i.RequesterId == model.ProfileId).ToList().Select(i => i.AccessRequestId).ToList(); //cascade happens on AccessPermission delete
 
                 //CritiqueGiver should cascade on profile delete
                 //Critique should cascade on profile delete
-                List<FollowerFollowing> followerFollowings = db.FollowersFollowing.Where(i => i.FollowerId == model.ProfileId || i.ProfileId == model.ProfileId).ToList();
-                List<Like> likes = db.Likes.Where(i => i.LikerId == model.ProfileId || i.ProfileId == model.ProfileId).ToList();
-                List<Comment> comments = db.Comments.Where(i => i.CommenterId == model.ProfileId || i.ProfileId == model.ProfileId).ToList();
-                List<CommentReply> commentReplies = new List<CommentReply>();
-                List<CommentFlag> commentFlags = new List<CommentFlag>(); //CommentFlags will cascade on FlaggerId delete
+                List<int> followerFollowingIds = db.FollowersFollowing.Where(i => i.FollowerId == model.ProfileId || i.ProfileId == model.ProfileId).ToList().Select(i => i.FollowerFollowingId).ToList();
+                List<int> likeIds = db.Likes.Where(i => i.LikerId == model.ProfileId || i.ProfileId == model.ProfileId).ToList().Select(i => i.LikeId).ToList();
+                List<int> commentIds = db.Comments.Where(i => i.CommenterId == model.ProfileId || i.ProfileId == model.ProfileId).ToList().Select(i => i.CommentId).ToList();
+                List<int> commentReplyIds = new List<int>();
+                List<int> commentFlagIds = new List<int>(); //CommentFlags will cascade on FlaggerId delete
 
-                foreach(var comment in comments)
+                foreach(var commentId in  commentIds)
                 {
-                    List<CommentReply> replies = db.CommentReplies.Where(i => i.CommentId == comment.CommentId).ToList();
-                    List<CommentFlag> flags = db.CommentFlags.Where(i => i.CommentId == comment.CommentId).ToList();
+                    List<int> replyIds = db.CommentReplies.Where(i => i.CommentId == commentId).ToList().Select(i => i.ReplyId).ToList();
+                    List<int> flagIds = db.CommentFlags.Where(i => i.CommentId == commentId).ToList().Select(i => i.CommentFlagId).ToList();
 
-                    foreach(var reply in replies)
+                    foreach(var replyId in replyIds)
                     {
-                        comments.Add(reply.Comment);
+                        commentReplyIds.Add(replyId);
+                        commentIds.Add(replyId);
                     }
 
-                    foreach(var flag in flags)
+                    foreach(var flagId in flagIds)
                     {
-                        commentFlags.Add(flag);
+                        commentFlagIds.Add(flagId);
                     }
                 }
 
                 //SeriesOwner should cascade on profile delete
-                List<FolderOwner> folderOwners = db.FolderOwners.Where(i => i.OwnerId == model.ProfileId).ToList();
+                List<int> folderOwnerIds = db.FolderOwners.Where(i => i.OwnerId == model.ProfileId).ToList().Select(i => i.FolderId).ToList();
 
                 db.Remove(penProfile);
                 db.SaveChanges();
@@ -731,38 +732,149 @@ namespace Penfolio2.Controllers
                 }
 
                 //we will know if all of the following works correctly once this other stuff is implemented
-                db.RemoveRange(commentReplies);
-                db.SaveChanges();
+                //remove comment replies for comments connected to this profile
+                foreach(var commentReplyId in commentReplyIds)
+                {
+                    var commentReply = db.CommentReplies.Where(i => i.ReplyId == commentReplyId).FirstOrDefault();
 
-                db.RemoveRange(commentFlags);
-                db.SaveChanges();
+                    if(commentReply != null)
+                    {
+                        db.CommentReplies.Remove(commentReply);
+                        db.SaveChanges();
+                    }
+                }
 
-                db.RemoveRange(comments);
-                db.SaveChanges();
+                //remove comment flags for comments connected to this profile
+                foreach(var commentFlagId in commentFlagIds)
+                {
+                    var commentFlag = db.CommentFlags.Where(i => i.CommentFlagId == commentFlagId).FirstOrDefault();
 
-                db.RemoveRange(folderOwners);
-                db.SaveChanges();
+                    if(commentFlag != null)
+                    {
+                        db.CommentFlags.Remove(commentFlag);
+                        db.SaveChanges();
+                    }
+                }
 
-                db.RemoveRange(likes); 
-                db.SaveChanges();
+                //remove comments connected to this profile
+                foreach(var commentId in commentIds)
+                {
+                    var comment = db.Comments.Where(i => i.CommentId == commentId).FirstOrDefault();
 
-                db.RemoveRange(friendships);
-                db.SaveChanges();
+                    if(comment != null)
+                    {
+                        db.Comments.Remove(comment);
+                        db.SaveChanges();
+                    }
+                }
 
-                db.RemoveRange(friendRequests);
-                db.SaveChanges();
+                //remove folder owners for this profile
+                foreach(var folderOwnerId  in folderOwnerIds)
+                {
+                    var folderOwner = db.FolderOwners.Where(i => i.OwnerId == model.ProfileId && i.FolderId == folderOwnerId).FirstOrDefault();
 
-                db.RemoveRange(followerFollowings);
-                db.SaveChanges();
+                    if(folderOwner != null)
+                    {
+                        db.FolderOwners.Remove(folderOwner);
+                        db.SaveChanges();
+                    }
+                }
 
-                db.RemoveRange(individualAccessGrants);
-                db.SaveChanges();
+                //delete likes for this profile
+                foreach(var likeId in likeIds)
+                {
+                    var like = db.Likes.Where(i => i.LikeId == likeId).FirstOrDefault();
 
-                db.RemoveRange(individualAccessRevokes);
-                db.SaveChanges();
+                    if(like != null)
+                    {
+                        db.Likes.Remove(like);
+                        db.SaveChanges();
+                    }
+                }
 
-                db.RemoveRange(writingProfiles);
-                db.SaveChanges();
+                //delete friendships for this profile
+                foreach(var friendshipId in friendshipIds)
+                {
+                    var friendship = db.Friendships.Where(i => i.FriendshipId == friendshipId).FirstOrDefault();
+
+                    if(friendship != null)
+                    {
+                        db.Friendships.Remove(friendship);
+                        db.SaveChanges();
+                    }
+                }
+
+                //delete friend requests for this profile
+                foreach(var friendRequestId in  friendRequestIds)
+                {
+                    var friendRequest = db.FriendRequests.Where(i => i.FriendRequestId ==  friendRequestId).FirstOrDefault();
+
+                    if(friendRequest != null)
+                    {
+                        db.FriendRequests.Remove(friendRequest);
+                        db.SaveChanges();
+                    }
+                }
+
+                //delete followers following for this profile
+                foreach(var followerFollowingId in followerFollowingIds)
+                {
+                    var followerFollowing = db.FollowersFollowing.Where(i => i.FollowerFollowingId == followerFollowingId).FirstOrDefault();
+
+                    if(followerFollowing != null)
+                    {
+                        db.FollowersFollowing.Remove(followerFollowing);
+                        db.SaveChanges();
+                    }
+                }
+
+                //delete access requests for this profile
+                foreach(var accessRequestId in accessRequestIds)
+                {
+                    var accessRequest = db.AccessRequests.Where(i => i.AccessRequestId == accessRequestId).FirstOrDefault();
+
+                    if(accessRequest != null)
+                    {
+                        db.AccessRequests.Remove(accessRequest);
+                        db.SaveChanges();
+                    }
+                }
+
+                //delete individual access grants for this profile
+                foreach(var individualAccessGrantId in individualAccessGrantIds)
+                {
+                    var individualAccessGrant = db.IndividualAccessGrants.Where(i => i.IndividualAccessGrantId == individualAccessGrantId).FirstOrDefault();
+
+                    if(individualAccessGrant != null)
+                    {
+                        db.IndividualAccessGrants.Remove(individualAccessGrant);
+                        db.SaveChanges();
+                    }
+                }
+
+                //delete individual access revokes for this profile
+                foreach(var individualAccessRevokeId in indvidualAccessRevokeIds)
+                {
+                    var individualAccessRevoke = db.IndividualAccessRevokes.Where(i => i.IndividualAccessRevokeId == individualAccessRevokeId).FirstOrDefault();
+
+                    if(individualAccessRevoke != null)
+                    {
+                        db.IndividualAccessRevokes.Remove(individualAccessRevoke);
+                        db.SaveChanges();
+                    }
+                }
+
+                //delete writing profiles for this profile
+                foreach(var writingProfileId in writingProfileIds)
+                {
+                    var writingProfile = db.WritingProfiles.Where(i => i.ProfileId == model.ProfileId &&  i.WritingId == writingProfileId).FirstOrDefault();
+
+                    if(writingProfile != null)
+                    {
+                        db.WritingProfiles.Remove(writingProfile);
+                        db.SaveChanges();
+                    }
+                }
 
                 return RedirectToAction("Index");
             }

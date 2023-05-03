@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Penfolio2.Data;
 using Penfolio2.Models;
+using System.Text;
 
 namespace Penfolio2.ViewComponents
 {
@@ -18,6 +19,7 @@ namespace Penfolio2.ViewComponents
         public async Task<IViewComponentResult> InvokeAsync(int? id = null, string? viewName = null)
         {
             Writing writing;
+            List<WritingProfile> owners = new List<WritingProfile>();
             string userId = GetUserId();
 
             if (userId == null)
@@ -255,6 +257,86 @@ namespace Penfolio2.ViewComponents
 
                     return View(viewName, model);
                 } //Author
+                else if(viewName.CompareTo("Delete") == 0)
+                {
+                    if (id == null)
+                    {
+                        return View();
+                    }
+
+                    writing = _db.Writings.Where(i => i.WritingId == id.Value).FirstOrDefault();
+
+                    if (writing == null)
+                    {
+                        return View();
+                    }
+
+                    ViewBag.IsCreator = false;
+                    ViewBag.IsCollaborator = false;
+                    ViewBag.Delete = true;
+
+                    if (userId == writing.UserId)
+                    {
+                        ViewBag.IsCreator = true;
+                    }
+
+                    owners = _db.WritingProfiles.Where(i => i.WritingId == id).ToList();
+
+                    foreach (var owner in owners)
+                    {
+                        if (owner.PenProfile == null)
+                        {
+                            owner.PenProfile = _db.PenProfiles.Where(i => i.ProfileId == owner.ProfileId).First();
+                        }
+
+                        if (owner.PenProfile.UserId == userId)
+                        {
+                            ViewBag.IsCollaborator = true;
+                        }
+                    }
+
+                    if (writing.WritingFormats == null || writing.WritingFormats.Count == 0)
+                    {
+                        writing.WritingFormats = _db.WritingFormats.Where(i => i.WritingId == writing.WritingId).ToList();
+
+                        foreach (var format in writing.WritingFormats)
+                        {
+                            if (format.FormatTag == null)
+                            {
+                                format.FormatTag = _db.FormatTags.Where(i => i.FormatId == format.FormatId).FirstOrDefault();
+
+                                if (format.FormatTag.AltFormatNames == null || format.FormatTag.AltFormatNames.Count == 0)
+                                {
+                                    format.FormatTag.AltFormatNames = _db.AltFormatNames.Where(i => i.FormatId == format.FormatId).ToList();
+                                }
+                            }
+                        }
+                    }
+
+                    if (writing.WritingGenres == null || writing.WritingGenres.Count == 0)
+                    {
+                        writing.WritingGenres = _db.WritingGenres.Where(i => i.WritingId == writing.WritingId).ToList();
+
+                        foreach (var genre in writing.WritingGenres)
+                        {
+                            if (genre.GenreTag == null)
+                            {
+                                genre.GenreTag = _db.GenreTags.Where(i => i.GenreId == genre.GenreId).FirstOrDefault();
+
+                                if (genre.GenreTag.AltGenreNames == null || genre.GenreTag.AltGenreNames.Count == 0)
+                                {
+                                    genre.GenreTag.AltGenreNames = _db.AltGenreNames.Where(i => i.GenreId == genre.GenreId).ToList();
+                                }
+                            }
+                        }
+                    }
+
+                    string document = HTMLByteArrayToString(writing.Document);
+
+                    ViewBag.Document = document;
+
+                    return View(writing);
+                } //Delete
             }
 
             if(id == null)
@@ -271,13 +353,14 @@ namespace Penfolio2.ViewComponents
 
             ViewBag.IsCreator = false;
             ViewBag.IsCollaborator = false;
+            ViewBag.Delete = false;
 
             if (userId == writing.UserId)
             {
                 ViewBag.IsCreator = true;
             }
 
-            List<WritingProfile> owners = _db.WritingProfiles.Where(i => i.WritingId == id).ToList();
+            owners = _db.WritingProfiles.Where(i => i.WritingId == id).ToList();
 
             foreach (var owner in owners)
             {
@@ -327,6 +410,8 @@ namespace Penfolio2.ViewComponents
                     }
                 }
             }
+
+            ViewBag.Document = "";
 
             return View(writing);
         }
@@ -1002,6 +1087,19 @@ namespace Penfolio2.ViewComponents
 
             //if you somehow manage to make it this far, return false
             return false;
+        }
+
+        public string HTMLByteArrayToString(byte[] input)
+        {
+            if (input == null)
+            {
+                return null;
+            }
+
+            string output = Encoding.Unicode.GetString(input);
+            output = output.Replace("&lt;", "<").Replace("&gt;", ">").Replace("'", "&#39;");
+
+            return output;
         }
     }
 }
