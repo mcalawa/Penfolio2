@@ -217,4 +217,9 @@ namespace Penfolio2.Models
         [Required]
         public bool IsAnonymous { get; set; }
     }
+
+    public class NotificationViewModel
+    {
+
+    }
 }

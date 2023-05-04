@@ -121,6 +121,7 @@ namespace Penfolio2.ViewComponents
                     var genreTags = _db.GenreTags.ToList();
                     var genreCategories = _db.GenreCategories.ToList();
                     var genreFormats = _db.GenreFormats.ToList();
+                    var formatTags = _db.FormatTags.ToList();
                     List<int> selectedGenreIds = new List<int>();
                     List<int> selectedFormatIds = new List<int>();
 
@@ -157,6 +158,7 @@ namespace Penfolio2.ViewComponents
                         GenreTags = genreTags,
                         GenreCategories = genreCategories,
                         GenreFormats = genreFormats,
+                        FormatTags = formatTags,
                         SelectedGenreIds = selectedGenreIds,
                         SelectedFormatIds = selectedFormatIds
                     };

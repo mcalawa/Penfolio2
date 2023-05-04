@@ -53,6 +53,22 @@ namespace Penfolio2.Controllers
             return OrderByNewest(availableWritings);
         }
 
+        public List<Writing> GetAllWritingAvailableforSearch(List<Writing> writings)
+        {
+            List<Writing> availableWritings = new List<Writing>();
+
+            foreach(var writing in writings)
+            {
+                List<IdentityError> errors = new List<IdentityError>();
+                if (IsAccessableByUser(writing.AccessPermissionId, ref errors, "search"))
+                {
+                    availableWritings.Add(writing);
+                }
+            }
+
+            return OrderByNewest(availableWritings);
+        }
+
         public List<Writing> GetAllWritingAvailable()
         {
             var writings = db.Writings.ToList();
@@ -68,6 +84,77 @@ namespace Penfolio2.Controllers
             }
 
             return OrderByNewest(availableWritings);
+        }
+
+        // GET: WritingController/SearchByFormatTag/Rhyming%20poetry
+        [Route("Writing/SearchByFormatTag/{id}")]
+        public ActionResult SearchByFormatTag(string id)
+        {
+            id = Uri.UnescapeDataString(id);
+            int formatId = 0;
+            string hashtag = "#" + id;
+            if(db.FormatTags.Any(i => i.FormatName.ToLower() ==  id.ToLower()))
+            {
+                formatId = db.FormatTags.Where(i => i.FormatName.ToLower() == id.ToLower()).First().FormatId;
+            }
+            else if(db.AltFormatNames.Any(i => i.AltName.ToLower() == id.ToLower()))
+            {
+                formatId = db.AltFormatNames.Where(i => i.AltName.ToLower() == id.ToLower()).First().FormatId;
+            }
+
+            List<Writing> writings = new List<Writing>();
+            var writingFormats = db.WritingFormats.Where(i => i.FormatId == formatId).ToList();
+
+            foreach(var writingFormat in writingFormats)
+            {
+                var writing = db.Writings.Where(i => i.WritingId == writingFormat.WritingId).FirstOrDefault();
+
+                if(writing != null)
+                {
+                    writings.Add(writing);
+                }
+            }
+
+            writings = GetAllWritingAvailableforSearch(writings);
+            ViewBag.Hashtag = hashtag;
+
+            return View(writings);
+        }
+
+        // GET: WritingController/SearchByGenreTag/Suspense
+        [Route("Writing/SearchByGenreTag/{id}")]
+        public ActionResult SearchByGenreTag(string id)
+        {
+            id = Uri.UnescapeDataString(id);
+            int genreId = 0;
+            string hashtag = "#" + id;
+            if(db.GenreTags.Any(i => i.GenreName.ToLower() == id.ToLower()))
+            {
+                genreId = db.GenreTags.Where(i => i.GenreName.ToLower() == id.ToLower()).First().GenreId;
+            }
+            else if(db.AltGenreNames.Any(i => i.AltName.ToLower() == id.ToLower()))
+            {
+                genreId = db.AltGenreNames.Where(i => i.AltName.ToLower() == id.ToLower()).First().GenreId;
+            }
+
+            List<Writing> writings = new List<Writing>();
+            var writingGenres = db.WritingGenres.Where(i => i.GenreId == genreId).ToList();
+
+            foreach(var writingGenre in writingGenres)
+            {
+                var writing = db.Writings.Where(i => i.WritingId == writingGenre.WritingId).FirstOrDefault();
+
+                if(writing != null)
+                {
+                    writings.Add(writing);
+                }
+            }
+
+            writings = GetAllWritingAvailableforSearch(writings);
+
+            ViewBag.Hashtag = hashtag;
+
+            return View(writings);
         }
 
         // GET: WritingController/ViewWriting/5

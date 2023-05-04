@@ -1,0 +1,20 @@
+﻿@model IEnumerable<Penfolio2.Models.Writing>
+@{
+    ViewData["Title"] = "Writing Tagged " + ViewBag.Hashtag;
+}
+
+<div class="right-align">
+    <ul class="navbar-nav profileList">
+        <li>
+            <a asp-controller="Writing"
+               asp-action="Create">Create New Writing</a>
+        </li>
+    </ul>
+</div>
+
+<h1 class="clear-right">@ViewBag.Hashtag</h1>
+
+@foreach (var writing in Model)
+{
+    @await Component.InvokeAsync("Writing", new { id = writing.WritingId })
+}
