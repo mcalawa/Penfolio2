@@ -38,5 +38,9 @@ https://www.c-sharpcorner.com/UploadFile/201fc1/what-is-random-urls-and-how-to-c
 https://stackoverflow.com/questions/61238877/asp-net-core-c-sharp-select-option-redirect-change-selected-option Redirect on option select
 https://blog.elmah.io/how-to-get-base-url-in-asp-net-core/ How to get base URL
 
+CSS:
+https://stackoverflow.com/questions/572768/styling-an-input-type-file-button Styling the file upload button
+https://moderncss.dev/pure-css-custom-checkbox-style/ Styling a custom checkbox
+
 Other:
 https://www.publicdomainpictures.net/en/view-image.php?image=75286&picture=ink-amp-feather-quill-clipart Public domain image for the default user icons.

@@ -220,6 +220,28 @@ namespace Penfolio2.Models
 
     public class NotificationViewModel
     {
+        [Required, NotNull]
+        public DateTime NotificationDate { get; set; }
 
+        [AllowNull]
+        public AccessRequest? AccessRequest { get; set; } = null;  
+
+        [AllowNull]
+        public FriendRequest? FriendRequest { get; set; } = null;
+
+        [AllowNull]
+        public Like? Like { get; set; } = null;
+
+        [AllowNull]
+        public Comment? Comment { get; set; } = null;
+
+        [AllowNull]
+        public CommentReply? CommentReply { get; set; } = null;
+
+        [AllowNull]
+        public Critique? Critique { get; set; } = null;
+
+        [AllowNull]
+        public CritiqueRequest? CritiqueRequest { get; set; } = null;
     }
 }

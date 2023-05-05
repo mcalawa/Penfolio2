@@ -20,7 +20,7 @@ namespace Penfolio2.ViewComponents
         {
             Writing writing;
             List<WritingProfile> owners = new List<WritingProfile>();
-            string userId = GetUserId();
+            string? userId = GetUserId();
 
             if (userId == null)
             {

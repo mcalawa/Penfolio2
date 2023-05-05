@@ -21,6 +21,32 @@ body {
   margin-bottom: 60px;
 }
 
+h2 {
+    font-family: 'Homemade Apple', cursive;
+    color: #4f4c4c;
+    margin-bottom: 5px;
+}
+
+h3 {
+    font-family: 'Love Ya Like A Sister', cursive;
+    color: #3a3a3a;
+    margin-top: 0;
+}
+
+h4 {
+    font-family: 'La Belle Aurore', cursive;
+}
+
+a {
+    color: #6080c2;
+}
+
+a:hover, a:focus {
+    color: #2c519d;
+    text-decoration: none;
+    text-shadow: 0 0 1px #6080c2;
+}
+
 .right-align {
     float: right;
 }
@@ -36,4 +62,271 @@ body {
 
 .clear-right {
     clear: right;
+}
+
+button {
+    background-color: #f5ebf0;
+    border: 2px outset #efd3dd;
+    transition: 1s;
+}
+
+button:hover, button:focus {
+    background-color: #efd3dd;
+    border: 2px outset #cf909b;
+}
+
+button:disabled, button:disabled:hover, button:disabled:focus {
+    background-color: #f5ebf0;
+    border: 2px outset #efd3dd;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+input[type=submit] {
+    background-color: #f5ebf0;
+    border: 2px outset #efd3dd;
+    transition: 1s;
+}
+
+input[type=submit]:hover, input[type=submit]:focus  {
+    background-color: #efd3dd;
+    border: 2px outset #cf909b;
+}
+
+input[type=submit]:disabled, input[type=submit]:disabled:hover, input[type=submit]:disabled:focus {
+    background-color: #f5ebf0;
+    border: 2px solid #efd3dd;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+input[type=checkbox] {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #fff;
+    margin: 0;
+    font: inherit;
+    color: #fff;
+    width: 1em;
+    height: 1em;
+    border: 1px solid #787373;
+    border-radius: 0.15em;
+    place-content: center;
+    display: inline-grid;
+}
+
+input[type=checkbox]::before {
+    content: "";
+    width: 1em;
+    height: 1em;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em #fff;
+    background-color: #fff;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    transform: scale(0);
+}
+
+input[type=checkbox]:checked {
+    content: "";
+    width: 1em;
+    height: 1em;
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em #4f4c4c;
+    background-color: #4f4c4c;
+    border: 1px solid #4f4c4c;
+    outline: 1px solid #4f4c4c;
+}
+
+input[type=checkbox]::before {
+    transform: scale(0.65);
+}
+
+/*Styling for forms*/
+.inputGroup {
+    min-height: 575px;
+}
+
+input, textarea {
+    border: 1px solid;
+    border-color:  #ccc;
+}
+
+.formLabel {
+    display: block;
+}
+
+.formInput {
+    width: 100%;
+}
+
+.formItem {
+    margin-bottom: 5px;
+    min-width: 300px;
+    overflow: auto;
+}
+
+.checkItem {
+    margin-right: 15px;
+    white-space: nowrap;
+}
+
+.checkItem2 {
+    margin-right: 15px;
+    white-space: normal;
+}
+
+.buttonGroup {
+    min-height: 60px;
+    align-content: baseline;
+}
+
+#confirmText {
+    border: 1px solid #ccc;
+}
+
+.fileUpload {
+    margin-top: -35px;
+    display: block;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    width: 100%;
+}
+
+input[type=file]::file-selector-button {
+    border-radius: 0;
+    background-color: #f5ebf0;
+    border: 2px outset #efd3dd;
+    transition: 1s;
+}
+
+input[type=file]::file-selector-button:hover, input[type=file]::file-selector-button:focus {
+    background-color: #efd3dd;
+    border: 2px outset #cf909b;
+}
+
+input[type=file]::file-selector-button:hover {
+    cursor: pointer;
+}
+
+/*Styling for the writingPreview*/
+.writingPreview {
+    background-color: #fff;
+    margin-top: 2em; 
+    margin-bottom: 2em; 
+    padding: 10px; 
+    border-radius: 10px;
+    box-shadow: 1px 1px 5px #d48383, -1px -1px 5px #d48383;
+    text-align: center; 
+    overflow: auto; 
+}
+
+.addDateTime {
+    text-align: right; 
+}
+
+.writingDescription {
+    background-image: url("../images/penfoliobackground.png");
+    box-shadow: 0 0 3px #cf909b;
+    padding: 5px; 
+    margin: 0 10% 1em 10%; 
+}
+
+.descriptionText {
+    align-self: center; 
+    overflow: hidden; 
+    display: inline-block; 
+}
+
+.descriptionText p {
+    text-align: justify; 
+}
+
+.tagScroller {
+    overflow: hidden !important; 
+}
+
+.scrollArrow {
+    background-color: #d48383;
+    border: none;
+    display: block; 
+    padding: 4px 0 4px 0; 
+    font-size: 18.3333px; 
+    border: none; 
+    color:  #efb0ad;
+}
+
+.scrollArrow:hover, .scrollArrow:focus {
+    background-color: #d48383;
+    color: #efb0ad;
+    border: none;
+}
+
+.scrollLeft {
+    float: left;
+    padding-right: 2px; 
+    padding-left: 2px;
+    border: none;
+}
+
+.scrollRight {
+    float: right; 
+    padding-left: 2px; 
+    border: none;
+}
+
+.tagScrollbar {
+    background-color: #f2d8d6;
+    padding: 6px 3px 6.5px 3px; 
+    overflow-x: scroll !important; 
+    overflow-y: hidden !important; 
+    margin-right: 18px; 
+    margin-left: 18px; 
+    margin-bottom: -19px; 
+    white-space: nowrap;
+}
+
+.scrollbarTag {
+    background-color: #fcfcfc;
+    padding: 2px 4px 2px 6px; 
+    box-shadow: 0 0 2px #cf909b;
+    border-radius: 3px;
+    margin: 0 5px 0 5px; 
+}
+
+/*Styling for view components in writing create and edit*/
+.profileSelector {
+    min-height: 84px;
+}
+
+.description {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-top: 20px;
+}
+
+#accessContainer {
+    margin-bottom: 40px;
+}
+
+.confirm {
+    font-weight: bold;
+}
+
+/*Notifications*/
+.notificationCount {
+    position: absolute;
+    top: -4px;
+    left: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 5px;
+    font-weight: 400;
 }

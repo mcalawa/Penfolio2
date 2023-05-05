@@ -18,56 +18,57 @@
     var checkedParent = false;
 }
 
-<!--The div class for the genre tag container-->
-<div id="genreTagContainer">
+<!--The div class for the genre tag selector-->
+<div id="genreTagSelector">
     <!--The header of this particular section; shows an explanation in the description box at the bottom when you mouse over it-->
     <h3 onmouseover='showExplanation("genreTagDescription", "A writing genre is the style or subject matter your piece of writing falls under. Examples include fantasy, travel, and thriller. By selecting writing genres, you will be providing categorizations that will help organize your writing and help others find it more easily should you choose to share it. For more information on what each of the genres mean, hover over the genre names. Selecting higher level genres will load more genres that fall under that category.")'>Select Writing Genre</h3>
     <!--The container for all of the genre tags themselves-->
-    <div class="fictionOrNonfiction">
-        <h4 onmouseover='showExplanation("genreTagDescription", "While some genres are available no matter what, whether your writing is fiction or nonfiction affects many of the genres that it can potentially be. Some writing formats are by definition fiction or nonfiction, so if one of the options has already been selected, feel free ignore this part of the options and continue to select genres for your writing below.")'>Is your writing fiction or nonfiction?</h4>
-        <!--Creates the radiobuttons for fiction and nonfiction in their own spans for easy access; function parameters in fictionOrNonfiction are the GenreName, an array of genre tags that can only be the opposite of this genre, an array of child genres for this genre, and an array of FormatIds that have the opposite required GenreId-->
-        @foreach (var tag in Model.GenreTags.Where(i => i.GenreId < 3))
-        {
-            if(Model.SelectedGenreIds.Contains(tag.GenreId))
+    <div id="genreTagContainer">
+        <div class="fictionOrNonfiction">
+            <h4 onmouseover='showExplanation("genreTagDescription", "While some genres are available no matter what, whether your writing is fiction or nonfiction affects many of the genres that it can potentially be. Some writing formats are by definition fiction or nonfiction, so if one of the options has already been selected, feel free ignore this part of the options and continue to select genres for your writing below.")'>Is your writing fiction or nonfiction?</h4>
+            <!--Creates the radiobuttons for fiction and nonfiction in their own spans for easy access; function parameters in fictionOrNonfiction are the GenreName, an array of genre tags that can only be the opposite of this genre, an array of child genres for this genre, and an array of FormatIds that have the opposite required GenreId-->
+            @foreach (var tag in Model.GenreTags.Where(i => i.GenreId < 3))
             {
-                <span class="@tag.GenreId" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'><input type="radio" value="@tag.GenreId" name="FictionOrNonfiction" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='fictionOrNonfiction("@tag.GenreName", [@Html.Raw(String.Join(",", tag.GenreId == 1 ? nonfictionGenreOnly : fictionGenreOnly))], [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.GenreTag.IsNonfictionOnly || i.GenreTag.IsFictionOnly).Select(i => i.GenreId)))], [@Html.Raw(String.Join(",", tag.GenreId == 1 ? nonfictionOnly : fictionOnly))])' checked /> <span class="genreName">@tag.GenreName</span></span>
-            }
-            else
-            {
-                <span class="@tag.GenreId" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'><input type="radio" value="@tag.GenreId" name="FictionOrNonfiction" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='fictionOrNonfiction("@tag.GenreName", [@Html.Raw(String.Join(",", tag.GenreId == 1 ? nonfictionGenreOnly : fictionGenreOnly))], [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.GenreTag.IsNonfictionOnly || i.GenreTag.IsFictionOnly).Select(i => i.GenreId)))], [@Html.Raw(String.Join(",", tag.GenreId == 1 ? nonfictionOnly : fictionOnly))])' /> <span class="genreName">@tag.GenreName</span></span>
-            }
+                if (Model.SelectedGenreIds.Contains(tag.GenreId))
+                {
+                    <span class="@tag.GenreId" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'><input type="radio" value="@tag.GenreId" name="FictionOrNonfiction" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='fictionOrNonfiction("@tag.GenreName", [@Html.Raw(String.Join(",", tag.GenreId == 1 ? nonfictionGenreOnly : fictionGenreOnly))], [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.GenreTag.IsNonfictionOnly || i.GenreTag.IsFictionOnly).Select(i => i.GenreId)))], [@Html.Raw(String.Join(",", tag.GenreId == 1 ? nonfictionOnly : fictionOnly))])' checked /> <span class="genreName">@tag.GenreName</span></span>
+                }
+                else
+                {
+                    <span class="@tag.GenreId" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'><input type="radio" value="@tag.GenreId" name="FictionOrNonfiction" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='fictionOrNonfiction("@tag.GenreName", [@Html.Raw(String.Join(",", tag.GenreId == 1 ? nonfictionGenreOnly : fictionGenreOnly))], [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.GenreTag.IsNonfictionOnly || i.GenreTag.IsFictionOnly).Select(i => i.GenreId)))], [@Html.Raw(String.Join(",", tag.GenreId == 1 ? nonfictionOnly : fictionOnly))])' /> <span class="genreName">@tag.GenreName</span></span>
+                }
 
-            <br />
-        }
-    </div> <!--fictionOrNonfiction-->
-    <div class="genreTagsThreePlus">
-        <!--The header for the rest of the genre tags-->
-        <h4>Genres</h4>
-        <!--Creates each checkbox and corresponding name in its own span for easy access; function parameters in gtChildren are
-            1 the GenreId; id
-            2 an array of its children that don't have any dependencies (meaning no secondary parent); ndChildren
-            3 an array of its children that do have a secondary parent but don't have a tertiary parent (single dependency); sdChildren
-            4 an array of secondary parents for the children in the previous array with matching indexes; sDependencies
-            5 an array of children with a tertiary parent (multiple dependencies); mdChildren
-            6 an array of the secondary parents of the previous array with matching indexes; mdfDependencies
-            7 an array of tertiary parents for the same array as the last one with matching indexes; mdsDependencies
-            8 an array of children without secondary parents (meaning no dependencies) that have alternate possible parents; mpndChildren
-            9 an array of alternate possible parents for the children in the last array with matching indexes; mpndParents
-            10 an array of children with a secondary parent and no tertiary parent (single dependency) that have alternate parents; mpsdChildren
-            11 an array of possible alternate parents for the children in the last array with matching indexes; mpsdParents
-            12 an array of dependencies for the last two arrays with matching indexes; mpsDependencies
-            13 a bool that states whether or not this tag is fiction only; isFictionOnly
-            14 a bool that states whether or not this tag is nonfiction only; isNonfictionOnly
-            15 an array of genres that are fiction only; fictionOnly
-            16 an array of genres that are nonfiction only; nonfictionOnly
-            17 an array of parent formats; parentFormats-->
-        <!--Top level tags that can be either fiction or nonfiction-->
-        @foreach (var tag in Model.GenreTags.Where(i => i.ParentGenres.Select(j => j.ParentId).ToList().Contains(1) && i.ParentGenres.Select(j => j.ParentId).ToList().Contains(2)))
-        {
-            if(Model.SelectedGenreIds.Contains(tag.GenreId))
+                <br />
+            }
+        </div> <!--fictionOrNonfiction-->
+        <div class="genreTagsThreePlus">
+            <!--The header for the rest of the genre tags-->
+            <h4>Genres</h4>
+            <!--Creates each checkbox and corresponding name in its own span for easy access; function parameters in gtChildren are
+                1 the GenreId; id
+                2 an array of its children that don't have any dependencies (meaning no secondary parent); ndChildren
+                3 an array of its children that do have a secondary parent but don't have a tertiary parent (single dependency); sdChildren
+                4 an array of secondary parents for the children in the previous array with matching indexes; sDependencies
+                5 an array of children with a tertiary parent (multiple dependencies); mdChildren
+                6 an array of the secondary parents of the previous array with matching indexes; mdfDependencies
+                7 an array of tertiary parents for the same array as the last one with matching indexes; mdsDependencies
+                8 an array of children without secondary parents (meaning no dependencies) that have alternate possible parents; mpndChildren
+                9 an array of alternate possible parents for the children in the last array with matching indexes; mpndParents
+                10 an array of children with a secondary parent and no tertiary parent (single dependency) that have alternate parents; mpsdChildren
+                11 an array of possible alternate parents for the children in the last array with matching indexes; mpsdParents
+                12 an array of dependencies for the last two arrays with matching indexes; mpsDependencies
+                13 a bool that states whether or not this tag is fiction only; isFictionOnly
+                14 a bool that states whether or not this tag is nonfiction only; isNonfictionOnly
+                15 an array of genres that are fiction only; fictionOnly
+                16 an array of genres that are nonfiction only; nonfictionOnly
+                17 an array of parent formats; parentFormats-->
+            <!--Top level tags that can be either fiction or nonfiction-->
+            @foreach (var tag in Model.GenreTags.Where(i => i.ParentGenres.Select(j => j.ParentId).ToList().Contains(1) && i.ParentGenres.Select(j => j.ParentId).ToList().Contains(2)))
             {
-                <span class="@tag.GenreId checkItem" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'>
-                    <input type="checkbox" value="@tag.GenreId" name="GenreTags" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='gtChildren(@tag.GenreId,
+                if (Model.SelectedGenreIds.Contains(tag.GenreId))
+                {
+                    <span class="@tag.GenreId checkItem" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'>
+                        <input type="checkbox" value="@tag.GenreId" name="GenreTags" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='gtChildren(@tag.GenreId,
                     [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.SecondaryParentId == null).Select(i => i.GenreId)))],
                     [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.GenreId)))],
                     [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))],
@@ -84,12 +85,12 @@
                     [@Html.Raw(String.Join(",", fictionGenreOnly))],
                     [@Html.Raw(String.Join(",", nonfictionGenreOnly))],
                     [@Html.Raw(String.Join(",", tag.GenreFormats.Select(i => i.ParentFormatId)))])' checked /> <span class="genreName">@tag.GenreName</span>
-                </span>
-            }
-            else
-            {
-                <span class="@tag.GenreId checkItem" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'>
-                    <input type="checkbox" value="@tag.GenreId" name="GenreTags" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='gtChildren(@tag.GenreId,
+                    </span>
+                }
+                else
+                {
+                    <span class="@tag.GenreId checkItem" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'>
+                        <input type="checkbox" value="@tag.GenreId" name="GenreTags" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='gtChildren(@tag.GenreId,
                         [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.SecondaryParentId == null).Select(i => i.GenreId)))],
                         [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.GenreId)))],
                         [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))],
@@ -106,15 +107,15 @@
                         [@Html.Raw(String.Join(",", fictionGenreOnly))],
                         [@Html.Raw(String.Join(",", nonfictionGenreOnly))],
                         [@Html.Raw(String.Join(",", tag.GenreFormats.Select(i => i.ParentFormatId)))])' /> <span class="genreName">@tag.GenreName</span>
-                </span>
+                    </span>
+                }
             }
-        }
-        <!--Tags that are below the top level or which are nonfiction only or fiction only-->@foreach (var tag in Model.GenreTags.Where(i => i.GenreId > 2).Except(Model.GenreTags.Where(i => (i.ParentGenres.Select(j => j.ParentId).ToList().Contains(1) && i.ParentGenres.Select(j => j.ParentId).ToList().Contains(2)))))
-        {
-            if(Model.SelectedGenreIds.Contains(tag.GenreId))
+            <!--Tags that are below the top level or which are nonfiction only or fiction only-->@foreach (var tag in Model.GenreTags.Where(i => i.GenreId > 2).Except(Model.GenreTags.Where(i => (i.ParentGenres.Select(j => j.ParentId).ToList().Contains(1) && i.ParentGenres.Select(j => j.ParentId).ToList().Contains(2)))))
             {
-                <span class="@tag.GenreId checkItem" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'>
-                    <input type="checkbox" value="@tag.GenreId" name="GenreTags" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='gtChildren(@tag.GenreId,
+                if (Model.SelectedGenreIds.Contains(tag.GenreId))
+                {
+                    <span class="@tag.GenreId checkItem" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'>
+                        <input type="checkbox" value="@tag.GenreId" name="GenreTags" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='gtChildren(@tag.GenreId,
                     [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.SecondaryParentId == null).Select(i => i.GenreId)))],
                     [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.GenreId)))],
                     [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))],
@@ -131,41 +132,41 @@
                     [@Html.Raw(String.Join(",", fictionGenreOnly))],
                     [@Html.Raw(String.Join(",", nonfictionGenreOnly))],
                     [@Html.Raw(String.Join(",", tag.GenreFormats.Select(i => i.ParentFormatId)))])' checked /> <span class="genreName">@tag.GenreName</span>
-                </span>
-            }
-            else
-            {
-                checkedParent = false;
-                foreach (var parent in tag.ParentGenres)
-                {
-                    if (parent.TertiaryParentId == null && parent.SecondaryParentId == null && Model.SelectedGenreIds.Contains(parent.ParentId))
-                    {
-                        checkedParent = true;
-                    }
-                    else if (parent.TertiaryParentId == null && parent.SecondaryParentId != null && Model.SelectedGenreIds.Contains(parent.ParentId) && Model.SelectedGenreIds.Contains(parent.SecondaryParentId.Value))
-                    {
-                        checkedParent = true;
-                    }
-                    else if (parent.TertiaryParentId != null && parent.SecondaryParentId != null && Model.SelectedGenreIds.Contains(parent.ParentId) && Model.SelectedGenreIds.Contains(parent.SecondaryParentId.Value) && Model.SelectedGenreIds.Contains(parent.TertiaryParentId.Value))
-                    {
-                        checkedParent = true;
-                    }
+                    </span>
                 }
-                foreach (var parent in tag.GenreFormats)
+                else
                 {
-                    if (parent.ParentGenreId == null && Model.SelectedFormatIds.Contains(parent.ParentFormatId))
+                    checkedParent = false;
+                    foreach (var parent in tag.ParentGenres)
                     {
-                        checkedParent = true;
+                        if (parent.TertiaryParentId == null && parent.SecondaryParentId == null && Model.SelectedGenreIds.Contains(parent.ParentId))
+                        {
+                            checkedParent = true;
+                        }
+                        else if (parent.TertiaryParentId == null && parent.SecondaryParentId != null && Model.SelectedGenreIds.Contains(parent.ParentId) && Model.SelectedGenreIds.Contains(parent.SecondaryParentId.Value))
+                        {
+                            checkedParent = true;
+                        }
+                        else if (parent.TertiaryParentId != null && parent.SecondaryParentId != null && Model.SelectedGenreIds.Contains(parent.ParentId) && Model.SelectedGenreIds.Contains(parent.SecondaryParentId.Value) && Model.SelectedGenreIds.Contains(parent.TertiaryParentId.Value))
+                        {
+                            checkedParent = true;
+                        }
                     }
-                    else if (parent.ParentGenreId != null && Model.SelectedFormatIds.Contains(parent.ParentFormatId) && Model.SelectedGenreIds.Contains(parent.ParentGenreId.Value))
+                    foreach (var parent in tag.GenreFormats)
                     {
-                        checkedParent = true;
+                        if (parent.ParentGenreId == null && Model.SelectedFormatIds.Contains(parent.ParentFormatId))
+                        {
+                            checkedParent = true;
+                        }
+                        else if (parent.ParentGenreId != null && Model.SelectedFormatIds.Contains(parent.ParentFormatId) && Model.SelectedGenreIds.Contains(parent.ParentGenreId.Value))
+                        {
+                            checkedParent = true;
+                        }
                     }
-                }
-                if(checkedParent)
-                {
-                    <span class="@tag.GenreId checkItem" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'>
-                        <input type="checkbox" value="@tag.GenreId" name="GenreTags" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='gtChildren(@tag.GenreId,
+                    if (checkedParent)
+                    {
+                        <span class="@tag.GenreId checkItem" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'>
+                            <input type="checkbox" value="@tag.GenreId" name="GenreTags" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='gtChildren(@tag.GenreId,
                         [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.SecondaryParentId == null).Select(i => i.GenreId)))],
                         [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.GenreId)))],
                         [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))],
@@ -182,12 +183,12 @@
                         [@Html.Raw(String.Join(",", fictionGenreOnly))],
                         [@Html.Raw(String.Join(",", nonfictionGenreOnly))],
                         [@Html.Raw(String.Join(",", tag.GenreFormats.Select(i => i.ParentFormatId)))])' /> <span class="genreName">@tag.GenreName</span>
-                    </span>
-                }
-                else
-                {
-                    <span class="@tag.GenreId checkItem collapse" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'>
-                        <input type="checkbox" value="@tag.GenreId" name="GenreTags" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='gtChildren(@tag.GenreId,
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="@tag.GenreId checkItem collapse" onmouseover='showExplanation("genreTagDescription", "@tag.Explanation")'>
+                            <input type="checkbox" value="@tag.GenreId" name="GenreTags" onfocus='showExplanation("genreTagDescription", "@tag.Explanation")' onchange='gtChildren(@tag.GenreId,
                             [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.SecondaryParentId == null).Select(i => i.GenreId)))],
                             [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.GenreId)))],
                             [@Html.Raw(String.Join(",", tag.ChildGenres.Where(i => i.TertiaryParentId == null).Where(i => i.SecondaryParentId != null).Select(i => i.SecondaryParentId)))],
@@ -204,13 +205,14 @@
                             [@Html.Raw(String.Join(",", fictionGenreOnly))],
                             [@Html.Raw(String.Join(",", nonfictionGenreOnly))],
                             [@Html.Raw(String.Join(",", tag.GenreFormats.Select(i => i.ParentFormatId)))])' /> <span class="genreName">@tag.GenreName</span>
-                    </span>
+                        </span>
+                    }
                 }
             }
-        }
-    </div>
+        </div>
+    </div> <!--genreTagContainer-->
 
     <!--div for holding the description for the genre tags-->
     <div id="genreTagDescription" class="description">
     </div>
-</div> <!--genreTagContainer-->
+</div> <!--genreTagSelector-->

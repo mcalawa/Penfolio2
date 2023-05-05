@@ -13,16 +13,16 @@
             <div class="collapse visually-hidden">
                 <input asp-for="ProfileId" readonly />
             </div>
-            <div class="form-group">
-                <label asp-for="DisplayName" class="control-label"></label>
+            <div class="formItem">
+                <label asp-for="DisplayName" class="formLabel"></label>
                 <input asp-for="DisplayName" class="form-control" placeholder="@Model.DisplayName" />
                 <span asp-validation-for="DisplayName" class="text-danger"></span>
             </div>
             @if (!Model.IsMainProfile)
             {
-                <div class="form-group form-check">
+                <div class="formItem checkItem2">
                     <label class="form-check-label">
-                        <input class="form-check-input" asp-for="IsMainProfile" /> @Html.DisplayNameFor(model => model.IsMainProfile)
+                        <input asp-for="IsMainProfile" /> @Html.DisplayNameFor(model => model.IsMainProfile)
                     </label>
                 </div>
             }
@@ -32,58 +32,59 @@
                      <input class="form-check-input" asp-for="IsMainProfile" checked readonly />
                 </div>
             }
-            <div class="form-group">
-                <label asp-for="ProfileDescription" class="control-label"></label>
+            <div class="formItem">
+                <label asp-for="ProfileDescription" class="formLabel"></label>
                 <textarea asp-for="ProfileDescription" class="form-control">@Model.ProfileDescription</textarea>
                 <span asp-validation-for="ProfileDescription" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="UrlString" class="control-label"></label>
+            <div class="formItem">
+                <label asp-for="UrlString" class="formLabel"></label>
                 <input asp-for="UrlString" class="form-control" placeholder="@Model.UrlString" />
                 <span asp-validation-for="UrlString" class="text-danger"></span>
             </div>
 
             <h5>Access Permission</h5>
-            <div class="form-group form-check" id="public-access">
+            <div class="formItem checkItem2" id="public-access">
                 <label class="form-check-label">
-                    <input class="form-check-input" asp-for="PublicAccess" onchange='changeAccess("public-access")' /> @Html.DisplayNameFor(model => model.PublicAccess)
+                    <input asp-for="PublicAccess" onchange='changeAccess("public-access")' /> @Html.DisplayNameFor(model => model.PublicAccess)
                 </label>
             </div>
-            <div class="form-group form-check" id="friend-access">
+            <div class="formItem checkItem2" id="friend-access">
                 <label class="form-check-label">
-                    <input class="form-check-input" asp-for="FriendAccess" onchange='changeAccess("friend-access")' /> @Html.DisplayNameFor(model => model.FriendAccess)
+                    <input asp-for="FriendAccess" onchange='changeAccess("friend-access")' /> @Html.DisplayNameFor(model => model.FriendAccess)
                 </label>
             </div>
-            <div class="form-group form-check" id="publisher-access">
+            <div class="formItem checkItem2" id="publisher-access">
                 <label class="form-check-label">
-                    <input class="form-check-input" asp-for="PublisherAccess" onchange='changeAccess("publisher-access")' /> @Html.DisplayNameFor(model => model.PublisherAccess)
+                    <input asp-for="PublisherAccess" onchange='changeAccess("publisher-access")' /> @Html.DisplayNameFor(model => model.PublisherAccess)
                 </label>
             </div>
-            <div class="form-group form-check">
+            <div class="formItem checkItem2">
                 <label class="form-check-label">
-                    <input class="form-check-input" asp-for="MinorAccess" /> @Html.DisplayNameFor(model => model.MinorAccess)
+                    <input asp-for="MinorAccess" /> @Html.DisplayNameFor(model => model.MinorAccess)
                 </label>
             </div>
-            <div class="form-group form-check">
+            <div class="formItem checkItem2">
                 <label class="form-check-label">
-                    <input class="form-check-input" asp-for="ShowsUpInSearch" /> @Html.DisplayNameFor(model => model.ShowsUpInSearch)
+                    <input asp-for="ShowsUpInSearch" /> @Html.DisplayNameFor(model => model.ShowsUpInSearch)
                 </label>
             </div>
-            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+            
         </div>
         <div class="col-md-6 right-align">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="ProfileImage" class="control-label" style="width: 100%;"></label>
+                <label asp-for="ProfileImage" class="formLabel" style="width: 100%;"></label>
                 <img id="profilePicture" style="width:350px;height:350px; object-fit: cover" src="data:image/*;base64,@(Convert.ToBase64String(ViewBag.Image))" />
                 <input type="file"
                         accept=".png,.jpg,.jpeg,.gif,.tif"
                         asp-for="ProfileImage"
-                        class="form-control"
+                        class="fileUpload"
                         onchange="document.getElementById('profilePicture').src = window.URL.createObjectURL(this.files[0])" />
                 <span asp-validation-for="ProfileImage" class="text-danger"></span>
             </div>
         </div>
+        <button id="update-profile-button" type="submit" class="w-100">Save</button>
     </div>
 </form>
 
