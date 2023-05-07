@@ -41,6 +41,7 @@ https://blog.elmah.io/how-to-get-base-url-in-asp-net-core/ How to get base URL
 CSS:
 https://stackoverflow.com/questions/572768/styling-an-input-type-file-button Styling the file upload button
 https://moderncss.dev/pure-css-custom-checkbox-style/ Styling a custom checkbox
+https://www.lambdatest.com/blog/css-select/ Styling select
 
 Other:
 https://www.publicdomainpictures.net/en/view-image.php?image=75286&picture=ink-amp-feather-quill-clipart Public domain image for the default user icons.

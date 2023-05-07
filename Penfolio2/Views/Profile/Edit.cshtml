@@ -15,7 +15,7 @@
             </div>
             <div class="formItem">
                 <label asp-for="DisplayName" class="formLabel"></label>
-                <input asp-for="DisplayName" class="form-control" placeholder="@Model.DisplayName" />
+                <input asp-for="DisplayName" class="formInput" placeholder="@Model.DisplayName" />
                 <span asp-validation-for="DisplayName" class="text-danger"></span>
             </div>
             @if (!Model.IsMainProfile)
@@ -34,38 +34,38 @@
             }
             <div class="formItem">
                 <label asp-for="ProfileDescription" class="formLabel"></label>
-                <textarea asp-for="ProfileDescription" class="form-control">@Model.ProfileDescription</textarea>
+                <textarea asp-for="ProfileDescription" class="formInput">@Model.ProfileDescription</textarea>
                 <span asp-validation-for="ProfileDescription" class="text-danger"></span>
             </div>
             <div class="formItem">
                 <label asp-for="UrlString" class="formLabel"></label>
-                <input asp-for="UrlString" class="form-control" placeholder="@Model.UrlString" />
+                <input asp-for="UrlString" class="formInput" placeholder="@Model.UrlString" />
                 <span asp-validation-for="UrlString" class="text-danger"></span>
             </div>
 
             <h5>Access Permission</h5>
             <div class="formItem checkItem2" id="public-access">
-                <label class="form-check-label">
+                <label class="formLabel">
                     <input asp-for="PublicAccess" onchange='changeAccess("public-access")' /> @Html.DisplayNameFor(model => model.PublicAccess)
                 </label>
             </div>
             <div class="formItem checkItem2" id="friend-access">
-                <label class="form-check-label">
+                <label class="formLabel">
                     <input asp-for="FriendAccess" onchange='changeAccess("friend-access")' /> @Html.DisplayNameFor(model => model.FriendAccess)
                 </label>
             </div>
             <div class="formItem checkItem2" id="publisher-access">
-                <label class="form-check-label">
+                <label class="formLabel">
                     <input asp-for="PublisherAccess" onchange='changeAccess("publisher-access")' /> @Html.DisplayNameFor(model => model.PublisherAccess)
                 </label>
             </div>
             <div class="formItem checkItem2">
-                <label class="form-check-label">
+                <label class="formLabel">
                     <input asp-for="MinorAccess" /> @Html.DisplayNameFor(model => model.MinorAccess)
                 </label>
             </div>
             <div class="formItem checkItem2">
-                <label class="form-check-label">
+                <label class="formLabel">
                     <input asp-for="ShowsUpInSearch" /> @Html.DisplayNameFor(model => model.ShowsUpInSearch)
                 </label>
             </div>
@@ -73,7 +73,7 @@
         </div>
         <div class="col-md-6 right-align">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
+            <div class="formItem">
                 <label asp-for="ProfileImage" class="formLabel" style="width: 100%;"></label>
                 <img id="profilePicture" style="width:350px;height:350px; object-fit: cover" src="data:image/*;base64,@(Convert.ToBase64String(ViewBag.Image))" />
                 <input type="file"

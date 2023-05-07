@@ -24,27 +24,31 @@
 <h5>Would you still like to delete your profile?</h5>
 <div>
     <form asp-action="Delete" id="delete-user" method="post">
-        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-        <div class="collapse visually-hidden">
-            <input asp-for="ProfileId" readonly />
-            <input asp-for="DisplayName" readonly />
-            <input asp-for="RoleName" readonly />
-            <input asp-for="IsMainProfile" readonly />
-        </div>
-        @if(Model.IsMainProfile && Model.OtherProfiles.Count() > 0)
-        {
-            <div class="form-group">
-                <label asp-for="NewMainProfile" class="control-label"></label>
-                <select asp-for="NewMainProfile" class="form-control">
-                    @foreach (var profile in Model.OtherProfiles)
-                    {
-                        <option value="@profile.ProfileId">
-                            @profile.DisplayName (@profile.RoleName)
-                        </option>
-                    }
-                </select>
+        <div class="row">
+            <div class="col-md-6">
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                <div class="collapse visually-hidden">
+                    <input asp-for="ProfileId" readonly />
+                    <input asp-for="DisplayName" readonly />
+                    <input asp-for="RoleName" readonly />
+                    <input asp-for="IsMainProfile" readonly />
+                </div>
+                @if (Model.IsMainProfile && Model.OtherProfiles.Count() > 0)
+                {
+                    <div class="formItem">
+                        <label asp-for="NewMainProfile" class="formLabel"></label>
+                        <select asp-for="NewMainProfile">
+                            @foreach (var profile in Model.OtherProfiles)
+                            {
+                                <option value="@profile.ProfileId">
+                                    @profile.DisplayName (@profile.RoleName)
+                                </option>
+                            }
+                        </select>
+                    </div>
+                }
+                <button class="w-100 dangerButton" type="submit">Delete Profile</button>
             </div>
-        }
-        <button class="w-100 btn btn-lg btn-danger" type="submit">Delete Profile</button>
+        </div>
     </form>
 </div>

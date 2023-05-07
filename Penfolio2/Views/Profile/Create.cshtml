@@ -12,14 +12,14 @@
     <div class="col-md-4" >
         <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group" onmouseover='showDescription("profile-info", "display-name")' >
-                <label asp-for="DisplayName" class="control-label"></label>
-                <input asp-for="DisplayName" class="form-control" onfocus='showDescription("profile-info", "display-name")' />
+            <div class="formItem" onmouseover='showDescription("profile-info", "display-name")' >
+                <label asp-for="DisplayName" class="formLabel"></label>
+                <input asp-for="DisplayName" class="formInput" onfocus='showDescription("profile-info", "display-name")' />
                 <span asp-validation-for="DisplayName" class="text-danger"></span>
             </div>
-            <div onmouseover='showDescription("profile-info", "role-type")'>
-                <label asp-for="RoleType" class="control-label"></label>
-                <select asp-for="RoleType" class="form-control" onfocus='showDescription("profile-info", "role-type")'>
+            <div class="formItem" onmouseover='showDescription("profile-info", "role-type")'>
+                <label asp-for="RoleType" class="formLabel"></label>
+                <select asp-for="RoleType" onfocus='showDescription("profile-info", "role-type")'>
                     <option value="1">Writer</option>
                     <option value="2">Publisher</option>
                     <option value="3">Literary Agent</option>
@@ -27,64 +27,64 @@
             </div>
             @if(ViewBag.HasProfile == "true") 
             {
-                <div class="form-group form-check" onmouseover='showDescription("profile-info", "main-profile")'>
-                    <label class="form-check-label">
-                        <input class="form-check-input" asp-for="IsMainProfile" onfocus='showDescription("profile-info", "main-profile")' /> @Html.DisplayNameFor(model => model.IsMainProfile)
+                <div class="formItem checkItem2" onmouseover='showDescription("profile-info", "main-profile")'>
+                    <label class="formLabel">
+                        <input asp-for="IsMainProfile" onfocus='showDescription("profile-info", "main-profile")' /> @Html.DisplayNameFor(model => model.IsMainProfile)
                     </label>
                 </div>
             }
             else 
             {
-                <div class="form-group form-check" onmousever='showDescription("profile-info", "main-profile")'>
-                    <label class="form-check-label">
-                        <input class="form-check-input" asp-for="IsMainProfile" checked readonly onfocus='showDescription("profile-info", "main-profile")' /> @Html.DisplayNameFor(model => model.IsMainProfile)
+                <div class="formItem checkItem2" onmousever='showDescription("profile-info", "main-profile")'>
+                    <label class="formLabel">
+                        <input asp-for="IsMainProfile" checked readonly onfocus='showDescription("profile-info", "main-profile")' /> @Html.DisplayNameFor(model => model.IsMainProfile)
                     </label>
                 </div>
             }
-            <div class="form-group" onmouseover='showDescription("profile-info", "profile-description")'>
-                <label asp-for="ProfileDescription" class="control-label"></label>
-                <textarea asp-for="ProfileDescription" class="form-control" onfocus='showDescription("profile-info", "profile-description")'></textarea>
+            <div class="formItem" onmouseover='showDescription("profile-info", "profile-description")'>
+                <label asp-for="ProfileDescription" class="formLabel"></label>
+                <textarea asp-for="ProfileDescription" class="formInput" onfocus='showDescription("profile-info", "profile-description")'></textarea>
                 <span asp-validation-for="ProfileDescription" class="text-danger"></span>
             </div>
-            <div class="form-group" onmouseover='showDescription("profile-info", "custom-url")'>
-                <label asp-for="UrlString" class="control-label"></label>
-                <input asp-for="UrlString" class="form-control" onfocus='showDescription("profile-info", "custom-url")' />
+            <div class="formItem" onmouseover='showDescription("profile-info", "custom-url")'>
+                <label asp-for="UrlString" class="formLabel"></label>
+                <input asp-for="UrlString" class="formInput" onfocus='showDescription("profile-info", "custom-url")' />
                 <span asp-validation-for="UrlString" class="text-danger"></span>
             </div>
-            <div class="form-group" onmouseover='showDescription("profile-info", "profile-image")'>
-                <lable asp-for="ProfileImage" class="control-lable"></lable>
-                <input type="file" accept=".png,.jpg,.jpeg,.gif,.tif" asp-for="ProfileImage" class="form-control" onfocus='showDescription("profile-info", "profile-image")' />
+            <div class="formItem" onmouseover='showDescription("profile-info", "profile-image")'>
+                <lable asp-for="ProfileImage" class="formLabel"></lable>
+                <input type="file" accept=".png,.jpg,.jpeg,.gif,.tif" asp-for="ProfileImage" class="fileUpload" onfocus='showDescription("profile-info", "profile-image")' />
                 <span asp-validation-for="ProfileImage" class="text-danger"></span>
             </div>
             
             <h5 onmouseover='showDescription("profile-info", "access-permission-options")'>Access Permission Options</h5>
-            <div class="form-group form-check" onmouseover='showDescription("profile-info", "allow-public-access")' id="public-access">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="PublicAccess" onfocus='showDescription("profile-info", "allow-public-access")' onchange='changeAccess("public-access")' /> @Html.DisplayNameFor(model => model.PublicAccess)
+            <div class="formItem checkItem2" onmouseover='showDescription("profile-info", "allow-public-access")' id="public-access">
+                <label class="formLabel">
+                    <input asp-for="PublicAccess" onfocus='showDescription("profile-info", "allow-public-access")' onchange='changeAccess("public-access")' /> @Html.DisplayNameFor(model => model.PublicAccess)
                 </label>
             </div>
-            <div class="form-group form-check" onmouseover='showDescription("profile-info", "allow-friend-access")' id="friend-access">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="FriendAccess" onfocus='showDescription("profile-info", "allow-friend-access")' onchange='changeAccess("friend-access")' /> @Html.DisplayNameFor(model => model.FriendAccess)
+            <div class="formItem checkItem2" onmouseover='showDescription("profile-info", "allow-friend-access")' id="friend-access">
+                <label class="formLabel">
+                    <input asp-for="FriendAccess" onfocus='showDescription("profile-info", "allow-friend-access")' onchange='changeAccess("friend-access")' /> @Html.DisplayNameFor(model => model.FriendAccess)
                 </label>
             </div>
-            <div class="form-group form-check" onmouseover='showDescription("profile-info", "allow-publisher-access")' id="publisher-access">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="PublisherAccess" onfocus='showDescription("profile-info", "allow-publisher-access")' onchange='changeAccess("publisher-access")' /> @Html.DisplayNameFor(model => model.PublisherAccess)
+            <div class="formItem checkItem2" onmouseover='showDescription("profile-info", "allow-publisher-access")' id="publisher-access">
+                <label class="formLabel">
+                    <input asp-for="PublisherAccess" onfocus='showDescription("profile-info", "allow-publisher-access")' onchange='changeAccess("publisher-access")' /> @Html.DisplayNameFor(model => model.PublisherAccess)
                 </label>
             </div>
-            <div class="form-group form-check" onmouseover='showDescription("profile-info", "minor-access")'>
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="MinorAccess" onfocus='showDescription("profile-info", "minor-access")' /> @Html.DisplayNameFor(model => model.MinorAccess)
+            <div class="formItem checkItem2" onmouseover='showDescription("profile-info", "minor-access")'>
+                <label class="formLabel">
+                    <input asp-for="MinorAccess" onfocus='showDescription("profile-info", "minor-access")' /> @Html.DisplayNameFor(model => model.MinorAccess)
                 </label>
             </div>
-            <div class="form-group form-check" onmouseover='showDescription("profile-info", "shows-up-in-search")'>
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="ShowsUpInSearch" onfocus='showDescription("profile-info", "shows-up-in-search")' /> @Html.DisplayNameFor(model => model.ShowsUpInSearch)
+            <div class="formItem checkItem2" onmouseover='showDescription("profile-info", "shows-up-in-search")'>
+                <label class="formLabel">
+                    <input asp-for="ShowsUpInSearch" onfocus='showDescription("profile-info", "shows-up-in-search")' /> @Html.DisplayNameFor(model => model.ShowsUpInSearch)
                 </label>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+            <div class="formItem">
+                <input type="submit" value="Create" />
             </div>
         </form>
     </div>
@@ -166,7 +166,7 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Back to My Profiles</a>
 </div>
 
 @section Scripts {

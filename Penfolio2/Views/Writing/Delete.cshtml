@@ -16,6 +16,6 @@
 <div>
     <form asp-action="Delete" id="delete-user" method="post">
         @await Component.InvokeAsync("Writing", new { id = ViewBag.WritingId, viewName = "Delete" })
-        <button class="w-100 btn btn-lg btn-danger" type="submit">Delete Writing</button>
+        <button class="dangerButton centerItem" type="submit">Delete Writing</button>
     </form>
 </div>

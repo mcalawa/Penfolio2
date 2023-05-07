@@ -181,11 +181,9 @@ namespace Penfolio2.Models
         [Required, NotNull]
         public string SelectedProfiles { get; set; } = string.Empty;
 
-        [Required, NotNull]
-        public string SelectedFormats { get; set; } = string.Empty;
+        public string? SelectedFormats { get; set; } = string.Empty;
 
-        [Required, NotNull]
-        public string SelectedGenres { get; set; } = string.Empty;
+        public string? SelectedGenres { get; set; } = string.Empty;
 
         public virtual ICollection<PenProfile> WritingProfiles { get; set; }
 

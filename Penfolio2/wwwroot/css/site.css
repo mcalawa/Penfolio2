@@ -64,6 +64,31 @@ a:hover, a:focus {
     clear: right;
 }
 
+/*Bootstrap stuff*/
+
+.manageNavLink {
+    background: 0 0;
+    border: 0;
+    border-radius: 0.25rem;
+}
+
+.manageNavLink:focus, .manageNavLink:hover {
+    color: #2c519d;
+    text-decoration: none;
+    text-shadow: 0 0 1px #6080c2;
+}
+
+.manageNavLink.active:focus, .manageNavLink.active:hover {
+    color: #fff;
+    text-shadow: none;
+}
+
+.nav-pills .manageNavLink.active {
+    color: #fff;
+    background-color: #cf909b;
+}
+
+/*Styling for forms*/
 button {
     background-color: #f5ebf0;
     border: 2px outset #efd3dd;
@@ -80,6 +105,57 @@ button:disabled, button:disabled:hover, button:disabled:focus {
     border: 2px outset #efd3dd;
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.logoutButton {
+    background-color: transparent;
+    border: none;
+    color: #6080c2;
+}
+
+.logoutButton:hover, .logoutButton:focus {
+    color: #2c519d;
+    text-decoration: none;
+    text-shadow: 0 0 1px #6080c2;
+    border: none;
+    background-color: transparent;
+}
+
+.dangerButton {
+    background-color: #e53443;
+    border: 3px outset #bb2d3b;
+    color: #fff;
+    transition: 1s;
+    font-weight: 500;
+    width: 75%;
+    text-decoration: none;
+}
+
+.dangerButton:hover, .dangerButton:focus {
+    background-color: #bb2d3b;
+    border: 3px outset #9b1d28;
+    color: #fff;
+    font-weight: 500;
+    width: 75%;
+    text-decoration: none;
+}
+
+.dangerButton:disabled, .dangerButton:disabled:hover, .dangerButton:disabled:focus {
+    background-color: #bb2d3b;
+    border: 2px outset #9b1d28;
+    color: #fff;
+    opacity: 0.6;
+    cursor: not-allowed;
+    width: 75%;
+}
+
+.linkAsButton {
+    padding: 4px;
+}
+
+.centerItem {
+    margin: auto;
+    display: block;
 }
 
 input[type=submit] {
@@ -115,6 +191,10 @@ input[type=checkbox] {
     display: inline-grid;
 }
 
+input[type=checkbox]:hover {
+    background-color: #eee;
+}
+
 input[type=checkbox]::before {
     content: "";
     width: 1em;
@@ -124,7 +204,6 @@ input[type=checkbox]::before {
     box-shadow: inset 1em 1em #fff;
     background-color: #fff;
     clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-    transform: scale(0);
 }
 
 input[type=checkbox]:checked {
@@ -135,14 +214,54 @@ input[type=checkbox]:checked {
     box-shadow: inset 1em 1em #4f4c4c;
     background-color: #4f4c4c;
     border: 1px solid #4f4c4c;
-    outline: 1px solid #4f4c4c;
 }
 
-input[type=checkbox]::before {
+input[type=checkbox]:checked::before {
     transform: scale(0.65);
 }
 
-/*Styling for forms*/
+input[type=radio] {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #fff;
+    margin: 0;
+    font: inherit;
+    width: 1em;
+    height: 1em;
+    border: 1px solid #787373;
+    border-radius: 50%;
+    place-content: center;
+    display: inline-grid;
+}
+
+input[type=radio]:hover {
+    background-color: #eee;
+}
+
+input[type=radio]::before {
+    content: "";
+    width: 1em;
+    height: 1em;
+    transform: scale(0);
+    box-shadow: inset 1em 1em #4f4c4c;
+    border-radius: 50%;
+    background-color: #4f4c4c;
+    place-content: center;
+}
+
+input[type=radio]:checked {
+    content: "";
+    width: 1em;
+    height: 1em;
+    box-shadow: inset 1em 1em #fff;
+    background-color: #fff;
+    border: 1px solid #4f4c4c;
+}
+
+input[type=radio]:checked::before {
+    transform: scale(0.65);
+}
+
 .inputGroup {
     min-height: 575px;
 }
@@ -159,6 +278,129 @@ input, textarea {
 .formInput {
     width: 100%;
 }
+
+select {
+    border: 1px solid #ccc;
+    width: 100%;
+    background-color: #fff;
+    border-radius: 0;
+}
+
+/*select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: transparent;
+    border: none;
+    padding: 0 1em 0 0;
+    margin: 0;
+    width: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: inherit;
+    line-height: inherit;
+    outline: none;
+}
+
+select::-ms-expand {
+    display: none;
+}
+
+.formSelect {
+    width: 100%;
+    min-width: 15ch;
+    max-width: 30ch;
+    border: 1px solid #ccc;
+    padding: 0.25em 0.5em;
+    font-size: 1rem;
+    cursor: pointer;
+    line-height: 1;
+    background-color: #fff;
+    display: grid;
+    grid-template-areas: "select";
+    align-items: center;
+    position: relative;
+}
+
+select, .formSelect:after {
+    grid-area: select;
+}
+
+.formSelect::after {
+    content: "";
+    width: 0.8em;
+    height: 0.5em;
+    background-color: #787373;
+    clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+    justify-self: end;
+}
+
+select:focus + .focus {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    border: 2px solid #ccc;
+}
+
+option {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: transparent;
+    border: none;
+    padding: 0 1em 0 0;
+    margin: 0;
+    width: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: inherit;
+    line-height: inherit;
+    outline: none;
+}
+
+.formOption {
+    width: 100%;
+    min-width: 15ch;
+    max-width: 30ch;
+    border: 1px solid: #ccc;
+    padding: 0.25em 0.5em;
+    font-size: 1rem;
+    cursor: pointer;
+    line-height: 1;
+    background-color: #fff;
+    display: grid;
+    grid-template-areas: "option";
+    align-items: center;
+    position: relative;
+}
+
+option, .formOption:after {
+    grid-area: option;
+}
+
+.formOption:hover {
+    background-color: #ccc;
+}
+
+.formSelect {
+    position: relative;
+    font: inherit;
+}
+
+.formOption {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #fff;
+    font: inherit;
+    border: 1px solid #ccc;
+    width: 100%;
+    border-radius: 0;
+    display: inline-grid;
+}
+
+.formOption:hover {
+    background-color: #ccc;
+}*/
 
 .formItem {
     margin-bottom: 5px;
@@ -179,14 +421,10 @@ input, textarea {
 .buttonGroup {
     min-height: 60px;
     align-content: baseline;
-}
-
-#confirmText {
-    border: 1px solid #ccc;
+    margin-top: 1em;
 }
 
 .fileUpload {
-    margin-top: -35px;
     display: block;
     font-size: 1rem;
     font-weight: 400;
@@ -234,7 +472,7 @@ input[type=file]::file-selector-button:hover {
 .writingDescription {
     background-image: url("../images/penfoliobackground.png");
     box-shadow: 0 0 3px #cf909b;
-    padding: 5px; 
+    padding: 10px 10px 5px 10px; 
     margin: 0 10% 1em 10%; 
 }
 
@@ -300,6 +538,12 @@ input[type=file]::file-selector-button:hover {
     margin: 0 5px 0 5px; 
 }
 
+.displayDocument {
+    border: 1px solid #ccc;
+    padding: 5px;
+    margin: 0 10% 1em 10%;
+}
+
 /*Styling for view components in writing create and edit*/
 .profileSelector {
     min-height: 84px;
@@ -317,6 +561,20 @@ input[type=file]::file-selector-button:hover {
 
 .confirm {
     font-weight: bold;
+}
+
+#confirmDescription {
+    border: 1px solid #ccc;
+    display: block;
+    padding: 10px;
+}
+
+#confirmText {
+    border: 1px solid #ccc;
+}
+
+.fictionOrNonfiction {
+    margin-bottom: 1em;
 }
 
 /*Notifications*/

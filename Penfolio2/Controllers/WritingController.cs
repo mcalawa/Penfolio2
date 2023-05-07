@@ -250,6 +250,18 @@ namespace Penfolio2.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            var writingProfiles = GetWriterProfiles(userId);
+            var formatTags = db.FormatTags.ToList();
+            var genreTags = db.GenreTags.ToList();
+            var formatCategories = db.FormatCategories.ToList();
+            var genreCategories = db.GenreCategories.ToList();
+            var genreFormats = db.GenreFormats.ToList();
+
+            ViewBag.Profiles = String.Join(",", writingProfiles.Select(i => i.ProfileId));
+            ViewBag.FormatTags = String.Join(",", formatTags.Select(i => i.FormatId));
+            ViewBag.GenreTags = String.Join(",", genreTags.Select(i => i.GenreId));
+            ViewBag.IsCreator = true;
+
             if(ModelState.IsValid)
             {
                 //format the string of selected profiles
@@ -277,18 +289,32 @@ namespace Penfolio2.Controllers
                         } //if not, return the view with an error (TBD)
                         else
                         {
+                            model.WritingProfiles = writingProfiles;
+                            model.FormatTags = formatTags;
+                            model.GenreTags = genreTags;
+                            model.FormatCategories = formatCategories;
+                            model.GenreCategories = genreCategories;
+                            model.GenreFormats = genreFormats;
+
                             return View(model);
                         }
                     } //if it can't, return the view with an error (TBD)
                     else
                     {
+                        model.WritingProfiles = writingProfiles;
+                        model.FormatTags = formatTags;
+                        model.GenreTags = genreTags;
+                        model.FormatCategories = formatCategories;
+                        model.GenreCategories = genreCategories;
+                        model.GenreFormats = genreFormats;
+
                         return View(model);
                     }
                 }
 
                 //now do the same thing for the selected formats and selected genres
                 //with fewer steps because checking for ownership or no selected tags is not required
-                string[] formats = model.SelectedFormats.Split(",");
+                string[] formats = model.SelectedFormats != null ? model.SelectedFormats.Split(",") : new string[0];
                 List<int> formatIds = new List<int>();
 
                 foreach(var format in formats)
@@ -303,11 +329,18 @@ namespace Penfolio2.Controllers
                     } //if not, return the view with an error (TBD)
                     else
                     {
+                        model.WritingProfiles = writingProfiles;
+                        model.FormatTags = formatTags;
+                        model.GenreTags = genreTags;
+                        model.FormatCategories = formatCategories;
+                        model.GenreCategories = genreCategories;
+                        model.GenreFormats = genreFormats;
+
                         return View(model);
                     }
                 }
 
-                string[] genres = model.SelectedGenres.Split(",");
+                string[] genres = model.SelectedGenres != null ? model.SelectedGenres.Split(",") : new string[0];
                 List<int> genreIds = new List<int>();
 
                 foreach (var genre in genres)
@@ -322,6 +355,13 @@ namespace Penfolio2.Controllers
                     } //if not, return the view with an error (TBD)
                     else
                     {
+                        model.WritingProfiles = writingProfiles;
+                        model.FormatTags = formatTags;
+                        model.GenreTags = genreTags;
+                        model.FormatCategories = formatCategories;
+                        model.GenreCategories = genreCategories;
+                        model.GenreFormats = genreFormats;
+
                         return View(model);
                     }
                 }
@@ -395,6 +435,13 @@ namespace Penfolio2.Controllers
 
                 return RedirectToAction("Index");
             } //if ModelState.IsValid
+
+            model.WritingProfiles = writingProfiles;
+            model.FormatTags = formatTags;
+            model.GenreTags = genreTags;
+            model.FormatCategories = formatCategories;
+            model.GenreCategories = genreCategories;
+            model.GenreFormats = genreFormats;
 
             return View(model);
         }

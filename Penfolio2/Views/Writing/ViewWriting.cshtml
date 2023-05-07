@@ -4,9 +4,11 @@
 
 @if (ViewBag.Author)
 {
-    <span class="forUserWriting"><a href="/Writing/Edit/@Model.WritingId">Edit</a> | <a href="/Writing/Delete/@Model.WritingId">Delete</a></span>
+    <div class="right-align">
+        <span class="forUserWriting"><a href="/Writing/Edit/@Model.WritingId">Edit</a> | <a href="/Writing/Delete/@Model.WritingId">Delete</a></span>
+    </div>
 }
-<h2>@Model.Title</h2>
+<h2 class="clear-right">@Model.Title</h2>
 @await Component.InvokeAsync("Writing", new { viewName = "Author", id = Model.WritingId })
 
 <div id="content" class="ql-editor">@Html.Raw(ViewBag.Document)</div>

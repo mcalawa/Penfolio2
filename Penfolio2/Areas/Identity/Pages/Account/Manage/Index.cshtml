@@ -11,28 +11,28 @@
     <div class="col-md-6">
         <form id="profile-form" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
-                <label asp-for="Username" class="form-label"></label>
+            <div class="formItem">
+                <label asp-for="Username" class="formLabel"></label>
+                <input asp-for="Username" class="formInput" disabled />
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.GivenName" class="form-control" placeholder="Please enter your given name." />
-                <label asp-for="Input.GivenName" class="form-label"></label>
+            <div class="formItem">
+                <label asp-for="Input.GivenName" class="formLabel"></label>
+                <input asp-for="Input.GivenName" class="formInput" />
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Surname" class="form-control" placeholder="Please enter your given name." />
-                <label asp-for="Input.Surname" class="form-label"></label>
+            <div class="formItem">
+                <label asp-for="Input.Surname" class="formLabel"></label>
+                <input asp-for="Input.Surname" class="formInput" />
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
-                <label asp-for="Input.PhoneNumber" class="form-label"></label>
+            @*<div class="formItem">
+                <label asp-for="Input.PhoneNumber" class="formLabel"></label>
+                <input asp-for="Input.PhoneNumber" class="formInput" />
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>*@
+            <div class="formItem">
+                <label asp-for="Input.Birthdate" class="formLabel"></label>
+                <input asp-for="Input.Birthdate" class="formInput" />
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Birthdate" class="form-control" />
-                <label asp-for="Input.Birthdate" class="form-label"></label>
-            </div>
-            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+            <button id="update-profile-button" type="submit" class="w-100">Save</button>
         </form>
     </div>
 </div>

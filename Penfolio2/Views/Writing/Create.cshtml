@@ -13,18 +13,22 @@
                 <div class="inputGroup">
                     <div class="formItem">
                         <label asp-for="Title" class="formLabel"></label>
-                        <input asp-for="Title" id="title" />
+                        <input asp-for="Title" class="formInput" id="title" />
                         <span asp-validation-for="Title" class="text-danger"></span>
                     </div>
                     <div class="formItem">
                         <label asp-for="Description" class="formLabel"></label>
-                        <textarea asp-for="Description" id="description"></textarea>
+                        <textarea asp-for="Description" class="formInput" id="description"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
                     <div class="formItem">
                         <div id="editorContainer">
                             <!-- Create the editor container -->
                             <div id="editor" class="editor ql-editior ql-container">
+                                @if(Model.EditorContent != string.Empty)
+                                {
+                                    @Html.Raw(Model.EditorContent)
+                                }
                             </div>
                         </div>
                     </div>
@@ -94,7 +98,7 @@
                     <div class="confirmSelections">
                         <h3>Is this okay?</h3>
                         <span class="confirm">Title</span> <span id="confirmTitle"></span><br />
-                        <span class="confirm">Description</span> <span id="confirmDescription"></span><br />
+                        <span class="confirm">Description</span> <div id="confirmDescription"></div><br />
                         <span class="confirm">Profiles</span> <div id="confirmProfiles"></div><br />
                         <span class="confirm">Formats</span> <div id="confirmFormats"></div><br />
                         <span class="confirm">Genres</span> <div id="confirmGenres"></div><br />
@@ -102,8 +106,11 @@
                         <span class="confirm">Allow friend access?</span> <span id="confirmFriendAccess"></span><br />
                         <span class="confirm">Allow publisher access?</span> <span id="confirmPublisherAccess"></span><br />
                         <span class="confirm">Allow minor access?</span> <span id="confirmMinorAccess"></span><br />
-                        <span class="confirm">Shows up in search?</span> <span id="confirmShowsUpInSearch"></span><br />
-                        <div id="confirmText" class="ql-editor"></div>
+                        <span class="confirm">Shows up in search?</span> <span id="confirmShowsUpInSearch"></span><br /><br />
+                        <div class="formItem">
+                            <span class="confirm formLabel">Writing</span>
+                            <div id="confirmText" class="ql-editor"></div>
+                        </div>
                     </div>
                     <span class="collapse visually-hidden" id="confirmSelectedProfiles"></span>
                     <span class="collapse visually-hidden" id="confirmSelectedFormats"></span>
