@@ -216,30 +216,47 @@ namespace Penfolio2.Models
         public bool IsAnonymous { get; set; }
     }
 
+    public class NotificationsViewModel
+    {
+        public NotificationsViewModel()
+        {
+            Notifications = new HashSet<NotificationViewModel>();
+            PenProfiles = new HashSet<PenProfile>();
+            Writings = new HashSet<Writing>();
+        }
+
+        public virtual ICollection<NotificationViewModel> Notifications { get; set; }
+
+        public int Count { get; set; } = 0;
+
+        public virtual ICollection<PenProfile> PenProfiles { get; set; }
+
+        public virtual ICollection<Writing> Writings { get; set; }
+    }
+
     public class NotificationViewModel
     {
         [Required, NotNull]
         public DateTime NotificationDate { get; set; }
 
         [AllowNull]
-        public AccessRequest? AccessRequest { get; set; } = null;  
+        public AccessRequest? AccessRequest { get; set; } = null;
 
         [AllowNull]
         public FriendRequest? FriendRequest { get; set; } = null;
 
-        [AllowNull]
-        public Like? Like { get; set; } = null;
+        //FollowerFollowing; TBD because not implemented yet
 
-        [AllowNull]
-        public Comment? Comment { get; set; } = null;
+        //Like; TBD because not implemented yet
 
-        [AllowNull]
-        public CommentReply? CommentReply { get; set; } = null;
+        //Comment; TBD because not implemented yet
 
-        [AllowNull]
-        public Critique? Critique { get; set; } = null;
+        //CommentReply; TBD because not implemented yet
 
-        [AllowNull]
-        public CritiqueRequest? CritiqueRequest { get; set; } = null;
+        //CommentFlag; TBD because not implemented yet
+
+        //Critique; TBD because not implemented yet
+
+        //CritiqueRequest; TBD because not implemented  yet
     }
 }

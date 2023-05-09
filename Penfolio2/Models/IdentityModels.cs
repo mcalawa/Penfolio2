@@ -30,6 +30,9 @@ namespace Penfolio2.Models
         [Required, NotNull]
         public int Strikes { get; set; } = 0;
 
+        [Required, NotNull]
+        public DateTime LastNotificationViewDate { get; set; } = DateTime.Now;
+
         [ForeignKey("UserId")]
         public virtual ICollection<PenProfile> PenProfiles { get; set; }
 

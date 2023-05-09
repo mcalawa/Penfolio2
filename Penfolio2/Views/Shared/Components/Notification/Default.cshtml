@@ -1,16 +1,171 @@
-﻿@model IEnumerable<Penfolio2.Models.NotificationViewModel>
+﻿@model Penfolio2.Models.NotificationsViewModel
 
 @{
-    int count = Model.Count();
+    string GetDateEnding(int day)
+    {
+        string dateEnding = "";
+        string dayAsString = day.ToString();
+        char[] dayAsCharArray = dayAsString.ToCharArray();
+
+        if(dayAsCharArray.Length == 1)
+        {
+            dateEnding = dayAsCharArray[0] == '1' ? "st" : dayAsCharArray[0] == '2' ? "nd" : dayAsCharArray[0] == '3' ? "rd" : "th";
+        }
+        else
+        {
+            dateEnding = dayAsCharArray[1] == '1' ? "st" : dayAsCharArray[1] == '2' ? "nd" : dayAsCharArray[1] == '3' ? "rd" : "th";
+        }
+
+        return dateEnding;
+    }
+
+    string GetMonth(int month)
+    {
+        string monthAsString = "";
+
+        if(month == 12)
+        {
+            monthAsString = "December";
+        }
+        else if(month == 11)
+        {
+            monthAsString = "November";
+        }
+        else if(month == 10)
+        {
+            monthAsString = "October";
+        }
+        else if(month == 9)
+        {
+            monthAsString = "September";
+        }
+        else if(month == 8)
+        {
+            monthAsString = "August";
+        }
+        else if(month == 7)
+        {
+            monthAsString = "July";
+        }
+        else if(month == 6)
+        {
+            monthAsString = "June";
+        }
+        else if(month == 5)
+        {
+            monthAsString = "May";
+        }
+        else if(month == 4)
+        {
+            monthAsString = "April";
+        }
+        else if(month == 3)
+        {
+            monthAsString = "March";
+        }
+        else if(month == 2)
+        {
+            monthAsString = "February";
+        }
+        else
+        {
+            monthAsString = "January";
+        }
+
+        return monthAsString;
+    }
+
+    int GetDaysSince(DateTime date)
+    {
+        return (DateTime.Now - date).Days;
+    }
+
+    string GetDaysSinceString(DateTime date)
+    {
+        int daysSince = GetDaysSince(date);
+        string daysSinceString = "";
+
+        if(daysSince == 0)
+        {
+            daysSinceString = "Today";
+        }
+        else if(daysSince == 1)
+        {
+            daysSinceString = "Yesterday";
+        }
+        else
+        {
+            daysSinceString = daysSince.ToString() + " days ago";
+        }
+
+        return daysSinceString;
+    }
 }
 
-<div id="notifications">
-    @if(count == 0)
-    {
-        <i class="fas fa-envelope"></i>
-    }
-    else
-    {
+<div tabindex="0" class="notifications">
+    @if(Model.Count == 0) {
         <i class="fas fa-envelope-open"></i>
     }
+    else {
+        <i class="fas fa-envelope"></i>
+        <span class="badge">@Model.Count</span>
+    }
+    <div class="dropdownContent">
+        @if(Model.Notifications.Count == 0)
+        {
+            <div class="notification">
+                You&#39;re all caught up!
+            </div>
+        }
+        else
+        {
+            @foreach(var notification in Model.Notifications) {
+                <div class="notification">
+                    <div class="notificationHeader">
+                        <div class="daysSince">@GetDaysSinceString(notification.NotificationDate)</div>
+                        <div class="notificationDate">@notification.NotificationDate.DayOfWeek, @GetMonth(@notification.NotificationDate.Month) @notification.NotificationDate.Day@GetDateEnding(notification.NotificationDate.Day)</div>
+                    </div>
+                    <div class="notificationBody">
+                        @if (notification.AccessRequest != null)
+                        {
+                            var requester = Model.PenProfiles.Where(i => i.ProfileId == notification.AccessRequest.RequesterId).First();
+                            var requesterRole = requester.UseSecondaryRoleName && requester.RoleId == 2 ? "Literary Agent" : requester.RoleId == 2 ? "Publisher" : "Writer";
+                            if (notification.AccessRequest?.AccessPermission?.ProfileId != null)
+                            {
+                                var toView = Model.PenProfiles.Where(i => i.ProfileId == notification.AccessRequest.AccessPermission.ProfileId).First();
+                                var toViewRole = toView.UseSecondaryRoleName && toView.RoleId == 2 ? "Literary Agent" : toView.RoleId == 2 ? "Publisher" : "Writer";
+                                <div class="notificationText"><a href="/Profile/@requester.UrlString">@requester.DisplayName (@requesterRole)</a> has requested access to view your @toViewRole profile <a href="/Profile/@toView.DisplayName">@toView.DisplayName</a></div>
+                                <div class="notificationAction">
+                                    <a href="/Notification/GrantAccessRequest/@notification.AccessRequest.AccessRequestId">Grant</a><br />
+                                    <a href="/Notification/DeclineAccessRequest/@notification.AccessRequest.AccessRequestId">Decline</a>
+                                </div>
+                            }
+                            else if (notification.AccessRequest?.AccessPermission?.WritingId != null)
+                            {
+                                var toView = Model.Writings.Where(i => i.WritingId == notification.AccessRequest.AccessPermission.WritingId).First();
+                                <div class="notificationText"><a href="/Profile/@requester.UrlString">@requester.DisplayName (@requesterRole)</a> has requested access to view your writing <a href="/Writing/ViewWriting/@toView.WritingId">@toView.Title</a></div>
+                                <div class="notificationAction">
+                                    <a href="/Notification/GrantAccessRequest/@notification.AccessRequest.AccessRequestId">Grant</a><br />
+                                    <a href="/Notification/DeclineAccessRequest/@notification.AccessRequest.AccessRequestId">Decline</a>
+                                </div>
+                            }
+                        }
+                        else if (notification.FriendRequest != null)
+                        {
+                            var requester = Model.PenProfiles.Where(i => i.ProfileId == notification.FriendRequest.RequesterId).First();
+                            var requesterRole = requester.UseSecondaryRoleName && requester.RoleId == 2 ? "Literary Agent" : requester.RoleId == 2 ? "Publisher" : "Writer";
+                            var toView = Model.PenProfiles.Where(i => i.ProfileId == notification.FriendRequest.RequesteeId).First();
+                            var toViewRole = toView.UseSecondaryRoleName && toView.RoleId == 2 ? "Literary Agent" : toView.RoleId == 2 ? "Publisher" : "Writer";
+                            <div class="notificationText"><a href="/Profile/@requester.UrlString">@requester.DisplayName (@requesterRole)</a> has sent a friend request to your @toViewRole profile <a href="/Profile/@toView.UrlString">@toView.DisplayName</a></div>
+                            <div class="notificationAction">
+                                <a href="/Notification/AcceptFriendRequest/@notification.FriendRequest.FriendRequestId">Accept</a><br />
+                                <a href="/Notification/DeclineFriendRequest/@notification.FriendRequest.FriendRequestId">Decline</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+    
 </div>

@@ -976,16 +976,68 @@ namespace Penfolio2.Controllers
                 penProfile.PenRole = db.ProfileRoles.Where(i => i.RoleId == penProfile.RoleId).FirstOrDefault();
             }
 
-            //populate Profile Writings
+            //populate Profile Writings Stage 1
             if(penProfile.ProfileWritings.Count == 0)
             {
                 penProfile.ProfileWritings = db.WritingProfiles.Where(i => i.ProfileId ==  penProfile.ProfileId).ToList();
+            }
 
-                foreach(var writing in  penProfile.ProfileWritings)
+            //populate Profile Writings Stage 2
+            foreach (var writing in penProfile.ProfileWritings)
+            {
+                if (writing.Writing == null)
                 {
-                    if(writing.Writing == null)
+                    writing.Writing = db.Writings.Where(i => i.WritingId == writing.WritingId).FirstOrDefault();
+                }
+            }
+
+            //populate Friendships Stage 1
+            if (penProfile.Friends.Count == 0)
+            {
+                penProfile.Friends = db.Friendships.Where(i => i.FirstFriendId == penProfile.ProfileId && i.Active).ToList();
+            }
+
+            //populate Friendships Stage 2
+            foreach(var friend in penProfile.Friends)
+            {
+                if(friend.SecondFriend == null)
+                {
+                    friend.SecondFriend = db.PenProfiles.Where(i => i.ProfileId == friend.SecondFriendId).FirstOrDefault();
+                }
+            }
+
+            //populate Individual Access Grants stage 1
+            if(penProfile.AccessPermission != null && penProfile.AccessPermission.IndividualAccessGrants.Count == 0)
+            {
+                penProfile.AccessPermission.IndividualAccessGrants = db.IndividualAccessGrants.Where(i => i.Active == true && i.AccessPermissionId == penProfile.AccessPermissionId).ToList();
+            }
+
+            //populate Individual Access Grants stage 2
+            if(penProfile.AccessPermission != null)
+            {
+                foreach(var grant in penProfile.AccessPermission.IndividualAccessGrants)
+                {
+                    if(grant.Grantee == null)
                     {
-                        writing.Writing = db.Writings.Where(i => i.WritingId == writing.WritingId).FirstOrDefault();
+                        grant.Grantee = db.PenProfiles.Where(i => i.ProfileId == grant.GranteeId).FirstOrDefault();
+                    }
+                }
+            }
+
+            //populate Individual Access Revokes stage 1
+            if(penProfile.AccessPermission != null && penProfile.AccessPermission.IndividualAccessRevokes.Count == 0)
+            {
+                penProfile.AccessPermission.IndividualAccessRevokes = db.IndividualAccessRevokes.Where(i => i.Active == true && i.AccessPermissionId == penProfile.AccessPermissionId).ToList();
+            }
+
+            //populate Individual Access Revokes stage 2
+            if(penProfile.AccessPermission != null)
+            {
+                foreach(var revoke in penProfile.AccessPermission.IndividualAccessRevokes)
+                {
+                    if(revoke.Revokee == null)
+                    {
+                        revoke.Revokee = db.PenProfiles.Where(i => i.ProfileId == revoke.RevokeeId).FirstOrDefault();
                     }
                 }
             }
