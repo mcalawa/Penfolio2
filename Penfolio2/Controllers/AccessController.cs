@@ -1152,6 +1152,42 @@ namespace Penfolio2.Controllers
                 }
             }
 
+            //populate Individual Access Grants stage 1
+            if (writing.AccessPermission != null && writing.AccessPermission.IndividualAccessGrants.Count == 0)
+            {
+                writing.AccessPermission.IndividualAccessGrants = db.IndividualAccessGrants.Where(i => i.Active == true && i.AccessPermissionId == writing.AccessPermissionId).ToList();
+            }
+
+            //populate Individual Access Grants stage 2
+            if (writing.AccessPermission != null)
+            {
+                foreach (var grant in writing.AccessPermission.IndividualAccessGrants)
+                {
+                    if (grant.Grantee == null)
+                    {
+                        grant.Grantee = db.PenProfiles.Where(i => i.ProfileId == grant.GranteeId).FirstOrDefault();
+                    }
+                }
+            }
+
+            //populate Individual Access Revokes stage 1
+            if (writing.AccessPermission != null && writing.AccessPermission.IndividualAccessRevokes.Count == 0)
+            {
+                writing.AccessPermission.IndividualAccessRevokes = db.IndividualAccessRevokes.Where(i => i.Active == true && i.AccessPermissionId == writing.AccessPermissionId).ToList();
+            }
+
+            //populate Individual Access Revokes stage 2
+            if (writing.AccessPermission != null)
+            {
+                foreach (var revoke in writing.AccessPermission.IndividualAccessRevokes)
+                {
+                    if (revoke.Revokee == null)
+                    {
+                        revoke.Revokee = db.PenProfiles.Where(i => i.ProfileId == revoke.RevokeeId).FirstOrDefault();
+                    }
+                }
+            }
+
             //populate WritingSeries
 
             //populate WritingFolders

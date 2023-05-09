@@ -306,7 +306,7 @@ namespace Penfolio2.Controllers
 
             if(accessRequest.AccessPermission == null)
             {
-                accessRequest.AccessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == id).FirstOrDefault();
+                accessRequest.AccessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == accessRequest.AccessPermissionId).FirstOrDefault();
             }
 
             if(accessRequest.AccessPermission == null)
@@ -493,7 +493,7 @@ namespace Penfolio2.Controllers
 
             if (accessRequest.AccessPermission == null)
             {
-                accessRequest.AccessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == id).FirstOrDefault();
+                accessRequest.AccessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == accessRequest.AccessPermissionId).FirstOrDefault();
             }
 
             if (accessRequest.AccessPermission == null)
@@ -559,7 +559,7 @@ namespace Penfolio2.Controllers
                 db.Entry(accessRequest).State = EntityState.Modified;
                 db.SaveChanges();
 
-                return RedirectToAction("Index", "Profile", new { id = accessRequest.AccessPermission.ProfileId });
+                return RedirectToAction("Index", "Profile", new { id = profile.UrlString });
             } //if this is for a piece of writing
             else if (accessRequest.AccessPermission.WritingId != null)
             {
