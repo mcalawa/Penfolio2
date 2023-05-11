@@ -1,0 +1,33 @@
+﻿@model Penfolio2.Models.RequestAccessViewModel
+@{
+}
+@if (Model.PenProfiles.Count > 0)
+{
+    <form method="post" asp-action="SendAccessRequest" asp-controller="Notification">
+        <ul class="profileList navbar-nav">
+            <li>
+                Send access request as
+            </li>
+            <li>
+                <select asp-for="ProfileId">
+                    @foreach (var profile in Model.PenProfiles)
+                    {
+                        <option value="@profile?.ProfileId">
+                            @profile.DisplayName (@if (profile.UseSecondaryRoleName)
+                            {
+                                @profile?.PenRole?.SecondaryRoleName
+                            }
+                            else
+                            {
+                                @profile?.PenRole?.RoleName
+                            })
+                        </option>
+                    }
+                </select>
+            </li>
+            <li>
+                <input type="hidden" asp-for="AccessPermissionId" value="@Model.AccessPermissionId" /><input type="submit" value="Send" />
+            </li>
+        </ul>
+    </form>
+}

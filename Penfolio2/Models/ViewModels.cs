@@ -259,4 +259,60 @@ namespace Penfolio2.Models
 
         //CritiqueRequest; TBD because not implemented  yet
     }
+
+    public class AuthorsForFriendAccessViewModel
+    {
+        public AuthorsForFriendAccessViewModel()
+        {
+            Friendships = new HashSet<Friendship>();
+        }
+
+        [Required]
+        public string DisplayName { get; set; }
+
+        [Required]
+        public bool IsAnonymous { get; set; }
+
+        [Required]
+        public int ProfileId { get; set; }
+
+        public virtual ICollection<Friendship> Friendships { get; set; }
+    }
+
+    public class RequestAccessViewModel
+    {
+        public RequestAccessViewModel()
+        {
+            PenProfiles = new HashSet<PenProfile>();
+        }
+
+        [Required, NotNull]
+        public int AccessPermissionId { get; set; } = 0;
+
+        public int? ProfileId { get; set; } = null;
+
+        public virtual ICollection<PenProfile> PenProfiles { get; set; }
+    }
+
+    public class RequestFriendViewModel
+    {
+        public RequestFriendViewModel()
+        {
+            PenProfiles = new HashSet<PenProfile>();
+            Authors = new HashSet<AuthorsForFriendAccessViewModel>();
+        }
+
+        [Required, NotNull]
+        public int AccessPermissionId { get; set; } = 0;
+
+        public int? SenderProfileId { get; set; } = null;
+
+        public int ReceiverProfileId { get; set; } = 0;
+
+        public virtual AccessPermission? AccessPermission { get; set; }
+
+        public virtual ICollection<PenProfile> PenProfiles { get; set; }
+
+        public virtual ICollection<AuthorsForFriendAccessViewModel> Authors { get; set; }
+    }
 }

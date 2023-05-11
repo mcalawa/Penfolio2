@@ -7,6 +7,12 @@
 {
     @await Component.InvokeAsync("Profile", new { urlString = Model.UrlString })
 }
+else
+{
+    <div class="right-align">
+        @await Component.InvokeAsync("Notification", new { viewName = "CreateFriendRequest", id = Model.AccessPermissionId })
+    </div>
+}
 
 <h1 class="clear-right">@Model.DisplayName</h1>
 
@@ -69,6 +75,18 @@
                 var revokeRoleName = revoke.Revokee.UseSecondaryRoleName && revoke.Revokee.RoleId == 2 ? "Literary Agent" : revoke.Revokee.RoleId == 2 ? "Publisher" : "Writer";
                 <span><a href="/Profile/@revoke.Revokee.UrlString">@revoke.Revokee.DisplayName (@revokeRoleName)</a> | <a href="/Notification/RemoveIndividualAccessRevoke/@revoke.IndividualAccessRevokeId">Remove Individual Access Revoke</a></span><br />
             }
+        }
+    }
+    else if(Model.Friends.Where(i => i.Active).Select(i => i.SecondFriend).Any(i => i.UserId == ViewBag.UserId))
+    {
+        <hr />
+        <h4>Friends</h4>
+        @foreach (var friend in Model.Friends.Where(i => i.Active && i.SecondFriend.UserId == ViewBag.UserId).ToList())
+        {
+            var friendRoleName = friend.SecondFriend.UseSecondaryRoleName && friend.SecondFriend.RoleId == 2 ? "Literary Agent" : friend.SecondFriend.RoleId == 2 ? "Publisher" : "Writer";
+            <span><a href="/Profile/@friend.SecondFriend.UrlString">@friend.SecondFriend.DisplayName (@friendRoleName)</a> | <a href="/Notification/RemoveFriend/@friend.FriendshipId">Remove Friend</a></span>
+
+            <br />
         }
     }
 </div>

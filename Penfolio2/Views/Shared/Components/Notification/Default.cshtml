@@ -11,6 +11,10 @@
         {
             dateEnding = dayAsCharArray[0] == '1' ? "st" : dayAsCharArray[0] == '2' ? "nd" : dayAsCharArray[0] == '3' ? "rd" : "th";
         }
+        else if(dayAsCharArray.Length == 2 && dayAsCharArray[0] == '1')
+        {
+            dateEnding = "th";
+        }
         else
         {
             dateEnding = dayAsCharArray[1] == '1' ? "st" : dayAsCharArray[1] == '2' ? "nd" : dayAsCharArray[1] == '3' ? "rd" : "th";

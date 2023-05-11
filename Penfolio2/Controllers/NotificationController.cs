@@ -176,7 +176,9 @@ namespace Penfolio2.Controllers
             db.Entry(friendRequest).State = EntityState.Modified;
             db.SaveChanges();
 
-            return RedirectToAction("Index", "Profile", new { id = friendRequest.RequesteeId });
+            var profile = db.PenProfiles.Where(i => i.ProfileId == friendRequest.RequesterId).First();
+
+            return RedirectToAction("Index", "Profile", new { id = profile.UrlString });
         }
 
         public ActionResult DeclineFriendRequest(int id)
@@ -273,7 +275,7 @@ namespace Penfolio2.Controllers
             db.Entry(friendRequest).State = EntityState.Modified;
             db.SaveChanges();
 
-            return RedirectToAction("Index", "Profile", new { id = friendRequest.RequesteeId });
+            return RedirectToAction("Index", "Profile");
         }
 
         public ActionResult GrantAccessRequest(int id)
@@ -385,7 +387,7 @@ namespace Penfolio2.Controllers
                 db.Entry(accessRequest).State = EntityState.Modified;
                 db.SaveChanges();
 
-                return RedirectToAction("Index", "Profile", new { id = accessRequest.AccessPermission.ProfileId });
+                return RedirectToAction("Index", "Profile", new { id = profile.UrlString });
             } //if this is for a piece of writing
             else if(accessRequest.AccessPermission.WritingId != null)
             {
@@ -758,7 +760,14 @@ namespace Penfolio2.Controllers
             }
             else if(grant.AccessPermission.ProfileId != null)
             {
-                return RedirectToAction("Index", "Profile", new { id = grant.AccessPermission.ProfileId  });
+                if(db.PenProfiles.Any(i => i.ProfileId ==  grant.AccessPermission.ProfileId.Value))
+                {
+                    var profile = db.PenProfiles.Where(i => i.ProfileId == grant.AccessPermission.ProfileId.Value).First();
+
+                    return RedirectToAction("Index", "Profile", new { id = profile.UrlString });
+                }
+
+                return RedirectToAction("Index", "Profile");
             }
             else
             {
@@ -843,12 +852,160 @@ namespace Penfolio2.Controllers
             }
             else if (revoke.AccessPermission.ProfileId != null)
             {
-                return RedirectToAction("Index", "Profile", new { id = revoke.AccessPermission.ProfileId });
+                if (db.PenProfiles.Any(i => i.ProfileId == revoke.AccessPermission.ProfileId.Value))
+                {
+                    var profile = db.PenProfiles.Where(i => i.ProfileId == revoke.AccessPermission.ProfileId.Value).First();
+
+                    return RedirectToAction("Index", "Profile", new { id = profile.UrlString });
+                }
+
+                return RedirectToAction("Index", "Profile");
             }
             else
             {
                 return RedirectToAction("NotificationError");
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SendFriendRequest(RequestFriendViewModel model)
+        {
+            var userId = GetUserId();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = GetUserById(userId);
+
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if(user.PenProfiles.Count == 0)
+            {
+                user.PenProfiles = db.PenProfiles.Where(i => i.UserId == userId).ToList();
+            }
+
+            if (ModelState.IsValid && model.SenderProfileId != null)
+            {
+                if(!user.PenProfiles.Select(i => i.ProfileId).ToList().Contains(model.SenderProfileId.Value))
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+
+                if(db.PenProfiles.Any(i => i.ProfileId == model.SenderProfileId) && db.PenProfiles.Any(i => i.ProfileId == model.ReceiverProfileId) && db.AccessPermissions.Any(i => i.AccessPermissionId == model.AccessPermissionId))
+                {
+                    AccessPermission accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == model.AccessPermissionId).First();
+
+                    if(!db.Friendships.Any(i => i.Active && i.FirstFriendId == model.SenderProfileId.Value && i.SecondFriendId == model.ReceiverProfileId) && !db.Friendships.Any(i => i.Active && i.FirstFriendId == model.ReceiverProfileId && i.SecondFriendId == model.SenderProfileId.Value))
+                    {
+                        if(!db.FriendRequests.Any(i => i.Resolved != true && i.RequesterId == model.ReceiverProfileId && i.RequesteeId == model.SenderProfileId.Value) && !db.FriendRequests.Any(i => i.Resolved != true && i.RequesterId == model.SenderProfileId.Value && i.RequesteeId == model.ReceiverProfileId))
+                        {
+                            FriendRequest friendRequest = new FriendRequest
+                            {
+                                RequesterId = model.SenderProfileId.Value,
+                                RequesteeId = model.ReceiverProfileId,
+                                RequestDate = DateTime.Now,
+                                Resolved = false
+                            };
+
+                            db.FriendRequests.Add(friendRequest);
+                            db.SaveChanges();
+                        } //if there's not already an unresolved friend request
+                    } //if there's not already a friendship here
+
+                    if(accessPermission.ProfileId != null)
+                    {
+                        var profile = db.PenProfiles.Where(i => i.ProfileId == accessPermission.ProfileId.Value).FirstOrDefault();
+
+                        if(profile != null)
+                        {
+                            return RedirectToAction("Index", "Profile", new { id = profile.UrlString });
+                        }
+                    }
+                    else if(accessPermission.WritingId != null)
+                    {
+                        return RedirectToAction("ViewWriting", "Writing", new { id = accessPermission.WritingId.Value });
+                    }
+                } //if the profiles and the accessPermission exist
+            } //if ModelState.IsValid
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SendAccessRequest(RequestAccessViewModel model)
+        {
+            var userId = GetUserId();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = GetUserById(userId);
+
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (user.PenProfiles.Count == 0)
+            {
+                user.PenProfiles = db.PenProfiles.Where(i => i.UserId == userId).ToList();
+            }
+
+            if(ModelState.IsValid && model.ProfileId != null)
+            {
+                if(db.PenProfiles.Any(i => i.ProfileId == model.ProfileId.Value) && db.AccessPermissions.Any(i => i.AccessPermissionId == model.AccessPermissionId))
+                {
+                    if(!user.PenProfiles.Select(i => i.ProfileId).ToList().Contains(model.ProfileId.Value))
+                    {
+                        return RedirectToAction("NotificationError");
+                    }
+
+                    AccessPermission accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == model.AccessPermissionId).First();
+
+                    accessPermission = PopulateAccessPermission(accessPermission);
+
+                    if(!accessPermission.IndividualAccessGrants.Any(i => i.Active && i.GranteeId == model.ProfileId.Value) &&  !accessPermission.IndividualAccessRevokes.Any(i => i.Active && i.RevokeeId == model.ProfileId.Value) && !accessPermission.AccessRequests.Any(i => i.Resolved == false && i.RequesterId == model.ProfileId.Value))
+                    {
+                        AccessRequest accessRequest = new AccessRequest
+                        {
+                            AccessPermissionId = model.AccessPermissionId,
+                            RequesterId = model.ProfileId.Value,
+                            RequestDate = DateTime.Now,
+                            Resolved = false
+                        };
+
+                        db.AccessRequests.Add(accessRequest);
+                        db.SaveChanges();
+                    }
+
+                    if (accessPermission.ProfileId != null)
+                    {
+                        var profile = db.PenProfiles.Where(i => i.ProfileId == accessPermission.ProfileId.Value).FirstOrDefault();
+
+                        if (profile != null)
+                        {
+                            return RedirectToAction("Index", "Profile", new { id = profile.UrlString });
+                        }
+
+                        return RedirectToAction("Index", "Profile");
+                    }
+                    else if (accessPermission.WritingId != null)
+                    {
+                        return RedirectToAction("ViewWriting", "Writing", new { id = accessPermission.WritingId });
+                    }
+                }
+            }
+
+            return RedirectToAction("NotificationError");
         }
 
         public ActionResult NotificationError()

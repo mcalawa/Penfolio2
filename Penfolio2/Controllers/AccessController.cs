@@ -1051,15 +1051,15 @@ namespace Penfolio2.Controllers
             if (user.PenProfiles.Count == 0)
             {
                 user.PenProfiles = db.PenProfiles.Where(i => i.UserId == user.Id).ToList();
+            }
 
-                for (int i = 0; i < user.PenProfiles.Count; i++)
-                {
-                    var penProfile = user.PenProfiles.ElementAt(i);
-                    penProfile = PopulatePenProfile(penProfile);
-                    user.PenProfiles.ElementAt(i).AccessPermission = penProfile.AccessPermission;
-                    user.PenProfiles.ElementAt(i).PenUser = user;
-                    user.PenProfiles.ElementAt(i).PenRole = penProfile.PenRole;
-                }
+            for (int i = 0; i < user.PenProfiles.Count; i++)
+            {
+                var penProfile = user.PenProfiles.ElementAt(i);
+                penProfile = PopulatePenProfile(penProfile);
+                user.PenProfiles.ElementAt(i).AccessPermission = penProfile.AccessPermission;
+                user.PenProfiles.ElementAt(i).PenUser = user;
+                user.PenProfiles.ElementAt(i).PenRole = penProfile.PenRole;
             }
 
             return user;
@@ -1071,11 +1071,11 @@ namespace Penfolio2.Controllers
             if(writing.PenUser == null)
             {
                 writing.PenUser = db.PenUsers.Where(i => i.Id == writing.UserId).FirstOrDefault();
+            }
 
-                if(writing.PenUser != null)
-                {
-                    writing.PenUser = PopulatePenUser(writing.PenUser);
-                }
+            if(writing.PenUser != null)
+            {
+                writing.PenUser = PopulatePenUser(writing.PenUser);
             }
 
             //populate AccessPermission
@@ -1088,19 +1088,19 @@ namespace Penfolio2.Controllers
             if(writing.WritingProfiles.Count == 0)
             {
                 writing.WritingProfiles = db.WritingProfiles.Where(i => i.WritingId == writing.WritingId).ToList();
+            }
 
-                //populate PenProfile for WritingProfiles
-                foreach(var profile in writing.WritingProfiles)
+            //populate PenProfile for WritingProfiles
+            foreach(var profile in writing.WritingProfiles)
+            {
+                if(profile.PenProfile == null)
                 {
-                    if(profile.PenProfile == null)
-                    {
-                        profile.PenProfile = db.PenProfiles.Where(i => i.ProfileId == profile.ProfileId).FirstOrDefault();
+                    profile.PenProfile = db.PenProfiles.Where(i => i.ProfileId == profile.ProfileId).FirstOrDefault();
+                }
 
-                        if(profile.PenProfile != null)
-                        {
-                            profile.PenProfile = PopulatePenProfile(profile.PenProfile);
-                        }
-                    }
+                if(profile.PenProfile != null)
+                {
+                    profile.PenProfile = PopulatePenProfile(profile.PenProfile);
                 }
             }
 
@@ -1108,22 +1108,24 @@ namespace Penfolio2.Controllers
             if(writing.WritingFormats.Count == 0)
             {
                 writing.WritingFormats = db.WritingFormats.Where(i => i.WritingId == writing.WritingId).ToList();
+            }
 
-                //populate each FormatTag in WritingFormats
-                foreach(var format in writing.WritingFormats)
+            //populate each FormatTag in WritingFormats
+            foreach(var format in writing.WritingFormats)
+            {
+                if(format.FormatTag == null)
                 {
-                    if(format.FormatTag == null)
-                    {
-                        format.FormatTag = db.FormatTags.Where(i => i.FormatId == format.FormatId).FirstOrDefault();
+                    format.FormatTag = db.FormatTags.Where(i => i.FormatId == format.FormatId).FirstOrDefault();
 
-                        if(format.FormatTag != null)
-                        {
-                            //populate AltFormatNames in FormatTag
-                            if(format.FormatTag.AltFormatNames.Count == 0)
-                            {
-                                format.FormatTag.AltFormatNames = db.AltFormatNames.Where(i => i.FormatId == format.FormatId).ToList();
-                            }
-                        }
+                        
+                }
+                    
+                if(format.FormatTag != null)
+                {
+                    //populate AltFormatNames in FormatTag
+                    if(format.FormatTag.AltFormatNames.Count == 0)
+                    {
+                        format.FormatTag.AltFormatNames = db.AltFormatNames.Where(i => i.FormatId == format.FormatId).ToList();
                     }
                 }
             }
@@ -1132,22 +1134,22 @@ namespace Penfolio2.Controllers
             if(writing.WritingGenres.Count == 0)
             {
                 writing.WritingGenres = db.WritingGenres.Where(i => i.WritingId == writing.WritingId).ToList();
+            }
 
-                //populate each GenreTag in WritingGenres
-                foreach(var genre in writing.WritingGenres)
+            //populate each GenreTag in WritingGenres
+            foreach(var genre in writing.WritingGenres)
+            {
+                if(genre.GenreTag == null)
                 {
-                    if(genre.GenreTag == null)
-                    {
-                        genre.GenreTag = db.GenreTags.Where(i => i.GenreId == genre.GenreId).FirstOrDefault();
+                    genre.GenreTag = db.GenreTags.Where(i => i.GenreId == genre.GenreId).FirstOrDefault();
+                }
 
-                        if(genre.GenreTag != null)
-                        {
-                            //populate AltGenreNames in GenreTag
-                            if(genre.GenreTag.AltGenreNames.Count == 0)
-                            {
-                                genre.GenreTag.AltGenreNames = db.AltGenreNames.Where(i => i.GenreId == genre.GenreId).ToList();
-                            }
-                        }
+                if(genre.GenreTag != null)
+                {
+                    //populate AltGenreNames in GenreTag
+                    if(genre.GenreTag.AltGenreNames.Count == 0)
+                    {
+                        genre.GenreTag.AltGenreNames = db.AltGenreNames.Where(i => i.GenreId == genre.GenreId).ToList();
                     }
                 }
             }
@@ -1201,6 +1203,140 @@ namespace Penfolio2.Controllers
             //populate CritiqueRequest
 
             return writing;
+        }
+
+        protected AccessPermission PopulateAccessPermission(AccessPermission accessPermission)
+        {
+            List<AccessRequest> accessRequests;
+            List<AccessRequest> populatedAccessRequests = new List<AccessRequest>();
+
+            List<IndividualAccessGrant> individualAccessGrants;
+            List<IndividualAccessGrant> populatedIndividualAccessGrants = new List<IndividualAccessGrant>();
+
+            List<IndividualAccessRevoke> individualAccessRevokes;
+            List<IndividualAccessRevoke> populatedIndividualAccessRevokes = new List<IndividualAccessRevoke>();
+
+            //Populate AccessRequests Stage 1
+            if (accessPermission.AccessRequests.Count == 0)
+            {
+                accessRequests = db.AccessRequests.Where(i => i.AccessPermissionId == accessPermission.AccessPermissionId).ToList();
+            }
+            else
+            {
+                accessRequests = accessPermission.AccessRequests.ToList();
+            }
+
+            //Populate AccessRequests Stage 2
+            foreach (var accessRequest in accessRequests)
+            {
+                //Populate Requester
+                if (accessRequest.Requester == null)
+                {
+                    accessRequest.Requester = db.PenProfiles.Where(i => i.ProfileId == accessRequest.RequesterId).FirstOrDefault();
+
+                    if (accessRequest.Requester != null && accessRequest.Requester.PenRole == null)
+                    {
+                        accessRequest.Requester.PenRole = db.ProfileRoles.Where(i => i.RoleId == accessRequest.Requester.RoleId).FirstOrDefault();
+                    }
+                }
+                else if (accessRequest.Requester.PenRole == null)
+                {
+                    accessRequest.Requester.PenRole = db.ProfileRoles.Where(i => i.RoleId == accessRequest.Requester.RoleId).FirstOrDefault();
+                }
+
+                //Populate AccessPermission
+                if (accessRequest.AccessPermission == null)
+                {
+                    accessRequest.AccessPermission = accessPermission;
+                }
+
+                populatedAccessRequests.Add(accessRequest);
+            }
+
+            //Populate AcccessRequests Stage 3
+            accessPermission.AccessRequests = populatedAccessRequests;
+
+            //Populate IndividualAccessGrants Stage 1
+            if (accessPermission.IndividualAccessGrants.Count == 0)
+            {
+                individualAccessGrants = db.IndividualAccessGrants.Where(i => i.AccessPermissionId == accessPermission.AccessPermissionId).ToList();
+            }
+            else
+            {
+                individualAccessGrants = accessPermission.IndividualAccessGrants.ToList();
+            }
+
+            //Populate IndividualAccessGrants Stage 2
+            foreach (var individualAccessGrant in individualAccessGrants)
+            {
+                //Populate Grantee
+                if (individualAccessGrant.Grantee == null)
+                {
+                    individualAccessGrant.Grantee = db.PenProfiles.Where(i => i.ProfileId == individualAccessGrant.GranteeId).FirstOrDefault();
+
+                    if (individualAccessGrant.Grantee != null && individualAccessGrant.Grantee.PenRole == null)
+                    {
+                        individualAccessGrant.Grantee.PenRole = db.ProfileRoles.Where(i => i.RoleId == individualAccessGrant.Grantee.RoleId).FirstOrDefault();
+                    }
+                }
+                else if (individualAccessGrant.Grantee.PenRole == null)
+                {
+                    individualAccessGrant.Grantee.PenRole = db.ProfileRoles.Where(i => i.RoleId == individualAccessGrant.Grantee.RoleId).FirstOrDefault();
+                }
+
+                //Populate AccessPermission
+                if (individualAccessGrant.AccessPermission == null)
+                {
+                    individualAccessGrant.AccessPermission = accessPermission;
+                }
+
+                populatedIndividualAccessGrants.Add(individualAccessGrant);
+            }
+
+            //Populate IndividualAccessGrants Stage 3
+            accessPermission.IndividualAccessGrants = populatedIndividualAccessGrants;
+
+            //Populate IndividualAccessRevokes Stage 1
+            if (accessPermission.IndividualAccessRevokes.Count == 0)
+            {
+                individualAccessRevokes = db.IndividualAccessRevokes.Where(i => i.AccessPermissionId == accessPermission.AccessPermissionId).ToList();
+            }
+            else
+            {
+                individualAccessRevokes = accessPermission.IndividualAccessRevokes.ToList();
+            }
+
+            //Populate IndividualAccessRevokes Stage 2
+            foreach (var individualAccessRevoke in individualAccessRevokes)
+            {
+                //Populate Revokee
+                if (individualAccessRevoke.Revokee == null)
+                {
+                    individualAccessRevoke.Revokee = db.PenProfiles.Where(i => i.ProfileId == individualAccessRevoke.RevokeeId).FirstOrDefault();
+
+                    if (individualAccessRevoke.Revokee != null && individualAccessRevoke.Revokee.PenRole == null)
+                    {
+                        individualAccessRevoke.Revokee.PenRole = db.ProfileRoles.Where(i => i.RoleId == individualAccessRevoke.Revokee.RoleId).FirstOrDefault();
+                    }
+                }
+                else if (individualAccessRevoke.Revokee.PenRole == null)
+                {
+                    individualAccessRevoke.Revokee.PenRole = db.ProfileRoles.Where(i => i.RoleId == individualAccessRevoke.Revokee.RoleId).FirstOrDefault();
+                }
+
+                //Populate AccessPermission
+                if (individualAccessRevoke.Revokee == null)
+                {
+                    individualAccessRevoke.AccessPermission = accessPermission;
+                }
+
+                populatedIndividualAccessRevokes.Add(individualAccessRevoke);
+            }
+
+            //Populate IndividualAccessRevokes Stage 3
+            accessPermission.IndividualAccessRevokes = populatedIndividualAccessRevokes;
+
+            return accessPermission;
         }
     }
 }

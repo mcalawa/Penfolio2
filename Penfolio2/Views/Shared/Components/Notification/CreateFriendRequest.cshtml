@@ -1,0 +1,109 @@
+﻿@model Penfolio2.Models.RequestFriendViewModel
+@{
+    List<PenProfile> penProfilesForAuthor = Model.Authors.Count > 0 && Model.Authors.First().Friendships.Count > 0 ? Model.PenProfiles.Except(Model.Authors.First().Friendships.Select(i => i.SecondFriend).ToList()).ToList() : Model.PenProfiles.ToList();
+    penProfilesForAuthor = new List<PenProfile>();
+
+    foreach(var profile in Model.PenProfiles)
+    {
+        if(Model.Authors.Count > 0)
+        {
+            var firstAuthor = Model.Authors.First();
+
+            if(!firstAuthor.Friendships.Any(i => i.Active && i.SecondFriendId == profile.ProfileId) && !profile.FriendRequestsReceived.Any(i => i.Resolved == false && i.RequesterId == firstAuthor.ProfileId && i.RequesteeId == profile.ProfileId) && !profile.FriendRequestsSent.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == firstAuthor.ProfileId))
+            {
+                penProfilesForAuthor.Add(profile);
+            }
+        }
+    }
+
+    List<PenProfile> UpdatePenProfilesForAuthor(int profileId)
+    {
+        if(Model.Authors.Any(i => i.ProfileId == profileId))
+        {
+            var selectedAuthor = Model.Authors.Where(i => i.ProfileId == profileId).First();
+            penProfilesForAuthor = new List<PenProfile>();
+
+            foreach (var profile in Model.PenProfiles)
+            {
+                if (!selectedAuthor.Friendships.Any(i => i.Active && i.SecondFriendId == profile.ProfileId) && !profile.FriendRequestsReceived.Any(i => i.Resolved == false && i.RequesterId == selectedAuthor.ProfileId && i.RequesteeId == profile.ProfileId) && !profile.FriendRequestsSent.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == selectedAuthor.ProfileId))
+                {
+                    penProfilesForAuthor.Add(profile);
+                }
+            }
+
+            return penProfilesForAuthor;
+        }
+        else
+        {
+            return Model.PenProfiles.ToList();
+        }
+    }
+}
+@if(Model.AccessPermission != null && Model.PenProfiles.Count > 0)
+{
+    <form method="post" asp-action="SendFriendRequest" asp-controller="Notification">
+        <ul class="profileList navbar-nav">@if (Model.AccessPermission.ProfileId != null)
+            {
+                <li>
+                    Send friend request as
+                </li>
+                <li>
+                    <select asp-for="SenderProfileId">
+                        @foreach (var profile in Model.PenProfiles)
+                        {
+                            <option value="@profile?.ProfileId">
+                                @profile.DisplayName (@if (profile.UseSecondaryRoleName)
+                                {
+                                    @profile?.PenRole?.SecondaryRoleName
+                                }
+                                else
+                                {
+                                    @profile?.PenRole?.RoleName
+                                })
+                            </option>
+                        }
+                    </select><input type="hidden" asp-for="ReceiverProfileId" value="@Model.AccessPermission.ProfileId.Value" />
+                </li>
+            }
+            else if (Model.AccessPermission.WritingId != null)
+            {
+                <li>
+                    Send friend request to
+                </li>
+                <li>
+                    <select asp-for="ReceiverProfileId" onchange="@penProfilesForAuthor = @UpdatePenProfilesForAuthor(Model.ReceiverProfileId);">
+                        @for (int i = 0; i < Model.Authors.Count; i++)
+                        {
+                            int count = i + 1;
+                            <option value="@Model.Authors.ElementAt(i).ProfileId">@Model.Authors.ElementAt(i).DisplayName (Author @count)</option>
+                        }
+                    </select>
+                </li>
+                <li>
+                    as
+                </li>
+                <li>
+                    <select asp-for="SenderProfileId">
+                        @foreach (var profile in penProfilesForAuthor)
+                        {
+                            <option value="@profile?.ProfileId">
+                                @profile.DisplayName (@if (profile.UseSecondaryRoleName)
+                                {
+                                    @profile?.PenRole?.SecondaryRoleName
+                                }
+                                else
+                                {
+                                    @profile?.PenRole?.RoleName
+                                })
+                            </option>
+                        }
+                    </select>
+                </li>
+            }
+            <li>
+                <input type="hidden" asp-for="AccessPermissionId" value="@Model.AccessPermissionId" /><input type="submit" value="Send" />
+            </li>
+        </ul>
+    </form>
+}
+

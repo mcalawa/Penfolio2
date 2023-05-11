@@ -337,7 +337,7 @@ namespace Penfolio2.ViewComponents
 
                     ViewBag.Document = document;
 
-                    return View(writing);
+                    return View(viewName, writing);
                 } //Delete
             }
 
@@ -561,6 +561,11 @@ namespace Penfolio2.ViewComponents
             }
 
             PenUser user = _db.PenUsers.Where(i => i.Id == userId).First();
+
+            if(user.PenProfiles.Count == 0)
+            {
+                user.PenProfiles = _db.PenProfiles.Where(i => i.UserId == userId).ToList();
+            }
 
             //get a list of all of this user's profiles
             List<int> userProfileIds = user.PenProfiles.ToList().Select(i => i.ProfileId).ToList();

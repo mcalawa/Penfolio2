@@ -41,6 +41,7 @@ namespace Penfolio2.Controllers
                 }
                 
                 ViewBag.OwnProfile = "true";
+                ViewBag.UserId = "";
 
                 return View(mainProfile);
             }
@@ -67,10 +68,12 @@ namespace Penfolio2.Controllers
                 if (ProfileBelongsToUser(penProfile.ProfileId))
                 {
                     ViewBag.OwnProfile = "true";
+                    ViewBag.UserId = "";
                 }
                 else
                 {
                     ViewBag.OwnProfile = "false";
+                    ViewBag.UserId = GetUserId();
                 }
 
                 List<IdentityError> errors = new List<IdentityError>();
@@ -889,6 +892,8 @@ namespace Penfolio2.Controllers
             List<IdentityError> errors = new List<IdentityError>();
             IsAccessableByUser(id, ref errors);
 
+            ViewBag.AccessPermissionId = id;
+
             if(errors.Any(i => i.Description == "Request not found."))
             {
                 return RedirectToAction("NotFound");
@@ -899,6 +904,20 @@ namespace Penfolio2.Controllers
             foreach (IdentityError error in errors)
             {
                 errorString += error.Description + " ";
+            }
+
+            ViewBag.FriendRequest = false;
+
+            if(errorString.Contains("send a friend request"))
+            {
+                ViewBag.FriendRequest = true;
+            }
+
+            ViewBag.AccessRequest = false;
+
+            if(errorString.Contains("request individual access"))
+            {
+                ViewBag.AccessRequest = true;
             }
 
             ViewBag.ErrorString = errorString;

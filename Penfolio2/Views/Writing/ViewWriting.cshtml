@@ -9,7 +9,7 @@
     </div>
 }
 <h2 class="clear-right">@Model.Title</h2>
-@await Component.InvokeAsync("Writing", new { viewName = "Author", id = Model.WritingId })
+@await Component.InvokeAsync("Writing", new { id = Model.WritingId, viewName = "Author" })
 
 <div id="content" class="ql-editor">@Html.Raw(ViewBag.Document)</div>
 

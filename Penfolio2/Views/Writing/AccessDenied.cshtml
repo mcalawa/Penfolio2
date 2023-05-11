@@ -5,3 +5,20 @@
 <h1>Access Denied</h1>
 
 <p>@ViewBag.ErrorString</p>
+
+@if (ViewBag.FriendRequest || ViewBag.AccessRequest)
+{
+    <hr />
+}
+
+@if (ViewBag.FriendRequest)
+{
+    <h4>Send a Friend Request</h4>
+    @await Component.InvokeAsync("Notification", new { viewName = "CreateFriendRequest", id = ViewBag.AccessPermissionId })
+}
+
+@if (ViewBag.AccessRequest)
+{
+    <h4>Send an Individual Access Request</h4>
+    @await Component.InvokeAsync("Notification", new { viewName = "CreateAccessRequest", id = ViewBag.AccessPermissionId })
+}

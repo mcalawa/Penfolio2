@@ -85,6 +85,10 @@ a:hover, a:focus {
     padding-right: 5px;
 }
 
+.profileList li input[type=submit] {
+    margin-top: -5px;
+}
+
 .clear-right {
     clear: right;
 }

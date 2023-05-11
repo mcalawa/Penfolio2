@@ -53,7 +53,7 @@ namespace Penfolio2.Controllers
             return OrderByNewest(availableWritings);
         }
 
-        public List<Writing> GetAllWritingAvailableforSearch(List<Writing> writings)
+        public List<Writing> GetAllWritingAvailableForSearch(List<Writing> writings)
         {
             List<Writing> availableWritings = new List<Writing>();
 
@@ -115,7 +115,7 @@ namespace Penfolio2.Controllers
                 }
             }
 
-            writings = GetAllWritingAvailableforSearch(writings);
+            writings = GetAllWritingAvailableForSearch(writings);
             ViewBag.Hashtag = hashtag;
 
             return View(writings);
@@ -150,7 +150,7 @@ namespace Penfolio2.Controllers
                 }
             }
 
-            writings = GetAllWritingAvailableforSearch(writings);
+            writings = GetAllWritingAvailableForSearch(writings);
 
             ViewBag.Hashtag = hashtag;
 
@@ -1206,6 +1206,8 @@ namespace Penfolio2.Controllers
             List<IdentityError> errors = new List<IdentityError>();
             IsAccessableByUser(id, ref errors);
 
+            ViewBag.AccessPermissionId = id;
+
             if (errors.Any(i => i.Description == "Request not found."))
             {
                 return RedirectToAction("NotFound");
@@ -1216,6 +1218,20 @@ namespace Penfolio2.Controllers
             foreach (IdentityError error in errors)
             {
                 errorString += error.Description + " ";
+            }
+
+            ViewBag.FriendRequest = false;
+
+            if (errorString.Contains("send a friend request"))
+            {
+                ViewBag.FriendRequest = true;
+            }
+
+            ViewBag.AccessRequest = false;
+
+            if (errorString.Contains("request individual access"))
+            {
+                ViewBag.AccessRequest = true;
             }
 
             ViewBag.ErrorString = errorString;
