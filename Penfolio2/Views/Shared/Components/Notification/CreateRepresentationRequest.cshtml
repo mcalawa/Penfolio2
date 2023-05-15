@@ -1,0 +1,52 @@
+﻿@model Penfolio2.Models.RequestRepresentationViewModel
+@{
+}
+@if (Model.PenProfiles.Count > 0)
+{
+    <h4>Send a Representation Request</h4>
+    <form method="post" asp-action="SendRepresentationRequest" asp-controller="Notification">
+        <ul class="profileList navbar-nav">
+            @if(Model.PenProfiles.Any(i => i.RoleId == 1))
+            {
+                <li>
+                    Send a request for this @Model.RoleName to represent your writer profile
+                </li>
+            }
+            else if(Model.PenProfiles.Any(i => i.RoleId == 2))
+            {
+                <li>
+                    Send a request to represent this writer profile as 
+                </li>
+            }
+            <li>
+                <select asp-for="SenderProfileId">
+                    @foreach (var profile in Model.PenProfiles)
+                    {
+                        <option value="@profile?.ProfileId">
+                            @profile.DisplayName @if (Model.PenProfiles.Any(i => i.RoleId == 2))
+                            {
+                                <span>
+                                    (@if (profile.UseSecondaryRoleName)
+                                    {
+                                        @profile?.PenRole?.SecondaryRoleName
+                                    }
+                                    else if (profile.RoleId == 2)
+                                    {
+                                        @profile?.PenRole?.RoleName
+                                    })
+                                </span>
+                            }
+                        </option>
+                    }
+                </select>
+            </li>
+            <li>
+                <input type="hidden" asp-for="ReceiverProfileId" value="@Model.ReceiverProfileId" /><input type="submit" value="Send" />
+            </li>
+        </ul>
+    </form>
+}
+else if (ViewBag.PendingRepresentationRequest)
+{
+    <p>Your representation request has been sent. Wait to hear back!</p>
+}

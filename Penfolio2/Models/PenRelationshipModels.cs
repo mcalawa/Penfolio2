@@ -88,4 +88,28 @@ namespace Penfolio2.Models
         [ForeignKey("BlockedUserId")]
         public virtual PenUser? BlockedUser { get; set; }
     }
+
+    public class PublisherWriter
+    {
+        [Required, Key]
+        public int PublisherWriterId { get; set; }
+
+        [Required, NotNull]
+        public int PublisherId { get; set; }
+
+        [Required, NotNull]
+        public int WriterId { get; set; }
+
+        [Required, NotNull]
+        public DateTime AcceptDate { get; set; }
+
+        [Required, NotNull]
+        public bool Active { get; set; }
+
+        [ForeignKey("PublisherId")]
+        public virtual PenProfile? Publisher { get; set; }
+
+        [ForeignKey("WriterId")]
+        public virtual PenProfile? Writer { get; set; }
+    }
 }

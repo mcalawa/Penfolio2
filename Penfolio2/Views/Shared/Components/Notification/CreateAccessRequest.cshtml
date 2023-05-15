@@ -3,6 +3,7 @@
 }
 @if (Model.PenProfiles.Count > 0)
 {
+    <h4>Send an Individual Access Request</h4>
     <form method="post" asp-action="SendAccessRequest" asp-controller="Notification">
         <ul class="profileList navbar-nav">
             <li>
@@ -30,4 +31,8 @@
             </li>
         </ul>
     </form>
+}
+else if (ViewBag.PendingAccessRequest)
+{
+    <p>Your access request has been sent. Wait to hear back!</p>
 }

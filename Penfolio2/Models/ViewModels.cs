@@ -136,6 +136,8 @@ namespace Penfolio2.Models
     {
         public WritingViewModel() 
         {
+            IndividualAccessRevokes = new HashSet<IndividualAccessRevoke>();
+            IndividualAccessGrants = new HashSet<IndividualAccessGrant>();
             WritingProfiles = new HashSet<PenProfile>();
             FormatTags = new HashSet<FormatTag>();
             GenreTags = new HashSet<GenreTag>();
@@ -184,6 +186,10 @@ namespace Penfolio2.Models
         public string? SelectedFormats { get; set; } = string.Empty;
 
         public string? SelectedGenres { get; set; } = string.Empty;
+
+        public virtual ICollection<IndividualAccessGrant> IndividualAccessGrants { get; set; }
+
+        public virtual ICollection<IndividualAccessRevoke> IndividualAccessRevokes { get; set; }
 
         public virtual ICollection<PenProfile> WritingProfiles { get; set; }
 
@@ -244,6 +250,9 @@ namespace Penfolio2.Models
 
         [AllowNull]
         public FriendRequest? FriendRequest { get; set; } = null;
+
+        [AllowNull]
+        public RepresentationRequest? RepresentationRequest { get; set; } = null;
 
         //FollowerFollowing; TBD because not implemented yet
 
@@ -314,5 +323,21 @@ namespace Penfolio2.Models
         public virtual ICollection<PenProfile> PenProfiles { get; set; }
 
         public virtual ICollection<AuthorsForFriendAccessViewModel> Authors { get; set; }
+    }
+
+    public class RequestRepresentationViewModel
+    {
+        public RequestRepresentationViewModel()
+        {
+            PenProfiles = new HashSet<PenProfile>();
+        }
+
+        public int? SenderProfileId { get; set; } = null;
+
+        public int ReceiverProfileId { get; set; } = 0;
+
+        public string? RoleName { get; set; } = null;
+
+        public virtual ICollection<PenProfile> PenProfiles { get; set; }
     }
 }

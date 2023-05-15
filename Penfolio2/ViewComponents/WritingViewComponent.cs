@@ -172,6 +172,8 @@ namespace Penfolio2.ViewComponents
                     bool publisherAccess = false;
                     bool minorAccess = false;
                     bool showsUpInSearch = false;
+                    List<IndividualAccessRevoke> individualAccessRevokes = new List<IndividualAccessRevoke>();
+                    List<IndividualAccessGrant> individualAccessGrants = new List<IndividualAccessGrant>();
 
                     if(id != null)
                     {
@@ -190,6 +192,26 @@ namespace Penfolio2.ViewComponents
                             publisherAccess = accessPermission.PublisherAccess;
                             minorAccess = accessPermission.MinorAccess;
                             showsUpInSearch = accessPermission.ShowsUpInSearch;
+
+                            individualAccessGrants = _db.IndividualAccessGrants.Where(i => i.AccessPermissionId ==  accessPermission.AccessPermissionId && i.Active).ToList();
+
+                            foreach(var grant in individualAccessGrants)
+                            {
+                                if(grant.Grantee == null)
+                                {
+                                    grant.Grantee = _db.PenProfiles.Where(i => i.ProfileId == grant.GranteeId).FirstOrDefault();
+                                }
+                            }
+
+                            individualAccessRevokes = _db.IndividualAccessRevokes.Where(i => i.AccessPermissionId == accessPermission.AccessPermissionId && i.Active).ToList();
+
+                            foreach(var revoke in individualAccessRevokes)
+                            {
+                                if(revoke.Revokee == null)
+                                {
+                                    revoke.Revokee = _db.PenProfiles.Where(i => i.ProfileId == revoke.RevokeeId).FirstOrDefault();
+                                }
+                            }
                         }
                     }
 
@@ -199,7 +221,9 @@ namespace Penfolio2.ViewComponents
                         FriendAccess = friendAccess,
                         PublisherAccess = publisherAccess,
                         MinorAccess = minorAccess,
-                        ShowsUpInSearch = showsUpInSearch
+                        ShowsUpInSearch = showsUpInSearch,
+                        IndividualAccessGrants = individualAccessGrants,
+                        IndividualAccessRevokes = individualAccessRevokes
                     };
 
                     return View(viewName, model);

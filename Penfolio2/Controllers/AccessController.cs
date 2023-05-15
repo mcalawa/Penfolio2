@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Penfolio2.Areas.Identity.Pages.Account;
@@ -710,6 +709,65 @@ namespace Penfolio2.Controllers
                     return true;
                 }
 
+                //if there's my agent access, let's check if the user represents this writer
+                if(accessPermission.MyAgentAccess)
+                {
+                    List<PublisherWriter> publisherWriters = new List<PublisherWriter>();
+
+                    foreach(var userProfileId in userProfileIds)
+                    {
+                        //get all of the publisherWriters for this profile
+                        List<PublisherWriter> pWs = db.PublisherWriters.Where(i => i.Active && i.PublisherId == userProfileId).ToList();
+
+                        foreach(var pW in pWs)
+                        {
+                            publisherWriters.Add(pW);
+                        }
+                    }
+                    
+                    //if this is the access permission for a profile and the user has a profile that represents this profile, return true
+                    if(accessPermission.ProfileId != null & publisherWriters.Any(i => i.WriterId == accessPermission.ProfileId.Value))
+                    {
+                        return true;
+                    } //if the AccessPermission is for a piece of Writing
+                    else if(accessPermission.WritingId !=  null)
+                    {
+                        List<PenProfile> writerProfiles = db.Writings.Where(i => i.AccessPermissionId == accessPermissionId).First().PenUser.PenProfiles.ToList();
+
+                        foreach(var publisherWriter in publisherWriters)
+                        {
+                            if(writerProfiles.Any(i => i.ProfileId == publisherWriter.WriterId))
+                            {
+                                return true;
+                            }
+                        }
+                    } //if the AccessPermission is for a Folder
+                    else if (accessPermission.FolderId != null)
+                    {
+                        List<FolderOwner> folderOwners = db.Folders.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault().Owners.ToList();
+
+                        foreach (var publisherWriter in publisherWriters)
+                        {
+                            if (folderOwners.Any(i => i.OwnerId == publisherWriter.WriterId))
+                            {
+                                return true;
+                            }
+                        }
+                    } //if the AccessPermission is for a Series
+                    else if (accessPermission.SeriesId != null)
+                    {
+                        List<SeriesOwner> seriesOwners = db.Series.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault().Owners.ToList();
+
+                        foreach (var publisherWriter in publisherWriters)
+                        {
+                            if (seriesOwners.Any(i => i.OwnerId == publisherWriter.WriterId))
+                            {
+                                return true;
+                            }
+                        }
+                    } //if it's a series
+                } //if there's my  agent access
+
                 //if there's friend access, let's check if we are friends
                 if (accessPermission.FriendAccess)
                 {
@@ -727,7 +785,7 @@ namespace Penfolio2.Controllers
                     }
 
                     //if this is the access permission for a profile and the user has a profile that has a friendship with this profile, return true
-                    if (accessPermission.ProfileId != null && friendships.Any(i => i.SecondFriendId == accessPermission.ProfileId))
+                    if (accessPermission.ProfileId != null && friendships.Any(i => i.SecondFriendId == accessPermission.ProfileId.Value))
                     {
                         return true;
                     } //if the AccessPermission is for a piece of Writing
@@ -770,7 +828,55 @@ namespace Penfolio2.Controllers
                     } //if it's a series
                 } //if there's friend access
 
-                if(accessPermission.PublisherAccess && accessPermission.FriendAccess)
+                if(accessPermission.MyAgentAccess && !accessPermission.PublisherAccess && accessPermission.FriendAccess)
+                {
+                    if (UserHasPublisherProfile() && UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by friends and publishers or literary agents who represent the owner. To gain access, request to represent the owner, send a friend request, or request individual access."
+                        });
+                    }
+                    else if (UserHasPublisherProfile() && !UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by friends and verified publishers or literary agents who represent the owner. To gain access, have your publisher account verified and request to represent the owner, send a friend request, or request individual access."
+                        });
+                    }
+                    else
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by friends and publishers or literary agents who represent the owner. To gain access, send a friend request or request individual access."
+                        });
+                    }
+                }
+                else if (accessPermission.MyAgentAccess && !accessPermission.PublisherAccess)
+                {
+                    if (UserHasPublisherProfile() && UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by publishers or literary agents who represent the owner. To gain access, request to represent the owner or request individual access."
+                        });
+                    }
+                    else if (UserHasPublisherProfile() && !UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by verified publishers or literary agents who represent the owner. To gain access, have your publisher account verified and request to represent the owner or request individual access."
+                        });
+                    }
+                    else
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by  publishers or literary agents who represent the owner. To gain access, request individual access."
+                        });
+                    }
+                }
+                else if (accessPermission.PublisherAccess && accessPermission.FriendAccess)
                 {
                     if(UserHasPublisherProfile() && !UserHasVerifiedPublisherProfile())
                     {
@@ -1006,8 +1112,38 @@ namespace Penfolio2.Controllers
                 }
             }
 
+            //populate PublisherWriters Stage 1
+            if(penProfile.RoleId == 2 && penProfile.PublisherWriters.Count == 0)
+            {
+                penProfile.PublisherWriters = db.PublisherWriters.Where(i => i.Active && i.PublisherId == penProfile.ProfileId).ToList();
+            }
+
+            //populate PublisherWriters Stage 2
+            foreach(var publisherWriter in penProfile.PublisherWriters)
+            {
+                if(publisherWriter.Writer == null)
+                {
+                    publisherWriter.Writer = db.PenProfiles.Where(i => i.ProfileId == publisherWriter.WriterId).FirstOrDefault();
+                }
+            }
+
+            //populate WriterPublishers Stage 1
+            if (penProfile.RoleId == 1 && penProfile.WriterPublishers.Count == 0)
+            {
+                penProfile.WriterPublishers = db.PublisherWriters.Where(i => i.Active && i.WriterId == penProfile.ProfileId).ToList();
+            }
+
+            //populate WriterPublishers Stage 2
+            foreach (var writerPublisher in penProfile.WriterPublishers)
+            {
+                if (writerPublisher.Publisher == null)
+                {
+                    writerPublisher.Publisher = db.PenProfiles.Where(i => i.ProfileId == writerPublisher.PublisherId).FirstOrDefault();
+                }
+            }
+
             //populate Individual Access Grants stage 1
-            if(penProfile.AccessPermission != null && penProfile.AccessPermission.IndividualAccessGrants.Count == 0)
+            if (penProfile.AccessPermission != null && penProfile.AccessPermission.IndividualAccessGrants.Count == 0)
             {
                 penProfile.AccessPermission.IndividualAccessGrants = db.IndividualAccessGrants.Where(i => i.Active == true && i.AccessPermissionId == penProfile.AccessPermissionId).ToList();
             }

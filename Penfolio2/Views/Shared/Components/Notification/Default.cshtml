@@ -166,6 +166,31 @@
                                 <a href="/Notification/DeclineFriendRequest/@notification.FriendRequest.FriendRequestId">Decline</a>
                             </div>
                         }
+                        else if(notification.RepresentationRequest != null)
+                        {
+                            var requester = Model.PenProfiles.Where(i => i.ProfileId == notification.RepresentationRequest.RequesterId).First();
+                            var requesterRole = requester.UseSecondaryRoleName && requester.RoleId == 2 ? "Literary Agent" : requester.RoleId == 2 ? "Publisher" : "Writer";
+                            var toView = Model.PenProfiles.Where(i => i.ProfileId == notification.RepresentationRequest.RequesteeId).First();
+                            var toViewRole = toView.UseSecondaryRoleName && toView.RoleId == 2 ? "Literary Agent" : toView.RoleId == 2 ? "Publisher" : "Writer";
+                            <div class="notificationText">
+                                @if(requester.RoleId == 1)
+                                {
+                                    <span>
+                                        <a href="/Profile/@requester.UrlString">@requester.DisplayName (@requesterRole)</a> has requested to be represented by your @toViewRole profile <a href="/Profile/@toView.UrlString">@toView.DisplayName</a>
+                                    </span>
+                                }
+                                else if(requester.RoleId == 2)
+                                {
+                                    <span>
+                                        <a href="/Profile/@requester.UrlString">@requester.DisplayName (@requesterRole)</a> haas requested to represent your @toViewRole profile <a href="/Profile/@toView.UrlString">@toView.DisplayName</a>
+                                    </span>
+                                }
+                            </div>
+                            <div class="notificationAction">
+                                <a href="/Notification/AcceptRepresentationRequest/@notification.RepresentationRequest.RepresentationRequestId">Accept</a><br />
+                                <a href="/Notification/DeclineRepresentationRequest/@notification.RepresentationRequest.RepresentationRequestId">Decline</a>
+                            </div>
+                        }
                     </div>
                 </div>
             }

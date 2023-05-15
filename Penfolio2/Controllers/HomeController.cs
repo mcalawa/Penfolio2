@@ -19,6 +19,11 @@ namespace Penfolio2.Controllers
             return View();
         }
 
+        public IActionResult About()
+        {
+            return View();
+        }
+
         [Authorize]
         public IActionResult Privacy()
         {

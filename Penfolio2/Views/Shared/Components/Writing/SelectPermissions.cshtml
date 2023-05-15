@@ -3,77 +3,107 @@
 }
 <div class="permissionsSelector">
     <h3 onmouseover='showExplanation("permissionsDescription", "Who can view a piece of writing. All permissions options can be changed at any time. For more information on what the different options mean, hover over them.")'>Select Access Permissions for Writing</h3>
-    <div id="permissionsContainer">
-        <div id="accessContainer">
-            <!--Public Access-->
-            <div class="formItem" onmouseover='showExplanation("permissionsDescription", "Allowing public access means that anyone can view this piece of writing. By selecting this option, you will automatically allow friends, followers, and publishers alike to view your work.")' id="public-access">
-                <label>
-                    @if(Model.PublicAccess)
+    <div class="row">
+        <div id="permissionsContainer" class="col-md-6">
+            <div id="accessContainer">
+                <!--Public Access-->
+                <div class="formItem" onmouseover='showExplanation("permissionsDescription", "Allowing public access means that anyone can view this piece of writing. By selecting this option, you will automatically allow friends, followers, and publishers alike to view your work.")' id="public-access">
+                    <label>
+                        @if (Model.PublicAccess)
+                        {
+                            <input asp-for="PublicAccess" onfocus='showExplanation("permissionsDescription", "Allowing public access means that anyone can view this piece of writing. By selecting this option, you will automatically allow friends, followers, and publishers alike to view your work.")' onchange='changeAccess("public-access")' checked /> @Html.DisplayNameFor(model => model.PublicAccess)
+                        }
+                        else
+                        {
+                            <input asp-for="PublicAccess" onfocus='showExplanation("permissionsDescription", "Allowing public access means that anyone can view this piece of writing. By selecting this option, you will automatically allow friends, followers, and publishers alike to view your work.")' onchange='changeAccess("public-access")' /> @Html.DisplayNameFor(model => model.PublicAccess)
+                        }
+                    </label>
+                </div>
+                <!--Friend Access-->
+                <div class="formItem" onmouseover='showExplanation("permissionsDescription", "Allowing friend access means that people who are your mutual friends will be able to see this writing. If this option is not unchecked, that means it does not allow public access.")' id="friend-access">
+                    <label>
+                        @if (Model.FriendAccess)
+                        {
+                            <input asp-for="FriendAccess" onfocus='showExpanation("permissionsDescription", "Allowing friend access means that people who are your mutual friends will be able to see this writing. If this option is unchecked, that means it does not allow public access.")' onchange='changeAccess("friend-access")' checked /> @Html.DisplayNameFor(model => model.FriendAccess)
+                        }
+                        else
+                        {
+                            <input asp-for="FriendAccess" onfocus='showExpanation("permissionsDescription", "Allowing friend access means that people who are your mutual friends will be able to see this writing. If this option is unchecked, that means it does not allow public access.")' onchange='changeAccess("friend-access")' /> @Html.DisplayNameFor(model => model.FriendAccess)
+                        }
+                    </label>
+                </div>
+                <!--Publisher Access-->
+                <div class="formItem" onmouseover='showExplanation("permissionsDescription", "Allowing publisher access means that profiles that are verified as being owned by publishers or literary agents will be able to view your writing. Just selecting publisher access is a great way to limit the number of people who can see your writing, while still allowing it to be found by potential employers. If this option is unchecked, that means it does not allow public access.")' id="publisher-access">
+                    <label>
+                        @if (Model.PublisherAccess)
+                        {
+                            <input asp-for="PublisherAccess" onfocus='showExplanation("permissionsDescription", "Allowing publisher access means that profiles that are verified as being owned by publishers or literary agents will be able to view your writing. Just selecting publisher access is a great way to limit the number of people who can see your writing, while still allowing it to be found by potential employers. If this option is unchecked, that means it does not allow public access.")' onchange='changeAccess("publisher-access")' checked /> @Html.DisplayNameFor(model => model.PublisherAccess)
+                        }
+                        else
+                        {
+                            <input asp-for="PublisherAccess" onfocus='showExplanation("permissionsDescription", "Allowing publisher access means that profiles that are verified as being owned by publishers or literary agents will be able to view your writing. Just selecting publisher access is a great way to limit the number of people who can see your writing, while still allowing it to be found by potential employers. If this option is unchecked, that means it does not allow public access.")' onchange='changeAccess("publisher-access")' /> @Html.DisplayNameFor(model => model.PublisherAccess)
+                        }
+                    </label>
+                </div>
+                <!--Minor Access-->
+                <div class="formItem" onmouseover='showExplanation("permissionsDescription", "One of the goals of Penfolio is to give you as a writer a single place to post all of your writing. This means that some of the pieces you post may not be appropriate for younger readers. By not selecting this option, you are noting that your writing is for more mature audiences and protecting minors from stumbling across material they may not be ready for yet. Examples of things that may not be appropriate for minors include graphic violence or explicit sexual content, strong language, and mature themes such as non-consensual romantic or physical interactions. Ultimately, deciding the age-appropriateness of your writing is up to you, but please use your best judgement.")' id="minor-access">
+                    <label>
+                        @if (Model.MinorAccess)
+                        {
+                            <input asp-for="MinorAccess" onfocus='showExplanation("permissionsDescription", "One of the goals of Penfolio is to give you as a writer a single place to post all of your writing. This means that some of the pieces you post may not be appropriate for younger readers. By not selecting this option, you are noting that your writing is for more mature audiences and protecting minors from stumbling across material they may not be ready for yet. Examples of things that may not be appropriate for minors include graphic violence or explicit sexual content, strong language, and mature themes such as non-consensual romantic or physical interactions. Ultimately, deciding the age-appropriateness of your writing is up to you, but please use your best judgement.")' checked /> @Html.DisplayNameFor(model => model.MinorAccess)
+                        }
+                        else
+                        {
+                            <input asp-for="MinorAccess" onfocus='showExplanation("permissionsDescription", "One of the goals of Penfolio is to give you as a writer a single place to post all of your writing. This means that some of the pieces you post may not be appropriate for younger readers. By not selecting this option, you are noting that your writing is for more mature audiences and protecting minors from stumbling across material they may not be ready for yet. Examples of things that may not be appropriate for minors include graphic violence or explicit sexual content, strong language, and mature themes such as non-consensual romantic or physical interactions. Ultimately, deciding the age-appropriateness of your writing is up to you, but please use your best judgement.")' /> @Html.DisplayNameFor(model => model.MinorAccess)
+                        }
+                    </label>
+                </div>
+                <!--Shows Up in Search-->
+                <div class="formItem" onmouseover='showExplanation("permissionDescription", "At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with their work. For this reason, you can choose whether or not your writing will show up in searches. If this option is unselected, other users will only be able to find this pieces of writing through a connected profile or a direct link. If it is selected, this piece of writing will show up in searches and users who do not fall under your chosen access permissions will be  able to request access to it. Please keep in mind that while this option allows you to show up in the search results of people who don&#39;t have access to this piece of writing, this distinction does not apply to minor access. If you do not have the Allow Minor Access box checked, this writing will still not show up in the search results of users under 18 or who have yet to specify their birthday for their account.")' id="shows-up-in-search">
+                    <label>
+                        @if (Model.ShowsUpInSearch)
+                        {
+                            <input asp-for="ShowsUpInSearch" onfocus='showExplanation("permissionDescription", "At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with their work. For this reason, you can choose whether or not your writing will show up in searches. If this option is unselected, other users will only be able to find this pieces of writing through a connected profile or a direct link. If it is selected, this piece of writing will show up in searches and users who do not fall under your chosen access permissions will be  able to request access to it. Please keep in mind that while this option allows you to show up in the search results of people who don&#39;t have access to this piece of writing, this distinction does not apply to minor access. If you do not have the Allow Minor Access box checked, this writing will still not show up in the search results of users under 18 or who have yet to specify their birthday for their account.")' checked /> @Html.DisplayNameFor(model => model.ShowsUpInSearch)
+                        }
+                        else
+                        {
+                            <input asp-for="ShowsUpInSearch" onfocus='showExplanation("permissionDescription", "At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with their work. For this reason, you can choose whether or not your writing will show up in searches. If this option is unselected, other users will only be able to find this pieces of writing through a connected profile or a direct link. If it is selected, this piece of writing will show up in searches and users who do not fall under your chosen access permissions will be  able to request access to it. Please keep in mind that while this option allows you to show up in the search results of people who don&#39;t have access to this piece of writing, this distinction does not apply to minor access. If you do not have the Allow Minor Access box checked, this writing will still not show up in the search results of users under 18 or who have yet to specify their birthday for their account.")' /> @Html.DisplayNameFor(model => model.ShowsUpInSearch)
+                        }
+                    </label>
+                </div>
+            </div> <!--accessContainer-->
+            @if (Model.IndividualAccessGrants.Count > 0 || Model.IndividualAccessRevokes.Count > 0)
+            {
+                <div id="individualAccessContainer">
+                    @if (Model.IndividualAccessGrants.Count > 0)
                     {
-                        <input asp-for="PublicAccess" onfocus='showExplanation("permissionsDescription", "Allowing public access means that anyone can view this piece of writing. By selecting this option, you will automatically allow friends, followers, and publishers alike to view your work.")' onchange='changeAccess("public-access")' checked /> @Html.DisplayNameFor(model => model.PublicAccess)
-                    }
-                    else
-                    {
-                        <input asp-for="PublicAccess" onfocus='showExplanation("permissionsDescription", "Allowing public access means that anyone can view this piece of writing. By selecting this option, you will automatically allow friends, followers, and publishers alike to view your work.")' onchange='changeAccess("public-access")' /> @Html.DisplayNameFor(model => model.PublicAccess)
-                    }
-                </label>
-            </div>
-            <!--Friend Access-->
-            <div class="formItem" onmouseover='showExplanation("permissionsDescription", "Allowing friend access means that people who are your mutual friends will be able to see this writing. If this option is not unchecked, that means it does not allow public access.")' id="friend-access">
-                <label>
-                    @if(Model.FriendAccess)
-                    {
-                        <input asp-for="FriendAccess" onfocus='showExpanation("permissionsDescription", "Allowing friend access means that people who are your mutual friends will be able to see this writing. If this option is unchecked, that means it does not allow public access.")' onchange='changeAccess("friend-access")' checked /> @Html.DisplayNameFor(model => model.FriendAccess)
-                    }
-                    else
-                    {
-                        <input asp-for="FriendAccess" onfocus='showExpanation("permissionsDescription", "Allowing friend access means that people who are your mutual friends will be able to see this writing. If this option is unchecked, that means it does not allow public access.")' onchange='changeAccess("friend-access")' /> @Html.DisplayNameFor(model => model.FriendAccess)
-                    }
-                </label>
-            </div>
-            <!--Publisher Access-->
-            <div class="formItem" onmouseover='showExplanation("permissionsDescription", "Allowing publisher access means that profiles that are verified as being owned by publishers or literary agents will be able to view your writing. Just selecting publisher access is a great way to limit the number of people who can see your writing, while still allowing it to be found by potential employers. If this option is unchecked, that means it does not allow public access.")' id="publisher-access">
-                <label>
-                    @if(Model.PublisherAccess)
-                    {
-                        <input asp-for="PublisherAccess" onfocus='showExplanation("permissionsDescription", "Allowing publisher access means that profiles that are verified as being owned by publishers or literary agents will be able to view your writing. Just selecting publisher access is a great way to limit the number of people who can see your writing, while still allowing it to be found by potential employers. If this option is unchecked, that means it does not allow public access.")' onchange='changeAccess("publisher-access")' checked /> @Html.DisplayNameFor(model => model.PublisherAccess)
-                    }
-                    else
-                    {
-                        <input asp-for="PublisherAccess" onfocus='showExplanation("permissionsDescription", "Allowing publisher access means that profiles that are verified as being owned by publishers or literary agents will be able to view your writing. Just selecting publisher access is a great way to limit the number of people who can see your writing, while still allowing it to be found by potential employers. If this option is unchecked, that means it does not allow public access.")' onchange='changeAccess("publisher-access")' /> @Html.DisplayNameFor(model => model.PublisherAccess)
-                    }
-                </label>
-            </div>
-            <!--Minor Access-->
-            <div class="formItem" onmouseover='showExplanation("permissionsDescription", "One of the goals of Penfolio is to give you as a writer a single place to post all of your writing. This means that some of the pieces you post may not be appropriate for younger readers. By not selecting this option, you are noting that your writing is for more mature audiences and protecting minors from stumbling across material they may not be ready for yet. Examples of things that may not be appropriate for minors include graphic violence or explicit sexual content, strong language, and mature themes such as non-consensual romantic or physical interactions. Ultimately, deciding the age-appropriateness of your writing is up to you, but please use your best judgement.")' id="minor-access">
-                <label>
-                    @if(Model.MinorAccess)
-                    {
-                        <input asp-for="MinorAccess" onfocus='showExplanation("permissionsDescription", "One of the goals of Penfolio is to give you as a writer a single place to post all of your writing. This means that some of the pieces you post may not be appropriate for younger readers. By not selecting this option, you are noting that your writing is for more mature audiences and protecting minors from stumbling across material they may not be ready for yet. Examples of things that may not be appropriate for minors include graphic violence or explicit sexual content, strong language, and mature themes such as non-consensual romantic or physical interactions. Ultimately, deciding the age-appropriateness of your writing is up to you, but please use your best judgement.")' checked /> @Html.DisplayNameFor(model => model.MinorAccess)
-                    }
-                    else
-                    {
-                        <input asp-for="MinorAccess" onfocus='showExplanation("permissionsDescription", "One of the goals of Penfolio is to give you as a writer a single place to post all of your writing. This means that some of the pieces you post may not be appropriate for younger readers. By not selecting this option, you are noting that your writing is for more mature audiences and protecting minors from stumbling across material they may not be ready for yet. Examples of things that may not be appropriate for minors include graphic violence or explicit sexual content, strong language, and mature themes such as non-consensual romantic or physical interactions. Ultimately, deciding the age-appropriateness of your writing is up to you, but please use your best judgement.")' /> @Html.DisplayNameFor(model => model.MinorAccess)
-                    }
-                </label>
-            </div>
-            <!--Shows Up in Search-->
-            <div class="formItem" onmouseover='showExplanation("permissionDescription", "At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with their work. For this reason, you can choose whether or not your writing will show up in searches. If this option is unselected, other users will only be able to find this pieces of writing through a connected profile or a direct link. If it is selected, this piece of writing will show up in searches and users who do not fall under your chosen access permissions will be  able to request access to it. Please keep in mind that while this option allows you to show up in the search results of people who don&#39;t have access to this piece of writing, this distinction does not apply to minor access. If you do not have the Allow Minor Access box checked, this writing will still not show up in the search results of users under 18 or who have yet to specify their birthday for their account.")' id="shows-up-in-search">
-                <label>
-                    @if(Model.ShowsUpInSearch)
-                    {
-                        <input asp-for="ShowsUpInSearch" onfocus='showExplanation("permissionDescription", "At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with their work. For this reason, you can choose whether or not your writing will show up in searches. If this option is unselected, other users will only be able to find this pieces of writing through a connected profile or a direct link. If it is selected, this piece of writing will show up in searches and users who do not fall under your chosen access permissions will be  able to request access to it. Please keep in mind that while this option allows you to show up in the search results of people who don&#39;t have access to this piece of writing, this distinction does not apply to minor access. If you do not have the Allow Minor Access box checked, this writing will still not show up in the search results of users under 18 or who have yet to specify their birthday for their account.")' checked /> @Html.DisplayNameFor(model => model.ShowsUpInSearch)
-                    }
-                    else
-                    {
-                        <input asp-for="ShowsUpInSearch" onfocus='showExplanation("permissionDescription", "At Penfolio, we think it is very important for people to be able to control exactly who can see and interact with their work. For this reason, you can choose whether or not your writing will show up in searches. If this option is unselected, other users will only be able to find this pieces of writing through a connected profile or a direct link. If it is selected, this piece of writing will show up in searches and users who do not fall under your chosen access permissions will be  able to request access to it. Please keep in mind that while this option allows you to show up in the search results of people who don&#39;t have access to this piece of writing, this distinction does not apply to minor access. If you do not have the Allow Minor Access box checked, this writing will still not show up in the search results of users under 18 or who have yet to specify their birthday for their account.")' /> @Html.DisplayNameFor(model => model.ShowsUpInSearch)
-                    }
-                </label>
-            </div>
-        </div> <!--accessContainer-->
-        <!--This is where permission for things like likes and comments and critique will be able to be selected should those features be implemented-->
-    </div> <!--permissionsContainer-->
+                        <h4 onmouseover='showExplanation("permissionDescription", "Anyone in this list has special permission to to see this piece of writing even if they otherwise wouldn&#39;t qualify based on your selected permissions.")'>Individual Access Grantees</h4>
+                        @foreach (var grant in Model.IndividualAccessGrants.Where(i => i.Active).ToList())
+                        {
+                            var grantRoleName = grant.Grantee.UseSecondaryRoleName && grant.Grantee.RoleId == 2 ? "Literary Agent" : grant.Grantee.RoleId == 2 ? "Publisher" : "Writer";
+                            <span><a href="/Profile/@grant.Grantee.UrlString">@grant.Grantee.DisplayName (@grantRoleName)</a> | <a href="/Notification/RemoveIndividualAccessGrant/@grant.IndividualAccessGrantId">Remove Individual Access Grant</a></span>
 
-    <div id="permissionsDescription" class="descriptionText">
+                            <br />
+                        }
+                    }
+                    @if (Model.IndividualAccessRevokes.Count > 0)
+                    {
+                        <h4 onmouseover='showExplanation("permissionDescription", "Everyone in this list has been blocked from accessing this piece of writing even if they would otherwise be allowed to based on your selected permissions.")'>Individual Access Revokees</h4>
+                        @foreach (var revoke in Model.IndividualAccessRevokes.Where(i => i.Active).ToList())
+                        {
+                            var revokeRoleName = revoke.Revokee.UseSecondaryRoleName && revoke.Revokee.RoleId == 2 ? "Literary Agent" : revoke.Revokee.RoleId == 2 ? "Publisher" : "Writer";
+                            <span><a href="/Profile/@revoke.Revokee.UrlString">@revoke.Revokee.DisplayName (@revokeRoleName)</a> | <a href="/Notification/RemoveIndividualAccessRevoke/@revoke.IndividualAccessRevokeId">Remove Individual Access Revoke</a></span>
+
+                            <br />
+                        }
+                    }
+                </div>
+            }
+            <!--This is where permission for things like likes and comments and critique will be able to be selected should those features be implemented-->
+        </div> <!--permissionsContainer-->
+
+        <div id="permissionsDescription" class="descriptionText col-md-6 right-align">
+        </div>
     </div>
+    
 </div> <!--permissionsSelector-->

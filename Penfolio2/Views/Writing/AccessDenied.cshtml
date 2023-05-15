@@ -19,6 +19,5 @@
 
 @if (ViewBag.AccessRequest)
 {
-    <h4>Send an Individual Access Request</h4>
     @await Component.InvokeAsync("Notification", new { viewName = "CreateAccessRequest", id = ViewBag.AccessPermissionId })
 }

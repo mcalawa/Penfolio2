@@ -39,6 +39,9 @@ namespace Penfolio2.Models
         public bool PublisherAccess { get; set; }
 
         [Required, NotNull]
+        public bool MyAgentAccess { get; set; } = true;
+
+        [Required, NotNull]
         public bool MinorAccess { get; set; }
 
         [Required, NotNull]
@@ -75,6 +78,30 @@ namespace Penfolio2.Models
 
         //[ForeignKey("RequesterId")]
         public virtual PenProfile? Requester { get; set; }
+    }
+
+    public class RepresentationRequest
+    {
+        [Required, Key]
+        public int RepresentationRequestId { get; set; }
+
+        [Required, NotNull]
+        public int RequesterId { get; set; }
+
+        [Required, NotNull]
+        public int RequesteeId { get; set; }
+
+        [Required, NotNull]
+        public DateTime RequestDate { get; set; }
+
+        [Required, NotNull]
+        public bool Resolved { get; set; }
+
+        [ForeignKey("RequesterId")]
+        public virtual PenProfile? Requester { get; set; }
+
+        [ForeignKey("RequesteeId")]
+        public virtual PenProfile? Requestee { get; set; }
     }
 
     public class IndividualAccessGrant

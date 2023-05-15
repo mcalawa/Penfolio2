@@ -28,9 +28,13 @@ namespace Penfolio2.ViewComponents
                     {
                         return View(viewName, new RequestFriendViewModel());
                     }
-                    else
+                    else if(viewName.CompareTo("CreateAccessRequest") == 0)
                     {
                         return View(viewName, new RequestAccessViewModel());
+                    }
+                    else
+                    {
+                        return View(viewName, new RequestRepresentationViewModel());
                     }
                 }
                 else
@@ -49,9 +53,13 @@ namespace Penfolio2.ViewComponents
                     {
                         return View(viewName, new RequestFriendViewModel());
                     }
-                    else
+                    else if (viewName.CompareTo("CreateAccessRequest") == 0)
                     {
                         return View(viewName, new RequestAccessViewModel());
+                    }
+                    else
+                    {
+                        return View(viewName, new RequestRepresentationViewModel());
                     }
                 }
                 else
@@ -80,6 +88,8 @@ namespace Penfolio2.ViewComponents
 
                     List<AuthorsForFriendAccessViewModel> authors = new List<AuthorsForFriendAccessViewModel>();
                     List<PenProfile> penProfiles = new List<PenProfile>();
+
+                    ViewBag.PendingFriendRequest = false;
 
                     //if accessPermission is for a piece of writing
                     if(accessPermission.WritingId != null)
@@ -112,6 +122,14 @@ namespace Penfolio2.ViewComponents
                                 };
 
                                 authors.Add(author);
+
+                                foreach(var userProfile in user.PenProfiles)
+                                {
+                                    if(_db.FriendRequests.Any(i => i.Resolved == false && i.RequesterId == userProfile.ProfileId && i.RequesteeId == profile.ProfileId) || _db.FriendRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == userProfile.ProfileId))
+                                    {
+                                        ViewBag.PendingFriendRequest = true;
+                                    }
+                                }
                             }
                         }
                     } //if accessPermission is for a profile
@@ -128,6 +146,11 @@ namespace Penfolio2.ViewComponents
                                 if(!receiverProfile.Friends.Any(i => i.Active && i.SecondFriendId == profile.ProfileId) && !_db.FriendRequests.Any(i => i.Resolved == false && i.RequesterId == receiverProfile.ProfileId && i.RequesteeId == profile.ProfileId) && !_db.FriendRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiverProfile.ProfileId))
                                 {
                                     penProfiles.Add(profile);
+                                }
+
+                                if(_db.FriendRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiverProfile.ProfileId) || _db.FriendRequests.Any(i => i.Resolved == false && i.RequesterId == receiverProfile.ProfileId && i.RequesteeId == profile.ProfileId))
+                                {
+                                    ViewBag.PendingFriendRequest = true;
                                 }
                             }
                         }
@@ -152,22 +175,29 @@ namespace Penfolio2.ViewComponents
 
                     var accessPermission = _db.AccessPermissions.Where(i => i.AccessPermissionId == id).FirstOrDefault();
 
-                    accessPermission = PopulateAccessPermission(accessPermission);
-
-                    if (accessPermission == null)
+                    if(accessPermission == null)
                     {
-                        return View(viewName, new RequestAccessViewModel());
+                        return View(new RequestAccessViewModel());
                     }
+
+                    accessPermission = PopulateAccessPermission(accessPermission);
 
                     user = PopulatePenUserForAccessRequest(user);
 
                     List<PenProfile> penProfiles = new List<PenProfile>();
+
+                    ViewBag.PendingAccessRequest = false;
 
                     foreach (var profile in user.PenProfiles)
                     {
                         if(!accessPermission.IndividualAccessGrants.Any(i => i.Active && i.GranteeId ==  profile.ProfileId) && !accessPermission.IndividualAccessRevokes.Any(i => i.Active && i.RevokeeId == profile.ProfileId) && !accessPermission.AccessRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId))
                         {
                             penProfiles.Add(profile);
+                        }
+
+                        if(accessPermission.AccessRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId))
+                        {
+                            ViewBag.PendingAccessRequest = true;
                         }
                     }
 
@@ -179,6 +209,75 @@ namespace Penfolio2.ViewComponents
 
                     return View(viewName, model);
                 }
+                else if (viewName.CompareTo("CreateRepresentationRequest") == 0)
+                {
+                    if (id == null)
+                    {
+                        return View(viewName, new RequestRepresentationViewModel());
+                    }
+
+                    var receiver = _db.PenProfiles.Where(i => i.ProfileId == id.Value).FirstOrDefault();
+
+                    if (receiver == null)
+                    {
+                        return View(viewName, new RequestRepresentationViewModel());
+                    }
+
+                    user = PopulatePenUserForRepresentationRequest(user);
+
+                    List<PenProfile> penProfiles = new List<PenProfile>();
+
+                    ViewBag.PendingRepresentationRequest = false;
+                    
+                    receiver = PopulatePenProfileForRepresentationRequest(receiver);
+
+                    //if the receiver is a writing profile
+                    if(receiver.RoleId == 1)
+                    {
+                        foreach(var profile in user.PenProfiles)
+                        {
+                            if(profile.RoleId == 2 && profile.Verified && !profile.PublisherWriters.Any(i => i.Active && i.WriterId == receiver.ProfileId) && !_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiver.ProfileId) && !_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == receiver.ProfileId && i.RequesteeId == profile.ProfileId))
+                            {
+                                penProfiles.Add(profile);
+                            }
+
+                            if(_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiver.ProfileId))
+                            {
+                                ViewBag.PendingRepresentationRequest = true;
+                            }
+                        }
+                    } //if the receiver is a publisher profile
+                    else if (receiver.RoleId == 2)
+                    {
+                        if(!receiver.Verified)
+                        {
+                            return View(viewName, new RequestRepresentationViewModel());
+                        }
+
+                        foreach (var profile in user.PenProfiles)
+                        {
+                            if (profile.RoleId == 1 && !profile.WriterPublishers.Any(i => i.Active && i.PublisherId == receiver.ProfileId) && !_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiver.ProfileId) && !_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == receiver.ProfileId && i.RequesteeId == profile.ProfileId))
+                            {
+                                penProfiles.Add(profile);
+                            }
+
+                            if (_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiver.ProfileId))
+                            {
+                                ViewBag.PendingRepresentationRequest = true;
+                            }
+                        }
+                    }
+
+                    var model = new RequestRepresentationViewModel
+                    {
+                        ReceiverProfileId = id.Value,
+                        RoleName = receiver.UseSecondaryRoleName ? receiver?.PenRole?.SecondaryRoleName : receiver?.PenRole?.RoleName,
+                        PenProfiles = penProfiles
+                    };
+
+                    return View(viewName, model);
+                }
+
             } //if there's a viewName
             
             List<NotificationViewModel> notifications = new List<NotificationViewModel>();
@@ -217,7 +316,8 @@ namespace Penfolio2.ViewComponents
                         {
                             AccessRequest = accessRequest,
                             NotificationDate = accessRequest.RequestDate,
-                            FriendRequest = null
+                            FriendRequest = null,
+                            RepresentationRequest = null
                         };
 
                         notifications.Add(notification);
@@ -231,7 +331,22 @@ namespace Penfolio2.ViewComponents
                     {
                         FriendRequest = friendRequest,
                         NotificationDate = friendRequest.RequestDate,
-                        AccessRequest = null
+                        AccessRequest = null,
+                        RepresentationRequest = null
+                    };
+
+                    notifications.Add(notification);
+                }
+
+                //handle all of the representation requests connected to this profile
+                foreach(var representationRequest in profile.RepresentationRequestsReceived.Where(i => i.Resolved == false))
+                {
+                    NotificationViewModel notification = new NotificationViewModel
+                    {
+                        RepresentationRequest = representationRequest,
+                        NotificationDate = representationRequest.RequestDate,
+                        AccessRequest = null,
+                        FriendRequest = null
                     };
 
                     notifications.Add(notification);
@@ -353,6 +468,33 @@ namespace Penfolio2.ViewComponents
             return user;
         }
 
+        protected PenUser PopulatePenUserForRepresentationRequest(PenUser user)
+        {
+            List<PenProfile> profiles;
+            List<PenProfile> populatedProfiles = new List<PenProfile>();
+
+            //Populate PenProfiles Stage 1
+            if (user.PenProfiles.Count == 0)
+            {
+                profiles = _db.PenProfiles.Where(i => i.UserId == user.Id).ToList();
+            }
+            else
+            {
+                profiles = user.PenProfiles.ToList();
+            }
+
+            //Populate PenProfiles Stage 2
+            foreach (var profile in profiles)
+            {
+                populatedProfiles.Add(PopulatePenProfileForRepresentationRequest(profile));
+            }
+
+            //Populate PenProfiles Stage 3
+            user.PenProfiles = populatedProfiles;
+
+            return user;
+        }
+
         protected PenProfile PopulatePenProfile(PenProfile profile)
         {
             List<WritingProfile> writingProfiles;
@@ -360,6 +502,9 @@ namespace Penfolio2.ViewComponents
 
             List<FriendRequest> friendRequests;
             List<FriendRequest> populatedFriendRequests = new List<FriendRequest>();
+
+            List<RepresentationRequest> representationRequests;
+            List<RepresentationRequest> populatedRepresentationRequests = new List<RepresentationRequest>();
 
             //Populate PenRole
             if(profile.PenRole == null)
@@ -417,6 +562,45 @@ namespace Penfolio2.ViewComponents
             //Populate FolderOwners; TBD because this is not implemented yet
 
             //Populate SeriesOwners; TBD because this is not implemented yet
+
+            //Populate RepresentationRequestsReceived Stage 1
+            if(profile.RepresentationRequestsReceived.Count == 0)
+            {
+                representationRequests = _db.RepresentationRequests.Where(i => i.RequesteeId == profile.ProfileId).ToList();
+            }
+            else
+            {
+                representationRequests = profile.RepresentationRequestsReceived.ToList();
+            }
+
+            //Populate RepresentationRequestsReceived Stage 2
+            foreach(var representationRequest in representationRequests)
+            {
+                PenProfile? requester;
+
+                if(representationRequest.Requester == null)
+                {
+                    requester = _db.PenProfiles.Where(i => i.ProfileId == representationRequest.RequesterId).FirstOrDefault();
+                }
+                else
+                {
+                    requester = representationRequest.Requester;
+                }
+
+                if(requester != null)
+                {
+                    if(requester.PenRole == null)
+                    {
+                        requester.PenRole = _db.ProfileRoles.Where(i => i.RoleId == requester.RoleId).FirstOrDefault();
+                    }
+
+                    representationRequest.Requester = requester;
+                    populatedRepresentationRequests.Add(representationRequest);
+                }
+            }
+
+            //Populate RepresentationRequestsReceived Stage 3
+            profile.RepresentationRequestsReceived = populatedRepresentationRequests;
 
             //Populate FriendRequestsRecieved Stage 1
             if(profile.FriendRequestsReceived.Count == 0)
@@ -633,6 +817,109 @@ namespace Penfolio2.ViewComponents
             }
 
             profile.AccessPermission = PopulateAccessPermission(profile.AccessPermission);
+
+            return profile;
+        }
+
+        protected PenProfile PopulatePenProfileForRepresentationRequest(PenProfile profile)
+        {
+            List<PublisherWriter> publisherWriters;
+            List<PublisherWriter> populatedPublisherWriters = new List<PublisherWriter>();
+
+            List<PublisherWriter> writerPublishers;
+            List<PublisherWriter> populatedWriterPublishers = new List<PublisherWriter>();
+
+            //Populate PenRole
+            if (profile.PenRole == null)
+            {
+                profile.PenRole = _db.ProfileRoles.Where(i => i.RoleId == profile.RoleId).FirstOrDefault();
+            }
+
+            //Populate PublisherWriters Stage 1
+            if(profile.RoleId == 1)
+            {
+                publisherWriters = new List<PublisherWriter>();
+            }
+            else if(profile.PublisherWriters.Count == 0)
+            {
+                publisherWriters = _db.PublisherWriters.Where(i => i.PublisherId == profile.ProfileId && i.Active).ToList();
+            }
+            else
+            {
+                publisherWriters = profile.PublisherWriters.Where(i => i.Active).ToList();
+            }
+
+            //Populate PublisherWriters Stage 2
+            foreach(var publisherWriter in publisherWriters)
+            {
+                PenProfile? writer;
+
+                if(publisherWriter.Writer == null)
+                {
+                    writer = _db.PenProfiles.Where(i => i.ProfileId == publisherWriter.WriterId).FirstOrDefault();
+                }
+                else
+                {
+                    writer = publisherWriter.Writer;
+                }
+
+                if(writer != null)
+                {
+                    if(writer.PenRole == null)
+                    {
+                        writer.PenRole = _db.ProfileRoles.Where(i => i.RoleId == writer.RoleId).FirstOrDefault();
+                    }
+
+                    publisherWriter.Writer = writer;
+                    populatedPublisherWriters.Add(publisherWriter);
+                }
+            }
+
+            //Populate PublisherWriters Stage 3
+            profile.PublisherWriters = populatedPublisherWriters;
+
+            //Populate WriterPublishers Stage 1
+            if (profile.RoleId == 2)
+            {
+                writerPublishers = new List<PublisherWriter>();
+            }
+            else if (profile.WriterPublishers.Count == 0)
+            {
+                writerPublishers = _db.PublisherWriters.Where(i => i.WriterId == profile.ProfileId && i.Active).ToList();
+            }
+            else
+            {
+                writerPublishers = profile.WriterPublishers.Where(i => i.Active).ToList();
+            }
+
+            //Populate WriterPublishers Stage 2
+            foreach (var writerPublisher in writerPublishers)
+            {
+                PenProfile? publisher;
+
+                if (writerPublisher.Publisher == null)
+                {
+                    publisher = _db.PenProfiles.Where(i => i.ProfileId == writerPublisher.PublisherId).FirstOrDefault();
+                }
+                else
+                {
+                    publisher = writerPublisher.Publisher;
+                }
+
+                if (publisher != null)
+                {
+                    if (publisher.PenRole == null)
+                    {
+                        publisher.PenRole = _db.ProfileRoles.Where(i => i.RoleId == publisher.RoleId).FirstOrDefault();
+                    }
+
+                    writerPublisher.Publisher = publisher;
+                    populatedWriterPublishers.Add(writerPublisher);
+                }
+            }
+
+            //Populate WriterPublishers Stage 3
+            profile.WriterPublishers = populatedWriterPublishers;
 
             return profile;
         }

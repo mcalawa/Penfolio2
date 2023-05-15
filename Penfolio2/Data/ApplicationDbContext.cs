@@ -67,6 +67,8 @@ namespace Penfolio2.Data
         public virtual DbSet<WritingGenre> WritingGenres { get; set; }
         public virtual DbSet<WritingProfile> WritingProfiles { get; set; }
         public virtual DbSet<WritingSeries> WritingSeries { get; set; }
+        public virtual DbSet<PublisherWriter> PublisherWriters { get; set; }
+        public virtual DbSet<RepresentationRequest> RepresentationRequests { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -237,6 +239,26 @@ namespace Penfolio2.Data
                 entity?.HasMany(p => p.LikesMade)
                       ?.WithOne(d => d.Liker)
                       ?.HasForeignKey(d => d.LikerId)
+                      ?.OnDelete(DeleteBehavior.Restrict);
+
+                entity?.HasMany(p => p.PublisherWriters)
+                      ?.WithOne(d => d.Publisher)
+                      ?.HasForeignKey(d => d.PublisherId)
+                      ?.OnDelete(DeleteBehavior.Restrict);
+
+                entity?.HasMany(p => p.WriterPublishers)
+                      ?.WithOne(d => d.Writer)
+                      ?.HasForeignKey(d => d.WriterId)
+                      ?.OnDelete(DeleteBehavior.Restrict);
+
+                entity?.HasMany(p => p.RepresentationRequestsReceived)
+                      ?.WithOne(d => d.Requestee)
+                      ?.HasForeignKey(d => d.RequesteeId)
+                      ?.OnDelete(DeleteBehavior.Restrict);
+
+                entity?.HasMany(p => p.RepresentationRequestsSent)
+                      ?.WithOne(d => d.Requester)
+                      ?.HasForeignKey(d => d.RequesterId)
                       ?.OnDelete(DeleteBehavior.Restrict);
             });
             modelBuilder.Entity<UserBlock>(entity =>
@@ -677,6 +699,18 @@ namespace Penfolio2.Data
                 entity.ToTable("CritiqueGiver");
 
                 entity.HasKey(x => x.CritiqueGiverId);
+            });
+            modelBuilder.Entity<PublisherWriter>(entity =>
+            {
+                entity.ToTable("PublisherWriter");
+
+                entity.HasKey(x => x.PublisherWriterId);
+            });
+            modelBuilder.Entity<RepresentationRequest>(entity =>
+            {
+                entity.ToTable("RepresentationRequest");
+
+                entity.HasKey(x => x.RepresentationRequestId);
             });
         }
 

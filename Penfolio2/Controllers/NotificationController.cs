@@ -626,6 +626,253 @@ namespace Penfolio2.Controllers
             return RedirectToAction("NotificationError");
         }
 
+        public ActionResult AcceptRepresentationRequest(int id)
+        {
+            var userId = GetUserId();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = GetUserById(userId);
+
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (user.PenProfiles.Count == 0)
+            {
+                user.PenProfiles = db.PenProfiles.Where(i => i.UserId == userId).ToList();
+            }
+
+            var representationRequest = db.RepresentationRequests.Where(i => i.RepresentationRequestId == id).FirstOrDefault();
+
+            if (representationRequest == null)
+            {
+                return RedirectToAction("NotificationError");
+            }
+
+            if(representationRequest.Requester == null)
+            {
+                representationRequest.Requester = db.PenProfiles.Where(i => i.ProfileId == representationRequest.RequesterId).FirstOrDefault();
+            }
+
+            if (representationRequest.Requester == null)
+            {
+                return RedirectToAction("NotificationError");
+            }
+
+            if (representationRequest.Requestee == null)
+            {
+                representationRequest.Requestee = db.PenProfiles.Where(i => i.ProfileId == representationRequest.RequesteeId).FirstOrDefault();
+            }
+
+            if (representationRequest.Requestee == null)
+            {
+                return RedirectToAction("NotificationError");
+            }
+
+            if(representationRequest.Requestee.RoleId == representationRequest.Requester.RoleId)
+            {
+                return RedirectToAction("NotificationError");
+            }
+
+            if(representationRequest.Requestee.UserId != userId)
+            {
+                return RedirectToAction("NotificationError");
+            }
+
+            //if the one accepting the request is a writer profile
+            if(representationRequest.Requestee.RoleId == 1)
+            {
+                if(!representationRequest.Requester.Verified)
+                {
+                    return RedirectToAction("NotificationError");
+                }
+
+                //check and see if there's already an active relationship
+                if(db.PublisherWriters.Any(i => i.Active && i.WriterId == representationRequest.RequesteeId && i.PublisherId == representationRequest.RequesterId))
+                {
+                    List<PublisherWriter> activePublisherWriters = db.PublisherWriters.Where(i => i.Active && i.WriterId == representationRequest.RequesteeId && i.PublisherId == representationRequest.RequesterId).ToList();
+                    PublisherWriter mostRecentActivePublisherWriter = activePublisherWriters.First();
+
+                    foreach(var publisherWriter in activePublisherWriters)
+                    {
+                        if(publisherWriter != mostRecentActivePublisherWriter)
+                        {
+                            publisherWriter.Active = false;
+                            db.Entry(publisherWriter).State = EntityState.Modified;
+                            db.SaveChanges();
+                        }
+                    }
+                } //if there isn't an active relationship, we have to create one
+                else
+                {
+                    PublisherWriter publisherWriter = new PublisherWriter
+                    {
+                        PublisherId = representationRequest.RequesterId,
+                        WriterId = representationRequest.RequesteeId,
+                        Active = true,
+                        AcceptDate = DateTime.Now
+                    };
+
+                    db.PublisherWriters.Add(publisherWriter);
+                    db.SaveChanges();
+                }
+            } //if the one accepting the request is a publisher profile
+            else if(representationRequest.Requestee.RoleId == 2)
+            {
+                if (!representationRequest.Requestee.Verified)
+                {
+                    return RedirectToAction("NotificationError");
+                }
+
+                //check and see if there's already an active relationship
+                if (db.PublisherWriters.Any(i => i.Active && i.WriterId == representationRequest.RequesterId && i.PublisherId == representationRequest.RequesteeId))
+                {
+                    List<PublisherWriter> activePublisherWriters = db.PublisherWriters.Where(i => i.Active && i.WriterId == representationRequest.RequesterId && i.PublisherId == representationRequest.RequesteeId).ToList();
+                    PublisherWriter mostRecentActivePublisherWriter = activePublisherWriters.First();
+
+                    foreach (var publisherWriter in activePublisherWriters)
+                    {
+                        if (publisherWriter != mostRecentActivePublisherWriter)
+                        {
+                            publisherWriter.Active = false;
+                            db.Entry(publisherWriter).State = EntityState.Modified;
+                            db.SaveChanges();
+                        }
+                    }
+                } //if there isn't an active relationship, we have to create one
+                else
+                {
+                    PublisherWriter publisherWriter = new PublisherWriter
+                    {
+                        PublisherId = representationRequest.RequesteeId,
+                        WriterId = representationRequest.RequesterId,
+                        Active = true,
+                        AcceptDate = DateTime.Now
+                    };
+
+                    db.PublisherWriters.Add(publisherWriter);
+                    db.SaveChanges();
+                }
+            }
+
+            user.LastNotificationViewDate = DateTime.Now;
+            db.Entry(user).State = EntityState.Modified;
+            db.SaveChanges();
+
+            representationRequest.Resolved = true;
+            db.Entry(representationRequest).State = EntityState.Modified;
+            db.SaveChanges();
+
+            return RedirectToAction("Index", "Profile", new { id = representationRequest.Requestee.UrlString });
+        }
+
+        public ActionResult DeclineRepresentationRequest(int id)
+        {
+            var userId = GetUserId();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = GetUserById(userId);
+
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (user.PenProfiles.Count == 0)
+            {
+                user.PenProfiles = db.PenProfiles.Where(i => i.UserId == userId).ToList();
+            }
+
+            var representationRequest = db.RepresentationRequests.Where(i => i.RepresentationRequestId == id).FirstOrDefault();
+            var accessRequest = db.AccessRequests.Where(i => i.AccessRequestId == id).FirstOrDefault();
+
+            if (representationRequest == null)
+            {
+                return RedirectToAction("NotificationError");
+            }
+
+            if (representationRequest.Requester == null)
+            {
+                representationRequest.Requester = db.PenProfiles.Where(i => i.ProfileId == representationRequest.RequesterId).FirstOrDefault();
+            }
+
+            if (representationRequest.Requester == null)
+            {
+                return RedirectToAction("NotificationError");
+            }
+
+            if (representationRequest.Requestee == null)
+            {
+                representationRequest.Requestee = db.PenProfiles.Where(i => i.ProfileId == representationRequest.RequesteeId).FirstOrDefault();
+            }
+
+            if (representationRequest.Requestee == null)
+            {
+                return RedirectToAction("NotificationError");
+            }
+
+            if (representationRequest.Requestee.RoleId == representationRequest.Requester.RoleId)
+            {
+                return RedirectToAction("NotificationError");
+            }
+
+            if(representationRequest.Requestee.UserId != userId)
+            {
+                return RedirectToAction("NotificationError");
+            }
+
+            //if the one declining the request is the writer
+            if(representationRequest.Requestee.RoleId == 1)
+            {
+                //check and see if there are any active PublisherWriters
+                if(db.PublisherWriters.Any(i => i.Active && i.WriterId == representationRequest.RequesteeId && i.PublisherId == representationRequest.RequesterId))
+                {
+                    List<PublisherWriter> activePublisherWriters = db.PublisherWriters.Where(i => i.Active && i.WriterId == representationRequest.RequesteeId && i.PublisherId == representationRequest.RequesterId).ToList();
+
+                    foreach(var activePublisherWriter in activePublisherWriters)
+                    {
+                        activePublisherWriter.Active = false;
+                        db.Entry(activePublisherWriter).State = EntityState.Modified;
+                        db.SaveChanges();
+                    }
+                }
+            } //if the one decling the request is the publisher
+            else if(representationRequest.Requestee.RoleId == 2)
+            {
+                //check and see if there are any active PublisherWriters
+                if (db.PublisherWriters.Any(i => i.Active && i.WriterId == representationRequest.RequesterId && i.PublisherId == representationRequest.RequesteeId))
+                {
+                    List<PublisherWriter> activePublisherWriters = db.PublisherWriters.Where(i => i.Active && i.WriterId == representationRequest.RequesterId && i.PublisherId == representationRequest.RequesteeId).ToList();
+
+                    foreach (var activePublisherWriter in activePublisherWriters)
+                    {
+                        activePublisherWriter.Active = false;
+                        db.Entry(activePublisherWriter).State = EntityState.Modified;
+                        db.SaveChanges();
+                    }
+                }
+            }
+
+            user.LastNotificationViewDate = DateTime.Now;
+            db.Entry(user).State = EntityState.Modified;
+            db.SaveChanges();
+
+            representationRequest.Resolved = true;
+            db.Entry(representationRequest).State = EntityState.Modified;
+            db.SaveChanges();
+
+            return RedirectToAction("Index", "Profile", new { id = representationRequest.Requestee.UrlString });
+        }
+
         public ActionResult RemoveFriend(int id)
         {
             var userId = GetUserId();
@@ -867,6 +1114,74 @@ namespace Penfolio2.Controllers
             }
         }
 
+        public ActionResult RemoveRepresentation(int id)
+        {
+            var userId = GetUserId();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = GetUserById(userId);
+
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (user.PenProfiles.Count == 0)
+            {
+                user.PenProfiles = db.PenProfiles.Where(i => i.UserId == userId).ToList();
+            }
+
+            var publisherWriter = db.PublisherWriters.Where(i => i.PublisherWriterId == id).FirstOrDefault();
+
+            if (publisherWriter == null)
+            {
+                return RedirectToAction("NotificationError");
+            }
+
+            if (!db.PenProfiles.Any(i => i.ProfileId == publisherWriter.WriterId) || !db.PenProfiles.Any(i => i.ProfileId == publisherWriter.PublisherId))
+            {
+                return RedirectToAction("NotificationError");
+            }
+
+            PenProfile publisher = db.PenProfiles.Where(i => i.ProfileId == publisherWriter.PublisherId).First();
+            PenProfile writer = db.PenProfiles.Where(i => i.ProfileId == publisherWriter.WriterId).First();
+
+            if(user.PenProfiles.Select(i => i.ProfileId).ToList().Contains(publisher.ProfileId))
+            {
+                List<PublisherWriter> activePublisherWriters = db.PublisherWriters.Where(i => i.Active && i.WriterId == writer.ProfileId && i.PublisherId == publisher.ProfileId).ToList();
+
+                foreach(var activePublisherWriter in activePublisherWriters)
+                {
+                    activePublisherWriter.Active = false;
+                    db.Entry(activePublisherWriter).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
+                return RedirectToAction("Index", "Profile", new { id = publisher.UrlString });
+            }
+            else if(user.PenProfiles.Select(i => i.ProfileId).ToList().Contains(writer.ProfileId))
+            {
+                List<PublisherWriter> activePublisherWriters = db.PublisherWriters.Where(i => i.Active && i.WriterId == writer.ProfileId && i.PublisherId == publisher.ProfileId).ToList();
+
+                foreach (var activePublisherWriter in activePublisherWriters)
+                {
+                    activePublisherWriter.Active = false;
+                    db.Entry(activePublisherWriter).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
+                return RedirectToAction("Index", "Profile", new { id = writer.UrlString });
+            }
+            else
+            {
+                return RedirectToAction("NotificationError");
+            }
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SendFriendRequest(RequestFriendViewModel model)
@@ -971,9 +1286,7 @@ namespace Penfolio2.Controllers
 
                     AccessPermission accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == model.AccessPermissionId).First();
 
-                    accessPermission = PopulateAccessPermission(accessPermission);
-
-                    if(!accessPermission.IndividualAccessGrants.Any(i => i.Active && i.GranteeId == model.ProfileId.Value) &&  !accessPermission.IndividualAccessRevokes.Any(i => i.Active && i.RevokeeId == model.ProfileId.Value) && !accessPermission.AccessRequests.Any(i => i.Resolved == false && i.RequesterId == model.ProfileId.Value))
+                    if(!db.IndividualAccessGrants.Any(i => i.AccessPermissionId == model.AccessPermissionId && i.Active && i.GranteeId == model.ProfileId.Value) &&  !db.IndividualAccessRevokes.Any(i => i.Active && i.AccessPermissionId == model.AccessPermissionId && i.RevokeeId == model.ProfileId.Value) && !db.AccessRequests.Any(i => i.Resolved == false && i.AccessPermissionId == model.AccessPermissionId && i.RequesterId == model.ProfileId.Value))
                     {
                         AccessRequest accessRequest = new AccessRequest
                         {
@@ -1002,6 +1315,73 @@ namespace Penfolio2.Controllers
                     {
                         return RedirectToAction("ViewWriting", "Writing", new { id = accessPermission.WritingId });
                     }
+                }
+            }
+
+            return RedirectToAction("NotificationError");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SendRepresentationRequest(RequestRepresentationViewModel model)
+        {
+            var userId = GetUserId();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = GetUserById(userId);
+
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (user.PenProfiles.Count == 0)
+            {
+                user.PenProfiles = db.PenProfiles.Where(i => i.UserId == userId).ToList();
+            }
+
+            if (ModelState.IsValid && model.SenderProfileId != null)
+            {
+                if(db.PenProfiles.Any(i => i.ProfileId == model.SenderProfileId.Value) && db.PenProfiles.Any(i => i.ProfileId == model.ReceiverProfileId))
+                {
+                    PenProfile sender = db.PenProfiles.Where(i => i.ProfileId == model.SenderProfileId.Value).First();
+                    PenProfile receiver = db.PenProfiles.Where(i => i.ProfileId == model.ReceiverProfileId).First();
+
+                    if(sender.UserId != userId)
+                    {
+                        return RedirectToAction("NotificationError");
+                    }
+
+                    if(sender.RoleId == 2 && !sender.Verified)
+                    {
+                        return RedirectToAction("NotificationError");
+                    }
+
+                    if(receiver.RoleId == 2 && !receiver.Verified)
+                    {
+                        return RedirectToAction("NotificationError");
+                    }
+
+                    //if there isn't already an unresolved representation request, create one
+                    if(!db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == sender.ProfileId && i.RequesteeId == receiver.ProfileId) && !db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == receiver.ProfileId && i.RequesteeId == sender.ProfileId))
+                    {
+                        RepresentationRequest representationRequest = new RepresentationRequest
+                        {
+                            RequesterId = sender.ProfileId,
+                            RequesteeId = receiver.ProfileId,
+                            Resolved = false,
+                            RequestDate = DateTime.Now
+                        };
+
+                        db.RepresentationRequests.Add(representationRequest);
+                        db.SaveChanges();
+                    }
+
+                    return RedirectToAction("Index", "Profile", new { id = receiver.UrlString });
                 }
             }
 

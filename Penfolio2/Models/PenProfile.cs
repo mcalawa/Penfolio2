@@ -23,6 +23,10 @@ namespace Penfolio2.Models
             LikesReceived = new HashSet<Like>();
             Following = new HashSet<FollowerFollowing>();
             Followers = new HashSet<FollowerFollowing>();
+            PublisherWriters = new HashSet<PublisherWriter>();
+            WriterPublishers = new HashSet<PublisherWriter>();
+            RepresentationRequestsReceived = new HashSet<RepresentationRequest>();
+            RepresentationRequestsSent = new HashSet<RepresentationRequest>();
         }
 
         [Required]
@@ -114,5 +118,17 @@ namespace Penfolio2.Models
 
         [ForeignKey("ProfileId")]
         public virtual ICollection<FollowerFollowing> Followers { get; set; }
+
+        [ForeignKey("WriterId")]
+        public virtual ICollection<PublisherWriter> WriterPublishers { get; set; }
+
+        [ForeignKey("PublisherId")]
+        public virtual ICollection<PublisherWriter> PublisherWriters { get; set; }
+
+        [ForeignKey("RequesterId")]
+        public virtual ICollection<RepresentationRequest> RepresentationRequestsSent { get; set; }
+
+        [ForeignKey("RequesteeId")]
+        public virtual ICollection<RepresentationRequest> RepresentationRequestsReceived { get; set; }
     }
 }
