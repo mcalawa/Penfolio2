@@ -41,7 +41,21 @@ https://blog.elmah.io/how-to-get-base-url-in-asp-net-core/ How to get base URL
 CSS:
 https://stackoverflow.com/questions/572768/styling-an-input-type-file-button Styling the file upload button
 https://moderncss.dev/pure-css-custom-checkbox-style/ Styling a custom checkbox
-https://www.lambdatest.com/blog/css-select/ Styling select
+https://www.w3schools.com/howto/howto_css_notification_button.asp Notification button
 
 Other:
 https://www.publicdomainpictures.net/en/view-image.php?image=75286&picture=ink-amp-feather-quill-clipart Public domain image for the default user icons.
+https://fontawesome.com/ Free icons
+https://quilljs.com/ Quill rich text editor
+
+Stuff for expansion:
+https://demos.webspellchecker.com/wproofreader-quill.html Spell checker for Quill editor
+
+Potentially useful Font Awesome icons:
+user
+download
+twitter
+image
+phone
+heart
+github
