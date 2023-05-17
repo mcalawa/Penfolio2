@@ -1,52 +1,134 @@
 ﻿@model Penfolio2.Models.RequestRepresentationViewModel
 @{
+    List<PenProfile> penProfilesForAuthor = Model.Authors.Count > 0 && Model.Authors.First().WriterPublishers.Count > 0 ? Model.PenProfiles.Except(Model.Authors.First().WriterPublishers.Select(i => i.Publisher).ToList()).ToList() : Model.PenProfiles.ToList();
+    penProfilesForAuthor = new List<PenProfile>();
+
+    foreach (var profile in Model.PenProfiles)
+    {
+        if (Model.Authors.Count > 0)
+        {
+            var firstAuthor = Model.Authors.First();
+
+            if (!firstAuthor.WriterPublishers.Any(i => i.Active && i.PublisherId == profile.ProfileId) && !profile.RepresentationRequestsReceived.Any(i => i.Resolved == false && i.RequesterId == firstAuthor.ProfileId && i.RequesteeId == profile.ProfileId) && !profile.RepresentationRequestsSent.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == firstAuthor.ProfileId))
+            {
+                penProfilesForAuthor.Add(profile);
+            }
+        }
+    }
+
+    List<PenProfile> UpdatePenProfilesForAuthor(int profileId)
+    {
+        if (Model.Authors.Any(i => i.ProfileId == profileId))
+        {
+            var selectedAuthor = Model.Authors.Where(i => i.ProfileId == profileId).First();
+            penProfilesForAuthor = new List<PenProfile>();
+
+            foreach (var profile in Model.PenProfiles)
+            {
+                if (!selectedAuthor.WriterPublishers.Any(i => i.Active && i.PublisherId == profile.ProfileId) && !profile.RepresentationRequestsReceived.Any(i => i.Resolved == false && i.RequesterId == selectedAuthor.ProfileId && i.RequesteeId == profile.ProfileId) && !profile.RepresentationRequestsSent.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == selectedAuthor.ProfileId))
+                {
+                    penProfilesForAuthor.Add(profile);
+                }
+            }
+
+            return penProfilesForAuthor;
+        }
+        else
+        {
+            return Model.PenProfiles.ToList();
+        }
+    }
 }
 @if (Model.PenProfiles.Count > 0)
 {
+    <br />
     <h4>Send a Representation Request</h4>
     <form method="post" asp-action="SendRepresentationRequest" asp-controller="Notification">
         <ul class="profileList navbar-nav">
-            @if(Model.PenProfiles.Any(i => i.RoleId == 1))
+            @if(Model.Authors.Count > 0)
             {
                 <li>
-                    Send a request for this @Model.RoleName to represent your writer profile
+                    Send a request to represent 
                 </li>
-            }
-            else if(Model.PenProfiles.Any(i => i.RoleId == 2))
-            {
                 <li>
-                    Send a request to represent this writer profile as 
+                    <select asp-for="ReceiverProfileId" onchange="@penProfilesForAuthor = @UpdatePenProfilesForAuthor(Model.ReceiverProfileId);">
+                        @for (int i = 0; i < Model.Authors.Count; i++)
+                        {
+                            int count = i + 1;
+                            <option value="@Model.Authors.ElementAt(i).ProfileId">@Model.Authors.ElementAt(i).DisplayName (Author @count)</option>
+                        }
+                    </select>
+                </li>
+                <li>
+                    as
+                </li>
+                <li>
+                    <select asp-for="SenderProfileId">
+                        @foreach (var profile in penProfilesForAuthor)
+                        {
+                            <option value="@profile?.ProfileId">
+                                @profile.DisplayName (@if (profile.UseSecondaryRoleName)
+                                {
+                                    @profile?.PenRole?.SecondaryRoleName
+                                }
+                                else
+                                {
+                                    @profile?.PenRole?.RoleName
+                                })
+                            </option>
+                        }
+                    </select>
+                </li>
+                <li>
+                    <input type="submit" value="Send" />
                 </li>
             }
-            <li>
-                <select asp-for="SenderProfileId">
-                    @foreach (var profile in Model.PenProfiles)
-                    {
-                        <option value="@profile?.ProfileId">
-                            @profile.DisplayName @if (Model.PenProfiles.Any(i => i.RoleId == 2))
-                            {
-                                <span>
-                                    (@if (profile.UseSecondaryRoleName)
-                                    {
-                                        @profile?.PenRole?.SecondaryRoleName
-                                    }
-                                    else if (profile.RoleId == 2)
-                                    {
-                                        @profile?.PenRole?.RoleName
-                                    })
-                                </span>
-                            }
-                        </option>
-                    }
-                </select>
-            </li>
-            <li>
-                <input type="hidden" asp-for="ReceiverProfileId" value="@Model.ReceiverProfileId" /><input type="submit" value="Send" />
-            </li>
+            else
+            {
+                @if(Model.PenProfiles.Any(i => i.RoleId == 1))
+                {
+                    <li>
+                        Send a request for this @Model.RoleName to represent your writer profile
+                    </li>
+                }
+                else if(Model.PenProfiles.Any(i => i.RoleId == 2))
+                {
+                    <li>
+                        Send a request to represent this writer profile as 
+                    </li>
+                }
+                <li>
+                    <select asp-for="SenderProfileId">
+                        @foreach (var profile in Model.PenProfiles)
+                        {
+                            <option value="@profile?.ProfileId">
+                                @profile.DisplayName @if (Model.PenProfiles.Any(i => i.RoleId == 2))
+                                {
+                                    <span>
+                                        (@if (profile.UseSecondaryRoleName)
+                                        {
+                                            @profile?.PenRole?.SecondaryRoleName
+                                        }
+                                        else if (profile.RoleId == 2)
+                                        {
+                                            @profile?.PenRole?.RoleName
+                                        })
+                                    </span>
+                                }
+                            </option>
+                        }
+                    </select>
+                </li>
+                <li>
+                    <input type="hidden" asp-for="ReceiverProfileId" value="@Model.ReceiverProfileId" /><input type="submit" value="Send" />
+                </li>
+            }
         </ul>
     </form>
 }
 else if (ViewBag.PendingRepresentationRequest)
 {
+    <br />
+    <h4>Send a Representation Request</h4>
     <p>Your representation request has been sent. Wait to hear back!</p>
 }

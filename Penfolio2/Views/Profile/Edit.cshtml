@@ -59,6 +59,11 @@
                     <input asp-for="PublisherAccess" onchange='changeAccess("publisher-access")' /> @Html.DisplayNameFor(model => model.PublisherAccess)
                 </label>
             </div>
+            <div class="formItem checkItem2" id="my-agent-access">
+                <label class="formLabel">
+                    <input asp-for="MyAgentAccess" onchange='changeAccess("my-agent-access)' /> @Html.DisplayNameFor(model => model.MyAgentAccess)
+                </label>
+            </div>
             <div class="formItem checkItem2">
                 <label class="formLabel">
                     <input asp-for="MinorAccess" /> @Html.DisplayNameFor(model => model.MinorAccess)

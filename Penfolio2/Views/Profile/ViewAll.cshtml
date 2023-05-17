@@ -1,0 +1,14 @@
+﻿@model IEnumerable<Penfolio2.Models.PenProfile>
+@{
+}
+<h2>Profiles</h2>
+@foreach(var profile in Model) {
+    var roleName = profile.UseSecondaryRoleName && profile.RoleId == 2 ? "Literary Agent" : profile.RoleId == 2 ? "Publisher" : "Writer";
+    <div class="profile">
+        <img class="profileImageSmall" src="data:image/*;base64,@(Convert.ToBase64String(profile.ProfileImage))"> <a href="/Profile/@profile.UrlString">@profile.DisplayName (@roleName)</a>@if (profile.Verified)
+        {
+            <span class="verified"><i class="fa-solid fa-circle-check" alt="Verified"></i></span>
+        }<br />
+    </div>
+    
+}

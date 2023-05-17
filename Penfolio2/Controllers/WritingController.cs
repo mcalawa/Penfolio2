@@ -31,6 +31,44 @@ namespace Penfolio2.Controllers
             return View(writings);
         }
 
+        [Route("Writing/MyWriting")]
+        public ActionResult MyWriting()
+        {
+            List<Writing> myWriting = new List<Writing>();
+            var userId = GetUserId();
+
+            if(userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if(!db.Users.Any(i => i.Id == userId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = GetUserById(userId);
+
+            foreach(var profile in user.PenProfiles.Where(i => i.RoleId == 1))
+            {
+                List<WritingProfile> writingProfiles = db.WritingProfiles.Where(i => i.ProfileId == profile.ProfileId).ToList();
+
+                foreach(var writingProfile in writingProfiles)
+                {
+                    var writing = db.Writings.Where(i => i.WritingId == writingProfile.WritingId).FirstOrDefault();
+
+                    if(writing != null)
+                    {
+                        myWriting.Add(writing);
+                    }
+                }
+            }
+
+            myWriting = OrderByNewest(myWriting.Distinct().ToList());
+
+            return View(myWriting);
+        }
+
         public List<Writing> OrderByNewest(List<Writing> writings)
         {
             return writings.OrderByDescending(i => i.EditDate == null ? i.AddDate : i.EditDate).ToList();
@@ -372,6 +410,7 @@ namespace Penfolio2.Controllers
                     PublicAccess = model.PublicAccess,
                     FriendAccess = model.FriendAccess,
                     PublisherAccess = model.PublisherAccess,
+                    MyAgentAccess = model.MyAgentAccess,
                     MinorAccess = model.MinorAccess,
                     ShowsUpInSearch = model.ShowsUpInSearch
                 };
@@ -520,6 +559,7 @@ namespace Penfolio2.Controllers
                 PublicAccess = writing.AccessPermission.PublicAccess,
                 FriendAccess = writing.AccessPermission.FriendAccess,
                 PublisherAccess = writing.AccessPermission.PublisherAccess,
+                MyAgentAccess = writing.AccessPermission.MyAgentAccess,
                 MinorAccess = writing.AccessPermission.MinorAccess,
                 ShowsUpInSearch = writing.AccessPermission.ShowsUpInSearch,
                 WritingProfiles = writingProfiles,
@@ -829,6 +869,14 @@ namespace Penfolio2.Controllers
                 if(accessPermission.PublisherAccess != model.PublisherAccess)
                 {
                     accessPermission.PublisherAccess = model.PublisherAccess;
+                    db.Entry(accessPermission).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
+                //update my agent access
+                if(accessPermission.MyAgentAccess != model.MyAgentAccess)
+                {
+                    accessPermission.MyAgentAccess = model.MyAgentAccess;
                     db.Entry(accessPermission).State = EntityState.Modified;
                     db.SaveChanges();
                 }
@@ -1218,6 +1266,13 @@ namespace Penfolio2.Controllers
             foreach (IdentityError error in errors)
             {
                 errorString += error.Description + " ";
+            }
+
+            ViewBag.RepresentationRequest = false;
+
+            if(errorString.Contains("represent the owner"))
+            {
+                ViewBag.RepresentationRequest = true;
             }
 
             ViewBag.FriendRequest = false;

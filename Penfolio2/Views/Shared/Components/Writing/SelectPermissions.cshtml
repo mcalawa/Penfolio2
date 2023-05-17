@@ -45,6 +45,18 @@
                         }
                     </label>
                 </div>
+                <div class="formItem" onmouseover='showExplanation("permissionsDescription", "If you would like even more control over who can access your writing, this option allows it to be accessed by a publisher or literary agent who is representing a writer profile that is one of the authors. This means that by selecting this option and not allowing general publisher access, you can limit which publishers are able to access what you&#39;ve written. Since this option is limiting which publishers and literary agents are able to view your work, it is automatically selected when you allow publisher access, and publisher access is automatically removed if you uncheck this item.")' id="my-agent-access">
+                    <label>
+                        @if(Model.MyAgentAccess)
+                        {
+                            <input asp-for="MyAgentAccess" onfocus='showExplanation("permissionsDescription", "If you would like even more control over who can access your writing, this option allows it to be accessed by a publisher or literary agent who is representing a writer profile that is one of the authors. This means that by selecting this option and not allowing general publisher access, you can limit which publishers are able to access what you&#39;ve written. Since this option is limiting which publishers and literary agents are able to view your work, it is automatically selected when you allow publisher access, and publisher access is automatically removed if you uncheck this item.")' onchange='changeAccess("my-agent-access")' checked /> @Html.DisplayNameFor(model => model.MyAgentAccess)
+                        }
+                        else
+                        {
+                            <input asp-for="MyAgentAccess" onfocus='showExplanation("permissionsDescription", "If you would like even more control over who can access your writing, this option allows it to be accessed by a publisher or literary agent who is representing a writer profile that is one of the authors. This means that by selecting this option and not allowing general publisher access, you can limit which publishers are able to access what you&#39;ve written. Since this option is limiting which publishers and literary agents are able to view your work, it is automatically selected when you allow publisher access, and publisher access is automatically removed if you uncheck this item.")' onchange='changeAccess("my-agent-access")' checked /> @Html.DisplayNameFor(model => model.MyAgentAccess)
+                        }
+                    </label>
+                </div>
                 <!--Minor Access-->
                 <div class="formItem" onmouseover='showExplanation("permissionsDescription", "One of the goals of Penfolio is to give you as a writer a single place to post all of your writing. This means that some of the pieces you post may not be appropriate for younger readers. By not selecting this option, you are noting that your writing is for more mature audiences and protecting minors from stumbling across material they may not be ready for yet. Examples of things that may not be appropriate for minors include graphic violence or explicit sexual content, strong language, and mature themes such as non-consensual romantic or physical interactions. Ultimately, deciding the age-appropriateness of your writing is up to you, but please use your best judgement.")' id="minor-access">
                     <label>

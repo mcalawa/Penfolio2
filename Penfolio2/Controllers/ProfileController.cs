@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Penfolio2.Data;
 using Penfolio2.Models;
+using System.Drawing;
 
 namespace Penfolio2.Controllers
 {
@@ -90,6 +91,32 @@ namespace Penfolio2.Controllers
             }
         }
 
+        [Route("Profile/ViewAll")]
+        public ActionResult ViewAll()
+        {
+            List<PenProfile> penProfiles = GetAllAvailableProfiles();
+
+            return View(penProfiles);
+        }
+
+        public List<PenProfile> GetAllAvailableProfiles()
+        {
+            List<PenProfile> penProfiles = new List<PenProfile>();
+
+            foreach(var profile in db.PenProfiles.ToList())
+            {
+                List<IdentityError> errors = new List<IdentityError>();
+                bool isAccessable = IsAccessableByUser(profile.AccessPermissionId, ref errors);
+
+                if(isAccessable)
+                {
+                    penProfiles.Add(profile);
+                }
+            }
+
+            return penProfiles.OrderBy(i => i.DisplayName).ToList();
+        }
+
         // GET: ProfileController/Create
         [Route("Profile/Create")]
         public ActionResult Create()
@@ -121,6 +148,7 @@ namespace Penfolio2.Controllers
                     PublicAccess = model.PublicAccess,
                     FriendAccess = model.FriendAccess,
                     PublisherAccess = model.PublisherAccess,
+                    MyAgentAccess = model.MyAgentAccess,
                     MinorAccess = model.MinorAccess,
                     ShowsUpInSearch = model.ShowsUpInSearch
                 };
@@ -217,6 +245,7 @@ namespace Penfolio2.Controllers
                         PublicAccess = accessPermission.PublicAccess,
                         FriendAccess = accessPermission.FriendAccess,
                         PublisherAccess = accessPermission.PublisherAccess,
+                        MyAgentAccess = accessPermission.MyAgentAccess,
                         MinorAccess = accessPermission.MinorAccess,
                         ShowsUpInSearch = accessPermission.ShowsUpInSearch
                     };
@@ -268,6 +297,7 @@ namespace Penfolio2.Controllers
                         PublicAccess = false,
                         FriendAccess = false,
                         PublisherAccess = false,
+                        MyAgentAccess = false,
                         MinorAccess = false,
                         ShowsUpInSearch = false,
                         ProfileId = penProfile.ProfileId
@@ -301,6 +331,7 @@ namespace Penfolio2.Controllers
                             ProfileId = penProfile.ProfileId,
                             PublicAccess = accessPermission.PublicAccess,
                             PublisherAccess = accessPermission.PublisherAccess,
+                            MyAgentAccess = accessPermission.MyAgentAccess,
                             FriendAccess = accessPermission.FriendAccess,
                             MinorAccess = accessPermission.MinorAccess,
                             ShowsUpInSearch = accessPermission.ShowsUpInSearch
@@ -331,6 +362,7 @@ namespace Penfolio2.Controllers
                             ProfileId = penProfile.ProfileId,
                             PublicAccess = ap.PublicAccess,
                             PublisherAccess = ap.PublisherAccess,
+                            MyAgentAccess = ap.MyAgentAccess,
                             FriendAccess = ap.FriendAccess,
                             MinorAccess = ap.MinorAccess,
                             ShowsUpInSearch = ap.ShowsUpInSearch
@@ -385,6 +417,7 @@ namespace Penfolio2.Controllers
                             ProfileId = penProfile.ProfileId,
                             PublicAccess = accessPermission.PublicAccess == ap.PublicAccess ? ap.PublicAccess : false,
                             PublisherAccess = accessPermission.PublisherAccess == ap.PublisherAccess ? ap.PublisherAccess : false,
+                            MyAgentAccess = accessPermission.MyAgentAccess == ap.MyAgentAccess ? ap.MyAgentAccess : false,
                             FriendAccess = accessPermission.FriendAccess == ap.FriendAccess ? ap.FriendAccess : false,
                             MinorAccess = accessPermission.MinorAccess == ap.MinorAccess ? ap.MinorAccess : false,
                             ShowsUpInSearch = accessPermission.ShowsUpInSearch == ap.ShowsUpInSearch ? ap.ShowsUpInSearch : false
@@ -413,6 +446,7 @@ namespace Penfolio2.Controllers
                         PublicAccess = model.PublicAccess,
                         FriendAccess = model.FriendAccess,
                         PublisherAccess = model.PublisherAccess,
+                        MyAgentAccess = model.MyAgentAccess,
                         MinorAccess = model.MinorAccess,
                         ShowsUpInSearch = model.ShowsUpInSearch
                     };
@@ -432,6 +466,7 @@ namespace Penfolio2.Controllers
                         ap.PublicAccess = model.PublicAccess;
                         ap.FriendAccess = model.FriendAccess;
                         ap.PublisherAccess = model.PublisherAccess;
+                        ap.MyAgentAccess = model.MyAgentAccess;
                         ap.MinorAccess = model.MinorAccess;
                         ap.ShowsUpInSearch = model.ShowsUpInSearch;
                         db.Entry(ap).State = EntityState.Modified;
@@ -444,6 +479,7 @@ namespace Penfolio2.Controllers
                             PublicAccess = model.PublicAccess,
                             FriendAccess = model.FriendAccess,
                             PublisherAccess = model.PublisherAccess,
+                            MyAgentAccess = model.MyAgentAccess,
                             MinorAccess = model.MinorAccess,
                             ShowsUpInSearch = model.ShowsUpInSearch
                         };
@@ -459,6 +495,7 @@ namespace Penfolio2.Controllers
                     accessPermission.PublicAccess = model.PublicAccess;
                     accessPermission.FriendAccess = model.FriendAccess;
                     accessPermission.PublisherAccess = model.PublisherAccess;
+                    accessPermission.MyAgentAccess = model.MyAgentAccess;
                     accessPermission.MinorAccess = model.MinorAccess;
                     accessPermission.ShowsUpInSearch = model.ShowsUpInSearch;
                     db.Entry(accessPermission).State = EntityState.Modified;
@@ -479,6 +516,7 @@ namespace Penfolio2.Controllers
                         accessPermission.PublicAccess = model.PublicAccess;
                         accessPermission.FriendAccess = model.FriendAccess;
                         accessPermission.PublisherAccess = model.PublisherAccess;
+                        accessPermission.MyAgentAccess = model.MyAgentAccess;
                         accessPermission.MinorAccess = model.MinorAccess;
                         accessPermission.ShowsUpInSearch = model.ShowsUpInSearch;
                         db.Entry(accessPermission).State = EntityState.Modified;
@@ -493,6 +531,7 @@ namespace Penfolio2.Controllers
                         ap.PublicAccess = model.PublicAccess;
                         ap.FriendAccess = model.FriendAccess;
                         ap.PublisherAccess = model.PublisherAccess;
+                        ap.MyAgentAccess = model.MyAgentAccess;
                         ap.MinorAccess = model.MinorAccess;
                         ap.ShowsUpInSearch = model.ShowsUpInSearch;
                         db.Entry(ap).State = EntityState.Modified;
@@ -509,6 +548,7 @@ namespace Penfolio2.Controllers
                             PublicAccess = model.PublicAccess,
                             FriendAccess = model.FriendAccess,
                             PublisherAccess = model.PublisherAccess,
+                            MyAgentAccess = model.MyAgentAccess,
                             MinorAccess = model.MinorAccess,
                             ShowsUpInSearch = model.ShowsUpInSearch
                         };
@@ -524,6 +564,7 @@ namespace Penfolio2.Controllers
                     accessPermission.PublicAccess = model.PublicAccess;
                     accessPermission.FriendAccess = model.FriendAccess;
                     accessPermission.PublisherAccess = model.PublisherAccess;
+                    accessPermission.MyAgentAccess = model.MyAgentAccess;
                     accessPermission.MinorAccess = model.MinorAccess;
                     accessPermission.ShowsUpInSearch = model.ShowsUpInSearch;
                     db.Entry(accessPermission).State = EntityState.Modified;
@@ -696,6 +737,8 @@ namespace Penfolio2.Controllers
                 List<int> friendshipIds = db.Friendships.Where(i => i.SecondFriendId == model.ProfileId).ToList().Select(i => i.FriendshipId).ToList(); //cascade happens on firstfriend delete
                 List<int> friendRequestIds = db.FriendRequests.Where(i => i.RequesterId == model.ProfileId).ToList().Select(i => i.FriendRequestId).ToList(); //cascade happens on requestee delete
                 List<int> accessRequestIds = db.AccessRequests.Where(i => i.RequesterId == model.ProfileId).ToList().Select(i => i.AccessRequestId).ToList(); //cascade happens on AccessPermission delete
+                List<int> publisherWriterIds = db.PublisherWriters.Where(i => i.PublisherId == model.ProfileId || i.WriterId == model.ProfileId).ToList().Select(i => i.PublisherWriterId).ToList();
+                List<int> representationRequestIds = db.RepresentationRequests.Where(i => i.RequesterId == model.ProfileId || i.RequesteeId == model.ProfileId).ToList().Select(i => i.RepresentationRequestId).ToList();
 
                 //CritiqueGiver should cascade on profile delete
                 //Critique should cascade on profile delete
@@ -725,13 +768,35 @@ namespace Penfolio2.Controllers
                 //SeriesOwner should cascade on profile delete
                 List<int> folderOwnerIds = db.FolderOwners.Where(i => i.OwnerId == model.ProfileId).ToList().Select(i => i.FolderId).ToList();
 
-                db.Remove(penProfile);
+                db.PenProfiles.Remove(penProfile);
                 db.SaveChanges();
 
                 if (accessPermission != null)
                 {
-                    db.Remove(accessPermission);
+                    db.AccessPermissions.Remove(accessPermission);
                     db.SaveChanges();
+                }
+
+                foreach(var publisherWriterId in publisherWriterIds)
+                {
+                    var publisherWriter = db.PublisherWriters.Where(i => i.PublisherWriterId == publisherWriterId).FirstOrDefault();
+
+                    if(publisherWriter != null)
+                    {
+                        db.PublisherWriters.Remove(publisherWriter);
+                        db.SaveChanges();
+                    }
+                }
+
+                foreach(var representationRequestId in representationRequestIds)
+                {
+                    var representationRequest = db.RepresentationRequests.Where(i => i.RepresentationRequestId == representationRequestId).FirstOrDefault();
+
+                    if(representationRequest != null)
+                    {
+                        db.RepresentationRequests.Remove(representationRequest);
+                        db.SaveChanges();
+                    }
                 }
 
                 //we will know if all of the following works correctly once this other stuff is implemented
@@ -906,6 +971,13 @@ namespace Penfolio2.Controllers
                 errorString += error.Description + " ";
             }
 
+            ViewBag.RepresentationRequest = false;
+
+            if (errorString.Contains("represent the owner"))
+            {
+                ViewBag.RepresentationRequest = true;
+            }
+
             ViewBag.FriendRequest = false;
 
             if(errorString.Contains("send a friend request"))
@@ -1033,7 +1105,7 @@ namespace Penfolio2.Controllers
 
             using (dataStream)
             {
-                file.CopyToAsync(dataStream);
+                file.CopyTo(dataStream);
                 profileImage = dataStream.ToArray();
             }
 

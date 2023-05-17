@@ -38,8 +38,16 @@ function changeAccess(id) {
     if (id === "public-access" && $("div#" + id + " input[type=checkbox]").is(':checked')) {
         $("div#friend-access input[type=checkbox]").prop('checked', true);
         $("div#publisher-access input[type=checkbox]").prop('checked', true);
+        $("div#my-agent-access input[type=checkbox]").prop('checked', true);
     } //if friend access or publisher access were unchecked, uncheck public access as well
     else if ((id === "friend-access" || id === "publisher-access") && $("div#" + id + " input[type=checkbox]").is(':checked') !== true) {
         $("div#public-access input[type=checkbox]").prop('checked', false);
+    }
+    else if (id === "my-agent-access" && $("div#" + id + " input[type=checkbox]").is(':checked') !== true) {
+        $("div#public-access input[type=checkbox]").prop('checked', false);
+        $("div#publisher-access input[type=checkbox]").prop('checked', false);
+    }
+    else if (id === "my-agent-access" && $("div#" + id + " input[type=checkbox]").is(':checked') === true) {
+        $("div#publisher-access input[type=checkbox]").prop('checked', true);
     }
 }

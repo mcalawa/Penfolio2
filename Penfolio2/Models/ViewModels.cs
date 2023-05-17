@@ -54,6 +54,10 @@ namespace Penfolio2.Models
         public bool PublisherAccess { get; set; }
 
         [Required]
+        [Display(Name = "Allow Access to Publishers or Literary Agents Representing Me")]
+        public bool MyAgentAccess { get; set; } = false;
+
+        [Required]
         [Display(Name = "Allow Minor Access")]
         public bool MinorAccess { get; set; }
 
@@ -97,6 +101,10 @@ namespace Penfolio2.Models
         [Required]
         [Display(Name = "Allow Publisher and Literary Agent Access")]
         public bool PublisherAccess { get; set; }
+
+        [Required]
+        [Display(Name = "Allow Access to Publishers or Literary Agents Representing Me")]
+        public bool MyAgentAccess { get; set; } = false;
 
         [Required]
         [Display(Name = "Allow Minor Access")]
@@ -179,6 +187,10 @@ namespace Penfolio2.Models
         [Required]
         [Display(Name = "Writing Shows Up in Search")]
         public bool ShowsUpInSearch { get; set; } = false;
+
+        [Required]
+        [Display(Name = "Allow Access to Publishers or Literary Agents Representing Me")]
+        public bool MyAgentAccess { get; set; } = false;
 
         [Required, NotNull]
         public string SelectedProfiles { get; set; } = string.Empty;
@@ -325,11 +337,31 @@ namespace Penfolio2.Models
         public virtual ICollection<AuthorsForFriendAccessViewModel> Authors { get; set; }
     }
 
+    public class AuthorsForRequestRepresentationViewModel
+    {
+        public AuthorsForRequestRepresentationViewModel()
+        {
+            WriterPublishers = new HashSet<PublisherWriter>();
+        }
+
+        [Required]
+        public string DisplayName { get; set; }
+
+        [Required]
+        public bool IsAnonymous { get; set; }
+
+        [Required]
+        public int ProfileId { get; set; }
+
+        public virtual ICollection<PublisherWriter> WriterPublishers { get; set; }
+    }
+
     public class RequestRepresentationViewModel
     {
         public RequestRepresentationViewModel()
         {
             PenProfiles = new HashSet<PenProfile>();
+            Authors = new HashSet<AuthorsForRequestRepresentationViewModel>();
         }
 
         public int? SenderProfileId { get; set; } = null;
@@ -339,5 +371,7 @@ namespace Penfolio2.Models
         public string? RoleName { get; set; } = null;
 
         public virtual ICollection<PenProfile> PenProfiles { get; set; }
+
+        public virtual ICollection<AuthorsForRequestRepresentationViewModel> Authors { get; set; }
     }
 }

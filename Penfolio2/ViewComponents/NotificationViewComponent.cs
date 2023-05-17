@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Plugins;
 using Penfolio2.Data;
 using Penfolio2.Models;
 
@@ -95,7 +96,7 @@ namespace Penfolio2.ViewComponents
                     if(accessPermission.WritingId != null)
                     {
                         List<WritingProfile> writingProfiles = _db.WritingProfiles.Where(i => i.WritingId == accessPermission.WritingId).ToList();
-                        penProfiles = user.PenProfiles.ToList();
+                        List<PenProfile> preliminaryProfiles = user.PenProfiles.ToList();
 
                         foreach(var writingProfile in writingProfiles)
                         {
@@ -123,15 +124,21 @@ namespace Penfolio2.ViewComponents
 
                                 authors.Add(author);
 
-                                foreach(var userProfile in user.PenProfiles)
+                                foreach(var userProfile in preliminaryProfiles)
                                 {
                                     if(_db.FriendRequests.Any(i => i.Resolved == false && i.RequesterId == userProfile.ProfileId && i.RequesteeId == profile.ProfileId) || _db.FriendRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == userProfile.ProfileId))
                                     {
                                         ViewBag.PendingFriendRequest = true;
                                     }
+                                    else
+                                    {
+                                        penProfiles.Add(userProfile);
+                                    }
                                 }
                             }
                         }
+
+                        penProfiles = penProfiles.Distinct().ToList();
                     } //if accessPermission is for a profile
                     else if(accessPermission.ProfileId != null)
                     {
@@ -211,14 +218,16 @@ namespace Penfolio2.ViewComponents
                 }
                 else if (viewName.CompareTo("CreateRepresentationRequest") == 0)
                 {
+                    ViewBag.PendingRepresentationRequest = false;
+
                     if (id == null)
                     {
                         return View(viewName, new RequestRepresentationViewModel());
                     }
 
-                    var receiver = _db.PenProfiles.Where(i => i.ProfileId == id.Value).FirstOrDefault();
+                    var accessPermission = _db.AccessPermissions.Where(i => i.AccessPermissionId == id.Value).FirstOrDefault();
 
-                    if (receiver == null)
+                    if(accessPermission == null)
                     {
                         return View(viewName, new RequestRepresentationViewModel());
                     }
@@ -226,56 +235,125 @@ namespace Penfolio2.ViewComponents
                     user = PopulatePenUserForRepresentationRequest(user);
 
                     List<PenProfile> penProfiles = new List<PenProfile>();
+                    List<AuthorsForRequestRepresentationViewModel> authors = new List<AuthorsForRequestRepresentationViewModel>();
 
-                    ViewBag.PendingRepresentationRequest = false;
-                    
-                    receiver = PopulatePenProfileForRepresentationRequest(receiver);
-
-                    //if the receiver is a writing profile
-                    if(receiver.RoleId == 1)
+                    //if this is for a profile
+                    if (accessPermission.ProfileId != null)
                     {
-                        foreach(var profile in user.PenProfiles)
-                        {
-                            if(profile.RoleId == 2 && profile.Verified && !profile.PublisherWriters.Any(i => i.Active && i.WriterId == receiver.ProfileId) && !_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiver.ProfileId) && !_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == receiver.ProfileId && i.RequesteeId == profile.ProfileId))
-                            {
-                                penProfiles.Add(profile);
-                            }
+                        var receiver = _db.PenProfiles.Where(i => i.ProfileId == id.Value).FirstOrDefault();
 
-                            if(_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiver.ProfileId))
-                            {
-                                ViewBag.PendingRepresentationRequest = true;
-                            }
-                        }
-                    } //if the receiver is a publisher profile
-                    else if (receiver.RoleId == 2)
-                    {
-                        if(!receiver.Verified)
+                        if (receiver == null)
                         {
                             return View(viewName, new RequestRepresentationViewModel());
                         }
 
-                        foreach (var profile in user.PenProfiles)
+                        receiver = PopulatePenProfileForRepresentationRequest(receiver);
+
+                        //if the receiver is a writing profile
+                        if (receiver.RoleId == 1)
                         {
-                            if (profile.RoleId == 1 && !profile.WriterPublishers.Any(i => i.Active && i.PublisherId == receiver.ProfileId) && !_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiver.ProfileId) && !_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == receiver.ProfileId && i.RequesteeId == profile.ProfileId))
+                            foreach (var profile in user.PenProfiles)
                             {
-                                penProfiles.Add(profile);
+                                if (profile.RoleId == 2 && profile.Verified && !profile.PublisherWriters.Any(i => i.Active && i.WriterId == receiver.ProfileId) && !_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiver.ProfileId) && !_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == receiver.ProfileId && i.RequesteeId == profile.ProfileId))
+                                {
+                                    penProfiles.Add(profile);
+                                }
+
+                                if (_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiver.ProfileId))
+                                {
+                                    ViewBag.PendingRepresentationRequest = true;
+                                }
+                            }
+                        } //if the receiver is a publisher profile
+                        else if (receiver.RoleId == 2)
+                        {
+                            if (!receiver.Verified)
+                            {
+                                return View(viewName, new RequestRepresentationViewModel());
                             }
 
-                            if (_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiver.ProfileId))
+                            foreach (var profile in user.PenProfiles)
                             {
-                                ViewBag.PendingRepresentationRequest = true;
+                                if (profile.RoleId == 1 && !profile.WriterPublishers.Any(i => i.Active && i.PublisherId == receiver.ProfileId) && !_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiver.ProfileId) && !_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == receiver.ProfileId && i.RequesteeId == profile.ProfileId))
+                                {
+                                    penProfiles.Add(profile);
+                                }
+
+                                if (_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == receiver.ProfileId))
+                                {
+                                    ViewBag.PendingRepresentationRequest = true;
+                                }
                             }
                         }
+
+                        var model = new RequestRepresentationViewModel
+                        {
+                            ReceiverProfileId = id.Value,
+                            RoleName = receiver.UseSecondaryRoleName ? receiver?.PenRole?.SecondaryRoleName : receiver?.PenRole?.RoleName,
+                            PenProfiles = penProfiles
+                        };
+
+                        return View(viewName, model);
+                    } //if it's for a piece of writing
+                    else if(accessPermission.WritingId != null)
+                    {
+                        List<WritingProfile> writingProfiles = _db.WritingProfiles.Where(i => i.WritingId == accessPermission.WritingId).ToList();
+                        List<PenProfile> preliminaryProfiles = user.PenProfiles.Where(i => i.RoleId == 2 && i.Verified).ToList();
+
+                        foreach (var writingProfile in writingProfiles)
+                        {
+                            var profile = _db.PenProfiles.Where(i => i.ProfileId == writingProfile.ProfileId).FirstOrDefault();
+
+                            if (profile != null)
+                            {
+                                List<IdentityError> errors = new List<IdentityError>();
+                                bool isAnonymous = true;
+
+                                if (IsAccessableByUser(profile.AccessPermissionId, ref errors, "search"))
+                                {
+                                    isAnonymous = false;
+                                }
+
+                                profile = PopulatePenProfileForRepresentationRequest(profile);
+
+                                var author = new AuthorsForRequestRepresentationViewModel
+                                {
+                                    ProfileId = profile.ProfileId,
+                                    DisplayName = isAnonymous ? "Anonymous" : profile.DisplayName,
+                                    IsAnonymous = isAnonymous,
+                                    WriterPublishers = profile.WriterPublishers
+                                };
+
+                                authors.Add(author);
+
+                                foreach (var userProfile in preliminaryProfiles)
+                                {
+                                    if (_db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == userProfile.ProfileId && i.RequesteeId == profile.ProfileId) || _db.RepresentationRequests.Any(i => i.Resolved == false && i.RequesterId == profile.ProfileId && i.RequesteeId == userProfile.ProfileId))
+                                    {
+                                        ViewBag.PendingRepresentationRequest = true;
+                                    }
+                                    else
+                                    {
+                                        penProfiles.Add(userProfile);
+                                    }
+                                }
+                            }
+                        } //foreach writingProfile
+
+                        penProfiles = penProfiles.Distinct().ToList();
+
+                        var model = new RequestRepresentationViewModel
+                        {
+                            ReceiverProfileId = 0,
+                            RoleName = "",
+                            PenProfiles = penProfiles,
+                            Authors = authors
+                        };
+
+                        return View(viewName, model);
                     }
 
-                    var model = new RequestRepresentationViewModel
-                    {
-                        ReceiverProfileId = id.Value,
-                        RoleName = receiver.UseSecondaryRoleName ? receiver?.PenRole?.SecondaryRoleName : receiver?.PenRole?.RoleName,
-                        PenProfiles = penProfiles
-                    };
-
-                    return View(viewName, model);
+                    return View(viewName, new RequestRepresentationViewModel());
                 }
 
             } //if there's a viewName
@@ -474,14 +552,7 @@ namespace Penfolio2.ViewComponents
             List<PenProfile> populatedProfiles = new List<PenProfile>();
 
             //Populate PenProfiles Stage 1
-            if (user.PenProfiles.Count == 0)
-            {
-                profiles = _db.PenProfiles.Where(i => i.UserId == user.Id).ToList();
-            }
-            else
-            {
-                profiles = user.PenProfiles.ToList();
-            }
+            profiles = _db.PenProfiles.Where(i => i.UserId == user.Id).ToList();
 
             //Populate PenProfiles Stage 2
             foreach (var profile in profiles)
@@ -1586,6 +1657,65 @@ namespace Penfolio2.ViewComponents
                     return true;
                 }
 
+                //if there's my agent access, let's check if the user represents this writer
+                if (accessPermission.MyAgentAccess)
+                {
+                    List<PublisherWriter> publisherWriters = new List<PublisherWriter>();
+
+                    foreach (var userProfileId in userProfileIds)
+                    {
+                        //get all of the publisherWriters for this profile
+                        List<PublisherWriter> pWs = _db.PublisherWriters.Where(i => i.Active && i.PublisherId == userProfileId).ToList();
+
+                        foreach (var pW in pWs)
+                        {
+                            publisherWriters.Add(pW);
+                        }
+                    }
+
+                    //if this is the access permission for a profile and the user has a profile that represents this profile, return true
+                    if (accessPermission.ProfileId != null && publisherWriters.Any(i => i.WriterId == accessPermission.ProfileId.Value))
+                    {
+                        return true;
+                    } //if the AccessPermission is for a piece of Writing
+                    else if (accessPermission.WritingId != null)
+                    {
+                        List<WritingProfile> writingProfiles = _db.WritingProfiles.Where(i => i.WritingId == accessPermission.WritingId).ToList();
+
+                        foreach (var publisherWriter in publisherWriters)
+                        {
+                            if (writingProfiles.Any(i => i.ProfileId == publisherWriter.WriterId))
+                            {
+                                return true;
+                            }
+                        }
+                    } //if the AccessPermission is for a Folder
+                    else if (accessPermission.FolderId != null)
+                    {
+                        List<FolderOwner> folderOwners = _db.Folders.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault().Owners.ToList();
+
+                        foreach (var publisherWriter in publisherWriters)
+                        {
+                            if (folderOwners.Any(i => i.OwnerId == publisherWriter.WriterId))
+                            {
+                                return true;
+                            }
+                        }
+                    } //if the AccessPermission is for a Series
+                    else if (accessPermission.SeriesId != null)
+                    {
+                        List<SeriesOwner> seriesOwners = _db.Series.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault().Owners.ToList();
+
+                        foreach (var publisherWriter in publisherWriters)
+                        {
+                            if (seriesOwners.Any(i => i.OwnerId == publisherWriter.WriterId))
+                            {
+                                return true;
+                            }
+                        }
+                    } //if it's a series
+                } //if there's my  agent access
+
                 //if there's friend access, let's check if we are friends
                 if (accessPermission.FriendAccess)
                 {
@@ -1645,7 +1775,55 @@ namespace Penfolio2.ViewComponents
                     } //if it's a series
                 } //if there's friend access
 
-                if (accessPermission.PublisherAccess && accessPermission.FriendAccess)
+                if (accessPermission.MyAgentAccess && !accessPermission.PublisherAccess && accessPermission.FriendAccess)
+                {
+                    if (UserHasPublisherProfile() && UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by friends and publishers or literary agents who represent the owner. To gain access, request to represent the owner, send a friend request, or request individual access."
+                        });
+                    }
+                    else if (UserHasPublisherProfile() && !UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by friends and verified publishers or literary agents who represent the owner. To gain access, have your publisher account verified and request to represent the owner, send a friend request, or request individual access."
+                        });
+                    }
+                    else
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by friends and publishers or literary agents who represent the owner. To gain access, send a friend request or request individual access."
+                        });
+                    }
+                }
+                else if (accessPermission.MyAgentAccess && !accessPermission.PublisherAccess)
+                {
+                    if (UserHasPublisherProfile() && UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by publishers or literary agents who represent the owner. To gain access, request to represent the owner or request individual access."
+                        });
+                    }
+                    else if (UserHasPublisherProfile() && !UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by verified publishers or literary agents who represent the owner. To gain access, have your publisher account verified and request to represent the owner or request individual access."
+                        });
+                    }
+                    else
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by  publishers or literary agents who represent the owner. To gain access, request individual access."
+                        });
+                    }
+                }
+                else if (accessPermission.PublisherAccess && accessPermission.FriendAccess)
                 {
                     if (UserHasPublisherProfile() && !UserHasVerifiedPublisherProfile())
                     {

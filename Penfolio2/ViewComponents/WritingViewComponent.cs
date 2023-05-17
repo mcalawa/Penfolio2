@@ -1007,6 +1007,65 @@ namespace Penfolio2.ViewComponents
                     return true;
                 }
 
+                //if there's my agent access, let's check if the user represents this writer
+                if (accessPermission.MyAgentAccess)
+                {
+                    List<PublisherWriter> publisherWriters = new List<PublisherWriter>();
+
+                    foreach (var userProfileId in userProfileIds)
+                    {
+                        //get all of the publisherWriters for this profile
+                        List<PublisherWriter> pWs = _db.PublisherWriters.Where(i => i.Active && i.PublisherId == userProfileId).ToList();
+
+                        foreach (var pW in pWs)
+                        {
+                            publisherWriters.Add(pW);
+                        }
+                    }
+
+                    //if this is the access permission for a profile and the user has a profile that represents this profile, return true
+                    if (accessPermission.ProfileId != null && publisherWriters.Any(i => i.WriterId == accessPermission.ProfileId.Value))
+                    {
+                        return true;
+                    } //if the AccessPermission is for a piece of Writing
+                    else if (accessPermission.WritingId != null)
+                    {
+                        List<WritingProfile> writingProfiles = _db.WritingProfiles.Where(i => i.WritingId == accessPermission.WritingId).ToList();
+
+                        foreach (var publisherWriter in publisherWriters)
+                        {
+                            if (writingProfiles.Any(i => i.ProfileId == publisherWriter.WriterId))
+                            {
+                                return true;
+                            }
+                        }
+                    } //if the AccessPermission is for a Folder
+                    else if (accessPermission.FolderId != null)
+                    {
+                        List<FolderOwner> folderOwners = _db.Folders.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault().Owners.ToList();
+
+                        foreach (var publisherWriter in publisherWriters)
+                        {
+                            if (folderOwners.Any(i => i.OwnerId == publisherWriter.WriterId))
+                            {
+                                return true;
+                            }
+                        }
+                    } //if the AccessPermission is for a Series
+                    else if (accessPermission.SeriesId != null)
+                    {
+                        List<SeriesOwner> seriesOwners = _db.Series.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault().Owners.ToList();
+
+                        foreach (var publisherWriter in publisherWriters)
+                        {
+                            if (seriesOwners.Any(i => i.OwnerId == publisherWriter.WriterId))
+                            {
+                                return true;
+                            }
+                        }
+                    } //if it's a series
+                } //if there's my  agent access
+
                 //if there's friend access, let's check if we are friends
                 if (accessPermission.FriendAccess)
                 {
@@ -1066,7 +1125,55 @@ namespace Penfolio2.ViewComponents
                     } //if it's a series
                 } //if there's friend access
 
-                if (accessPermission.PublisherAccess && accessPermission.FriendAccess)
+                if (accessPermission.MyAgentAccess && !accessPermission.PublisherAccess && accessPermission.FriendAccess)
+                {
+                    if (UserHasPublisherProfile() && UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by friends and publishers or literary agents who represent the owner. To gain access, request to represent the owner, send a friend request, or request individual access."
+                        });
+                    }
+                    else if (UserHasPublisherProfile() && !UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by friends and verified publishers or literary agents who represent the owner. To gain access, have your publisher account verified and request to represent the owner, send a friend request, or request individual access."
+                        });
+                    }
+                    else
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by friends and publishers or literary agents who represent the owner. To gain access, send a friend request or request individual access."
+                        });
+                    }
+                }
+                else if (accessPermission.MyAgentAccess && !accessPermission.PublisherAccess)
+                {
+                    if (UserHasPublisherProfile() && UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by publishers or literary agents who represent the owner. To gain access, request to represent the owner or request individual access."
+                        });
+                    }
+                    else if (UserHasPublisherProfile() && !UserHasVerifiedPublisherProfile())
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by verified publishers or literary agents who represent the owner. To gain access, have your publisher account verified and request to represent the owner or request individual access."
+                        });
+                    }
+                    else
+                    {
+                        errors.Add(new IdentityError
+                        {
+                            Description = "This " + accessType + " is only accessable by  publishers or literary agents who represent the owner. To gain access, request individual access."
+                        });
+                    }
+                }
+                else if (accessPermission.PublisherAccess && accessPermission.FriendAccess)
                 {
                     if (UserHasPublisherProfile() && !UserHasVerifiedPublisherProfile())
                     {

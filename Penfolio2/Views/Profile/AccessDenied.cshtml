@@ -21,3 +21,8 @@
 {
     @await Component.InvokeAsync("Notification", new { viewName = "CreateAccessRequest", id = ViewBag.AccessPermissionId })
 }
+
+@if (ViewBag.RepresentationRequest)
+{
+    @await Component.InvokeAsync("Notification", new { viewName = "CreateRepresentationRequest", id = ViewBag.AccessPermissionId })
+}

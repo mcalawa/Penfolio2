@@ -726,17 +726,17 @@ namespace Penfolio2.Controllers
                     }
                     
                     //if this is the access permission for a profile and the user has a profile that represents this profile, return true
-                    if(accessPermission.ProfileId != null & publisherWriters.Any(i => i.WriterId == accessPermission.ProfileId.Value))
+                    if(accessPermission.ProfileId != null && publisherWriters.Any(i => i.WriterId == accessPermission.ProfileId.Value))
                     {
                         return true;
                     } //if the AccessPermission is for a piece of Writing
                     else if(accessPermission.WritingId !=  null)
                     {
-                        List<PenProfile> writerProfiles = db.Writings.Where(i => i.AccessPermissionId == accessPermissionId).First().PenUser.PenProfiles.ToList();
+                        List<WritingProfile> writingProfiles = db.WritingProfiles.Where(i => i.WritingId == accessPermission.WritingId).ToList();
 
                         foreach(var publisherWriter in publisherWriters)
                         {
-                            if(writerProfiles.Any(i => i.ProfileId == publisherWriter.WriterId))
+                            if(writingProfiles.Any(i => i.ProfileId == publisherWriter.WriterId))
                             {
                                 return true;
                             }

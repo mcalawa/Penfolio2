@@ -87,7 +87,12 @@ namespace Penfolio2.Controllers
                         Friendship secondFriendship = db.Friendships.Where(i => i.FirstFriendId == friendRequest.RequesteeId && i.SecondFriendId == friendRequest.RequesterId && i.AcceptDate == friendship.AcceptDate).First();
 
                         secondFriendship.Active = true;
+                        secondFriendship.OtherFriendshipId = friendship.FriendshipId;
                         db.Entry(secondFriendship).State = EntityState.Modified;
+                        db.SaveChanges();
+
+                        friendship.OtherFriendshipId = secondFriendship.FriendshipId;
+                        db.Entry(friendship).State = EntityState.Modified;
                         db.SaveChanges();
                     } //if the second friendship just doesn't exist 
                     else
@@ -97,10 +102,15 @@ namespace Penfolio2.Controllers
                             FirstFriendId = friendRequest.RequesteeId,
                             SecondFriendId = friendRequest.RequesterId,
                             Active = true,
-                            AcceptDate = friendship.AcceptDate
+                            AcceptDate = friendship.AcceptDate,
+                            OtherFriendshipId = friendship.FriendshipId
                         };
 
                         db.Friendships.Add(newFriendship);
+                        db.SaveChanges();
+
+                        friendship.OtherFriendshipId = newFriendship.FriendshipId;
+                        db.Entry(friendship).State = EntityState.Modified;
                         db.SaveChanges();
                     }
                 } //if there's only a relationship one way, but it's the opposite way
@@ -125,7 +135,12 @@ namespace Penfolio2.Controllers
                     {
                         Friendship secondFriendship = db.Friendships.Where(i => i.FirstFriendId == friendRequest.RequesterId && i.SecondFriendId == friendRequest.RequesteeId && i.AcceptDate == friendship.AcceptDate).First();
                         secondFriendship.Active = true;
+                        secondFriendship.OtherFriendshipId = friendship.OtherFriendshipId;
                         db.Entry(secondFriendship).State = EntityState.Modified;
+                        db.SaveChanges();
+
+                        friendship.OtherFriendshipId = secondFriendship.FriendshipId;
+                        db.Entry(friendship).State = EntityState.Modified;
                         db.SaveChanges();
                     } //if the second friendship just doesn't exist
                     else
@@ -135,10 +150,15 @@ namespace Penfolio2.Controllers
                             FirstFriendId = friendRequest.RequesterId,
                             SecondFriendId = friendRequest.RequesteeId,
                             Active = true,
-                            AcceptDate = friendship.AcceptDate
+                            AcceptDate = friendship.AcceptDate,
+                            OtherFriendshipId = friendship.FriendshipId
                         };
 
                         db.Friendships.Add(newFriendship);
+                        db.SaveChanges();
+
+                        friendship.OtherFriendshipId = newFriendship.FriendshipId;
+                        db.Entry(friendship).State = EntityState.Modified;
                         db.SaveChanges();
                     }
                 }
@@ -166,6 +186,13 @@ namespace Penfolio2.Controllers
 
                 db.Friendships.Add(secondFriendship);
                 db.SaveChanges();
+
+                firstFriendship.OtherFriendshipId = secondFriendship.FriendshipId;
+                db.Entry(firstFriendship).State = EntityState.Modified;
+                db.SaveChanges();
+
+                secondFriendship.OtherFriendshipId = firstFriendship.FriendshipId;
+                db.Entry(secondFriendship).State = EntityState.Modified;
             }
 
             user.LastNotificationViewDate = DateTime.Now;

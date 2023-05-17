@@ -73,6 +73,11 @@
                     <input asp-for="PublisherAccess" onfocus='showDescription("profile-info", "allow-publisher-access")' onchange='changeAccess("publisher-access")' /> @Html.DisplayNameFor(model => model.PublisherAccess)
                 </label>
             </div>
+            <div class="formItem checkItem2" onmouseover='showDescription("profile-info", "allow-my-agent-access")' id="my-agent-access">
+                <label class="formLabel">
+                    <input asp-for="MyAgentAccess" onfocus='showDescription("profile-info", "allow-my-agent-access")' onchange='changeAccess("my-agent-access)' /> @Html.DisplayNameFor(model => model.MyAgentAccess)
+                </label>
+            </div>
             <div class="formItem checkItem2" onmouseover='showDescription("profile-info", "minor-access")'>
                 <label class="formLabel">
                     <input asp-for="MinorAccess" onfocus='showDescription("profile-info", "minor-access")' /> @Html.DisplayNameFor(model => model.MinorAccess)
@@ -150,6 +155,12 @@
         <p>Are you a writer looking to get discovered or a publisher or literary agent looking to connect with other industry professionals? Then you might consider checking the Allow Publisher and Literary Agent Access box. This option will allow verified publisher and literary agent accounts to view your profile, even if you don&#39;t allow more general access.</p>
         
         <p>Publisher and literary agent access is part of public access, so if you uncheck the box marked Allow Publisher and Literary Agent Access when you have Allow Public Access checked, it will also uncheck Allow Public Access.</p>
+    </div>
+
+    <div id="allow-my-agent-access">
+        <p>If you would like even more control over who can access your writer profile, this option allows it to be accessed by a publisher or literary agent who is representing you. This means that by selecting this option and not allowing general publisher access, you can limit which publishers are able to access this profile.</p> 
+        
+        <p>Since this option is limiting which publishers and literary agents are able to view your work, it is automatically selected when you allow publisher access, and publisher access is automatically removed if you uncheck this item.</p>
     </div>
 
     <div id="minor-access">

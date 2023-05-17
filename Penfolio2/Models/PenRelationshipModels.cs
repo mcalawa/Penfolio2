@@ -22,6 +22,8 @@ namespace Penfolio2.Models
         [Required, NotNull]
         public bool Active { get; set; }
 
+        public int? OtherFriendshipId { get; set; }
+
         [ForeignKey("FirstFriendId")]
         public virtual PenProfile? FirstFriend { get; set; }
 

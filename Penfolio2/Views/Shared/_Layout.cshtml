@@ -32,11 +32,21 @@
                         <li class="nav-item">
                             <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Profile" asp-action="Index">Profile</a>
+                        <li class="nav-item nav-dropdown">
+                            <a id="profileMenu" class="nav-link text-light" tabindex="0">Profile <i class="fa-solid fa-caret-down text-light"></i></a>
+                            <div class="nav-dropdown-content">
+                                <a class="nav-link text-light" asp-controller="Profile" asp-action="Index">My Profiles</a>
+                                <a class="nav-link text-light" asp-controller="Profile" asp-action="Create">Create New Profile</a>
+                                <a class="nav-link text-light" asp-controller="Profile" asp-action="ViewAll">View All Profiles</a>
+                            </div>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Writing" asp-action="Index">Writing</a>
+                        <li class="nav-item nav-dropdown">
+                            <a id="writingMenu" class="nav-link text-light" tabindex="0">Writing <i class="fa-solid fa-caret-down text-light"></i></a>
+                            <div class="nav-dropdown-content">
+                                <a class="nav-link text-light" asp-controller="Writing" asp-action="MyWriting">My Writing</a>
+                                <a class="nav-link text-light" asp-controller="Writing" asp-action="Create">Create New Writing</a>
+                                <a class="nav-link text-light" asp-controller="Writing" asp-action="Index">View All Writing</a>
+                            </div>
                         </li>
                     </ul>
                     <partial name="_LoginPartial" />
