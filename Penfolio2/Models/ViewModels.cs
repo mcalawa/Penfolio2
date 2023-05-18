@@ -5,23 +5,12 @@ using Penfolio2.Validation;
 
 namespace Penfolio2.Models
 {
-    public class AccessPermissionViewModel
-    {
-        [BindProperty]
-        public InputModel Input { get; set; }
-
-        public class InputModel
-        {
-
-        }
-    }
-
     public class CreateProfileViewModel
     {
         [Required]
         [Display(Name = "Display Name")]
         [ProfileValidator.DisplayNameForCreate]
-        public string DisplayName { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
 
         [Required]
         [Display(Name = "Profile Type")]
@@ -74,7 +63,7 @@ namespace Penfolio2.Models
         [Required]
         [Display(Name = "Display Name")]
         [ProfileValidator.DisplayNameForEdit]
-        public string DisplayName { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
 
         [Required]
         [Display(Name = "Set as Main Profile?")]
@@ -126,10 +115,10 @@ namespace Penfolio2.Models
         public int ProfileId { get; set; }
 
         [Required]
-        public string DisplayName { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
 
         [Required]
-        public string RoleName { get; set; }
+        public string RoleName { get; set; } = string.Empty;
 
         [Required]
         public bool IsMainProfile { get; set; }
@@ -224,8 +213,8 @@ namespace Penfolio2.Models
 
     public class AuthorViewModel
     {
-        [Required]
-        public string DisplayName { get; set; }
+        [Required] 
+        public string DisplayName { get; set; } = string.Empty;
 
         [AllowNull]
         public string? UrlString { get; set; }
@@ -288,8 +277,8 @@ namespace Penfolio2.Models
             Friendships = new HashSet<Friendship>();
         }
 
-        [Required]
-        public string DisplayName { get; set; }
+        [Required] 
+        public string DisplayName { get; set; } = string.Empty;
 
         [Required]
         public bool IsAnonymous { get; set; }
@@ -344,8 +333,8 @@ namespace Penfolio2.Models
             WriterPublishers = new HashSet<PublisherWriter>();
         }
 
-        [Required]
-        public string DisplayName { get; set; }
+        [Required] 
+        public string DisplayName { get; set; } = string.Empty;
 
         [Required]
         public bool IsAnonymous { get; set; }
@@ -373,5 +362,17 @@ namespace Penfolio2.Models
         public virtual ICollection<PenProfile> PenProfiles { get; set; }
 
         public virtual ICollection<AuthorsForRequestRepresentationViewModel> Authors { get; set; }
+    }
+
+    public class ProfileListViewModel
+    {
+        public ProfileListViewModel()
+        {
+            PenProfiles = new HashSet<PenProfile>();
+        }
+
+        public string OptionValue { get; set; } = "";
+
+        public virtual ICollection<PenProfile> PenProfiles { get; set; }
     }
 }

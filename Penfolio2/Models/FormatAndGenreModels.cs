@@ -22,7 +22,7 @@ namespace Penfolio2.Models
         public int FormatId { get; set; }
 
         [Required, NotNull]
-        public string FormatName { get; set; }
+        public string FormatName { get; set; } = string.Empty;
 
         [AllowNull]
         public string? Explanation { get; set; }
@@ -62,7 +62,7 @@ namespace Penfolio2.Models
         public int FormatId { get; set; }
 
         [Required, NotNull]
-        public string AltName { get; set; }
+        public string AltName { get; set; } = string.Empty;
 
         public virtual FormatTag? FormatTag { get; set; }
     }
@@ -113,7 +113,7 @@ namespace Penfolio2.Models
         public int GenreId { get; set; }
 
         [Required, NotNull]
-        public string GenreName { get; set; }
+        public string GenreName { get; set; } = string.Empty;
 
         [AllowNull]
         public string? Explanation { get; set; }
@@ -152,8 +152,8 @@ namespace Penfolio2.Models
         [ForeignKey("GenreTag")]
         public int GenreId { get; set; }
 
-        [Required, NotNull]
-        public string AltName { get; set; }
+        [Required, NotNull] 
+        public string AltName { get; set; } = string.Empty;
 
         public virtual GenreTag? GenreTag { get; set; }
     }
@@ -177,10 +177,10 @@ namespace Penfolio2.Models
         public int? TertiaryParentId { get; set; }
 
         [ForeignKey("GenreId")]
-        public virtual GenreTag GenreTag { get; set; }
+        public virtual GenreTag? GenreTag { get; set; }
 
         [ForeignKey("ParentId")]
-        public virtual GenreTag ParentGenre { get; set; }
+        public virtual GenreTag? ParentGenre { get; set; }
 
         [ForeignKey("SecondaryParentId")]
         [AllowNull]
@@ -208,9 +208,9 @@ namespace Penfolio2.Models
         public int? ParentGenreId { get; set; }
 
         [ForeignKey("GenreId")]
-        public virtual GenreTag GenreTag { get; set; }
+        public virtual GenreTag? GenreTag { get; set; }
 
-        public virtual FormatTag ParentFormatTag { get; set; }
+        public virtual FormatTag? ParentFormatTag { get; set; }
 
         [ForeignKey("ParentGenreId")]
         [AllowNull]

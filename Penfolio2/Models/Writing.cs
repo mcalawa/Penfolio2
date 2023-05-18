@@ -28,10 +28,10 @@ namespace Penfolio2.Models
 
         [Required, NotNull]
         [ForeignKey("PenUser")]
-        public string UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
         [Required, NotNull]
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         [Required, NotNull]
         public byte[] Document { get; set; }

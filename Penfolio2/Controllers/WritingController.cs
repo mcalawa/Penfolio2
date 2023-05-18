@@ -199,7 +199,7 @@ namespace Penfolio2.Controllers
         [Route("Writing/ViewWriting/{id}")]
         public ActionResult ViewWriting(int id)
         {
-            Writing writing = db.Writings.Where(i => i.WritingId == id).FirstOrDefault();
+            Writing? writing = db.Writings.Where(i => i.WritingId == id).FirstOrDefault();
 
             if(writing == null)
             {
@@ -214,21 +214,26 @@ namespace Penfolio2.Controllers
             List<IdentityError> errors = new List<IdentityError>();
 
             //if the user is not allowed to access this, redirect to error (TBD)
-            if(!IsAccessableByUser(writing.AccessPermissionId, ref errors))
+            if(writing != null && !IsAccessableByUser(writing.AccessPermissionId, ref errors))
             {
                 return RedirectToAction("AccessDenied", new { id = writing.AccessPermissionId });
             }
 
             ViewBag.Author = false;
 
-            if(IsAccessableByUser(writing.AccessPermissionId, ref errors, "edit"))
+            if(writing != null && IsAccessableByUser(writing.AccessPermissionId, ref errors, "edit"))
             {
                 ViewBag.Author = true;
             }
 
-            string document = HTMLByteArrayToString(writing.Document);
+            ViewBag.Document = "";
 
-            ViewBag.Document = document;
+            if(writing != null)
+            {
+                string document = HTMLByteArrayToString(writing.Document);
+
+                ViewBag.Document = document;
+            }
 
             return View(writing);
         }
@@ -496,7 +501,7 @@ namespace Penfolio2.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            Writing writing = db.Writings.Where(i => i.WritingId ==  id).FirstOrDefault();
+            Writing? writing = db.Writings.Where(i => i.WritingId ==  id).FirstOrDefault();
 
             if(writing == null)
             {
@@ -515,9 +520,20 @@ namespace Penfolio2.Controllers
 
             var writingProfiles = GetWriterProfiles(userId);
 
-            foreach(var wp in writing.WritingProfiles.Select(i => i.PenProfile).Where(i => i.UserId != userId).ToList())
+            foreach(var writingProfile in writing.WritingProfiles)
             {
-                writingProfiles.Add(wp);
+                if(writingProfile.PenProfile == null)
+                {
+                    writingProfile.PenProfile = db.PenProfiles.Where(i => i.ProfileId == writingProfile.ProfileId).First();
+                }
+            }
+
+            foreach(var wp in writing.WritingProfiles.Select(i => i.PenProfile).Except(writingProfiles).ToList())
+            {
+                if(wp != null)
+                {
+                    writingProfiles.Add(wp);
+                }
             }
 
             var formatTags = db.FormatTags.ToList();
@@ -556,12 +572,12 @@ namespace Penfolio2.Controllers
                 Title = writing.Title,
                 Description = writing.Description,
                 EditorContent = HTMLByteArrayToString(writing.Document),
-                PublicAccess = writing.AccessPermission.PublicAccess,
-                FriendAccess = writing.AccessPermission.FriendAccess,
-                PublisherAccess = writing.AccessPermission.PublisherAccess,
-                MyAgentAccess = writing.AccessPermission.MyAgentAccess,
-                MinorAccess = writing.AccessPermission.MinorAccess,
-                ShowsUpInSearch = writing.AccessPermission.ShowsUpInSearch,
+                PublicAccess = writing.AccessPermission != null ? writing.AccessPermission.PublicAccess : false,
+                FriendAccess = writing.AccessPermission != null ? writing.AccessPermission.FriendAccess : false,
+                PublisherAccess = writing.AccessPermission != null ? writing.AccessPermission.PublisherAccess : false,
+                MyAgentAccess = writing.AccessPermission != null ? writing.AccessPermission.MyAgentAccess : false,
+                MinorAccess = writing.AccessPermission != null ? writing.AccessPermission.MinorAccess : false,
+                ShowsUpInSearch = writing.AccessPermission != null ? writing.AccessPermission.ShowsUpInSearch : false,
                 WritingProfiles = writingProfiles,
                 FormatTags = formatTags,
                 GenreTags = genreTags,
@@ -726,7 +742,7 @@ namespace Penfolio2.Controllers
 
                 //we have the profiles to remove and the profiles that need to be added, and they are all valid, so we can now move on to the other parts of the edit
                 //format the string of selected format tags
-                string[] formatTags = model.SelectedFormats.Split(",");
+                string[] formatTags = model.SelectedFormats != null ? model.SelectedFormats.Split(",") : new string[0];
 
                 //create a list for the FormatIds that SelectedFormats represents
                 List<int> selectedFormatIds = new List<int>();
@@ -787,7 +803,7 @@ namespace Penfolio2.Controllers
                 } //for each of the current format tags
 
                 //format the string of selected genre tags
-                string[] genreTags = model.SelectedGenres.Split(",");
+                string[] genreTags = model.SelectedGenres != null ? model.SelectedGenres.Split(",") : new string[0];
 
                 //create a list for the GenreIds that SelectedGenres represents
                 List<int> selectedGenreIds = new List<int>();
@@ -1110,34 +1126,15 @@ namespace Penfolio2.Controllers
             }
 
             //handle Comments, CommentFlags, and CommentReplies
-            List<int> commentIds = db.Comments.Where(i => i.WritingId == id).ToList().Select(i => i.CommentId).ToList();
-            List<int> commentFlagIds = new List<int>();
-            List<int> commentReplyIds = new List<int>();
+            List<Comment> comments = new List<Comment>();
+            List<CommentReply> commentReplies = new List<CommentReply>();
+            List<CommentFlag> commentFlags = new List<CommentFlag>();
 
-            //populate
-            foreach(var commentId in commentIds)
-            {
-                List<int> replyIds = db.CommentReplies.Where(i => i.CommentId == commentId).ToList().Select(i => i.ReplyId).ToList();
-                List<int> flagIds = db.CommentFlags.Where(i => i.CommentId == commentId).ToList().Select(i => i.CommentFlagId).ToList();
+            GetCommentsForWritingId(id, ref comments, ref commentReplies, ref commentFlags);
 
-                foreach(var replyId in replyIds)
-                {
-                    if (!commentReplyIds.Contains(replyId))
-                    {
-                        commentReplyIds.Add(replyId);
-                    }
-                    
-                    if(!commentIds.Contains(replyId))
-                    {
-                        commentIds.Add(replyId);
-                    }
-                }
-
-                foreach(var flagId in flagIds)
-                {
-                    commentFlagIds.Add(flagId);
-                }
-            }
+            List<int> commentIds = comments.Count > 0 ? comments.Select(i => i.CommentId).ToList() : new List<int>();
+            List<int> commentReplyIds = commentReplies.Count > 0 ? commentReplies.Select(i => i.ReplyId).ToList() : new List<int>();
+            List<int> commentFlagIds = commentFlags.Count > 0 ? commentFlags.Select(i => i.CommentFlagId).ToList() : new List<int>();
 
             //now, do the actual deleting
             //remove comment replies for comments connected to this writing
@@ -1268,6 +1265,7 @@ namespace Penfolio2.Controllers
                 errorString += error.Description + " ";
             }
 
+            ViewBag.VerifiedPublisher = UserHasVerifiedPublisherProfile();
             ViewBag.RepresentationRequest = false;
 
             if(errorString.Contains("represent the owner"))
@@ -1366,7 +1364,7 @@ namespace Penfolio2.Controllers
         {
             if (input == null)
             {
-                return null;
+                return "";
             }
 
             string output = Encoding.Unicode.GetString(input);

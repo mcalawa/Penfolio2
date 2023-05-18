@@ -6,7 +6,7 @@
 
 <p>@ViewBag.ErrorString</p>
 
-@if (ViewBag.FriendRequest || ViewBag.AccessRequest)
+@if (ViewBag.FriendRequest || ViewBag.AccessRequest || (ViewBag.RepresentationRequest && ViewBag.VerifiedPublisher))
 {
     <hr />
 }

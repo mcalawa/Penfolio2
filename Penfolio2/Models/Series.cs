@@ -27,10 +27,10 @@ namespace Penfolio2.Models
 
         [Required, NotNull]
         [ForeignKey("PenUser")]
-        public string CreatorId { get; set; }
+        public string CreatorId { get; set; } = string.Empty;
 
         [Required, NotNull]
-        public string SeriesName { get; set; }
+        public string SeriesName { get; set; } = string.Empty;
 
         [AllowNull]
         public string? SeriesDescription { get; set; }

@@ -50,6 +50,16 @@ https://quilljs.com/ Quill rich text editor
 
 Stuff for expansion:
 https://demos.webspellchecker.com/wproofreader-quill.html Spell checker for Quill editor
+https://github.com/zenoamaro/react-quill/issues/756 Fixing a focus trap 1
+https://stackoverflow.com/questions/53909477/how-to-handle-tabbing-for-accessibility-with-a-textarea-that-uses-the-tab-button Fixing a focus trap 2
+https://www.w3.org/TR/UNDERSTANDING-WCAG20/keyboard-operation-trapping.html Fixing a focus trap 3
+https://github.com/quilljs/quill/issues/110 Fixing a focus trap 4
+https://github.com/quilljs/quill/pull/439 Fixing a focus trap 5
+https://codepen.io/anon/pen/JRJgQB Fixing a focus trap 6
+https://github.com/PrismJS/live/issues/8 Fixing a focus trap 7
+https://github.com/ajaxorg/ace/issues/3149 Fixing a focus trap 8
+https://stackoverflow.com/questions/24963246/ace-editor-simply-re-enable-command-after-disabled-it Fixing a focus trap 9
+https://uxdesign.cc/how-to-trap-focus-inside-modal-to-make-it-ada-compliant-6a50f9a70700 Fixing a focus trap 10
 
 Potentially useful Font Awesome icons:
 user

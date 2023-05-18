@@ -1,6 +1,6 @@
 ﻿@model Penfolio2.Models.RequestFriendViewModel
 @{
-    List<PenProfile> penProfilesForAuthor = Model.Authors.Count > 0 && Model.Authors.First().Friendships.Count > 0 ? Model.PenProfiles.Except(Model.Authors.First().Friendships.Select(i => i.SecondFriend).ToList()).ToList() : Model.PenProfiles.ToList();
+    List<PenProfile> penProfilesForAuthor = Model.Authors.Count > 0 && Model.Authors.First().Friendships.Count > 0 ? UpdatePenProfilesForAuthor(Model.Authors.First().ProfileId) : Model.PenProfiles.ToList();
     penProfilesForAuthor = new List<PenProfile>();
 
     foreach(var profile in Model.PenProfiles)

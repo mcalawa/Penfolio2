@@ -63,10 +63,10 @@ namespace Penfolio2.Models
         public int UserBlockId { get; set; }
 
         [Required, NotNull]
-        public string BlockingUserId { get; set; }
+        public string BlockingUserId { get; set; } = string.Empty;
 
         [Required, NotNull]
-        public string BlockedUserId { get; set; }
+        public string BlockedUserId { get; set; } = string.Empty;
 
         [ForeignKey("PenProfile")]
         [AllowNull]

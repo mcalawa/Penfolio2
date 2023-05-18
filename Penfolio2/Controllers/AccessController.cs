@@ -263,7 +263,7 @@ namespace Penfolio2.Controllers
             return IsAccessableByUser(accessPermissionId, ref errors, null);
         }
 
-        protected bool IsAccessableByUser(int accessPermissionId, ref List<IdentityError> errors, string action)
+        protected bool IsAccessableByUser(int accessPermissionId, ref List<IdentityError> errors, string? action)
         {
             if(action == null)
             {
@@ -294,7 +294,7 @@ namespace Penfolio2.Controllers
             //get a list of all of this user's profiles
             List<int> userProfileIds = user.PenProfiles.ToList().Select(i => i.ProfileId).ToList();
             //get the access permission from the database by id
-            AccessPermission accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault();
+            AccessPermission? accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault();
 
             //if the access permission doesn't exist, return false
             if (accessPermission == null)
@@ -339,7 +339,7 @@ namespace Penfolio2.Controllers
             else if (db.Writings.Any(i => i.AccessPermissionId == accessPermissionId))
             {
                 //get the writing
-                Writing writing = db.Writings.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault();
+                Writing? writing = db.Writings.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault();
 
                 //if there's no writing with that AccessPermissionId, return false
                 if (writing == null)
@@ -396,9 +396,7 @@ namespace Penfolio2.Controllers
             else if (db.Folders.Any(i => i.AccessPermissionId == accessPermissionId))
             {
                 //get the folder
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                Folder folder = db.Folders.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault();
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+                Folder? folder = db.Folders.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault();
 
                 //if there's no folder with that AccessPermissionId, return false
                 if (folder == null)
@@ -455,7 +453,7 @@ namespace Penfolio2.Controllers
             else if (db.Series.Any(i => i.AccessPermissionId == accessPermissionId))
             {
                 //get the series
-                Series series = db.Series.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault();
+                Series? series = db.Series.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault();
 
                 //if there's no series with that AccessPermissionId, return false
                 if (series == null)
@@ -558,14 +556,16 @@ namespace Penfolio2.Controllers
             }
 
             //get a list of individual access grants for this AccessPermissionId where the grant is still active
+            List<IndividualAccessGrant> individualAccessGrantsForEnumeration = db.IndividualAccessGrants.Where(i => i.AccessPermissionId == accessPermissionId && i.Active).ToList();
             List<IndividualAccessGrant> individualAccessGrants = db.IndividualAccessGrants.Where(i => i.AccessPermissionId == accessPermissionId && i.Active).ToList();
             //get a list of individual access revokes for this AccessPermissionId where the revoke is still active
+            List<IndividualAccessRevoke> individualAccessRevokesForEnumeration = db.IndividualAccessRevokes.Where(i => i.AccessPermissionId == accessPermissionId && i.Active).ToList();
             List<IndividualAccessRevoke> individualAccessRevokes = db.IndividualAccessRevokes.Where(i => i.AccessPermissionId == accessPermissionId && i.Active).ToList();
             //get a list of all of this user's profiles so we can remove any ids that don't belong to them from the list of individual access grants and revokes
             List<int> overlappingProfileIds = new List<int>();
 
             //remove anything from the list of individual access grants that doesn't apply to us
-            foreach (var item in individualAccessGrants)
+            foreach (var item in individualAccessGrantsForEnumeration)
             {
                 //if the GranteeId isn't one of the user's profiles
                 if (!userProfileIds.Contains(item.GranteeId))
@@ -580,7 +580,7 @@ namespace Penfolio2.Controllers
             }
 
             //remove anything from the list of individual access revokes that doesn't apply to us
-            foreach (var item in individualAccessRevokes)
+            foreach (var item in individualAccessRevokesForEnumeration)
             {
                 //if the RevokeeId isn't one of the user's profiles
                 if (!userProfileIds.Contains(item.RevokeeId))
@@ -597,8 +597,10 @@ namespace Penfolio2.Controllers
             foreach (var item in overlappingProfileIds)
             {
                 //get all the individual access grants for this ProfileId where the grant is active
+                List<IndividualAccessGrant> grantsForEnumeration = individualAccessGrants.Where(i => i.GranteeId == item && i.Active).ToList();
                 List<IndividualAccessGrant> grants = individualAccessGrants.Where(i => i.GranteeId == item && i.Active).ToList();
                 //get all the individual access revokes for this ProfileId where the revoke is active
+                List<IndividualAccessRevoke> revokesForEnumeration = individualAccessRevokes.Where(i => i.RevokeeId == item && i.Active).ToList();
                 List<IndividualAccessRevoke> revokes = individualAccessRevokes.Where(i => i.RevokeeId == item && i.Active).ToList();
                 //get the most recent grant
                 mostRecentGrant = grants.OrderByDescending(i => i.GrantDate).First();
@@ -606,10 +608,10 @@ namespace Penfolio2.Controllers
                 mostRecentRevoke = revokes.OrderByDescending(i => i.RevokeDate).First();
 
                 //if there is more than one active grant in the list, our first objective is to find the most recent grant and make all of the older grants inactive
-                if (grants.Count > 1)
+                if (grantsForEnumeration.Count > 1)
                 {
                     //go through all of the grants
-                    foreach (var grant in grants)
+                    foreach (var grant in grantsForEnumeration)
                     {
                         //if it's not the most recent grant, set active to false, update it in the database, and then remove it from the list
                         if (!grant.Equals(mostRecentGrant))
@@ -623,10 +625,10 @@ namespace Penfolio2.Controllers
                 } //if there's more than one grant
 
                 //if there is more than one active revoke in the list, our first objective is to find the most recent revoke and make all of the older revokes inactive
-                if (revokes.Count > 1)
+                if (revokesForEnumeration.Count > 1)
                 {
                     //go through all the revokes
-                    foreach (var revoke in revokes)
+                    foreach (var revoke in revokesForEnumeration)
                     {
                         //if it's not the most recent revoke, set active to false, update it in the database, and then remove it from the list
                         if (!revoke.Equals(mostRecentRevoke))
@@ -680,7 +682,15 @@ namespace Penfolio2.Controllers
             } //if there are both individual access grants and individual access revokes
             else if (individualAccessGrants.Count > 0 && individualAccessRevokes.Count > 0)
             {
-                if (mostRecentGrant.GrantDate > mostRecentRevoke.RevokeDate)
+                if (mostRecentGrant != null && mostRecentRevoke != null && mostRecentGrant.GrantDate > mostRecentRevoke.RevokeDate)
+                {
+                    return true;
+                }
+                else if(mostRecentGrant != null && mostRecentRevoke == null)
+                {
+                    return true;
+                }
+                else if(mostRecentGrant == null && mostRecentRevoke == null)
                 {
                     return true;
                 }
@@ -732,7 +742,7 @@ namespace Penfolio2.Controllers
                     } //if the AccessPermission is for a piece of Writing
                     else if(accessPermission.WritingId !=  null)
                     {
-                        List<WritingProfile> writingProfiles = db.WritingProfiles.Where(i => i.WritingId == accessPermission.WritingId).ToList();
+                        List<WritingProfile> writingProfiles = db.WritingProfiles.Where(i => i.WritingId == accessPermission.WritingId.Value).ToList();
 
                         foreach(var publisherWriter in publisherWriters)
                         {
@@ -744,7 +754,7 @@ namespace Penfolio2.Controllers
                     } //if the AccessPermission is for a Folder
                     else if (accessPermission.FolderId != null)
                     {
-                        List<FolderOwner> folderOwners = db.Folders.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault().Owners.ToList();
+                        List<FolderOwner> folderOwners = db.FolderOwners.Where(i => i.FolderId == accessPermission.FolderId.Value).ToList(); 
 
                         foreach (var publisherWriter in publisherWriters)
                         {
@@ -756,7 +766,7 @@ namespace Penfolio2.Controllers
                     } //if the AccessPermission is for a Series
                     else if (accessPermission.SeriesId != null)
                     {
-                        List<SeriesOwner> seriesOwners = db.Series.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault().Owners.ToList();
+                        List<SeriesOwner> seriesOwners = db.SeriesOwners.Where(i => i.SeriesId == accessPermission.SeriesId.Value).ToList();
 
                         foreach (var publisherWriter in publisherWriters)
                         {
@@ -792,7 +802,7 @@ namespace Penfolio2.Controllers
                     else if (accessPermission.WritingId != null)
                     {
 
-                        List<PenProfile> writerProfiles = db.Writings.Where(i => i.AccessPermissionId == accessPermissionId).First().PenUser.PenProfiles.ToList();
+                        List<WritingProfile> writerProfiles = db.WritingProfiles.Where(i => i.WritingId == accessPermission.WritingId.Value).ToList();
 
                         foreach (var friendship in friendships)
                         {
@@ -804,7 +814,7 @@ namespace Penfolio2.Controllers
                     } //if the AccessPermission is for a Folder
                     else if (accessPermission.FolderId != null)
                     {
-                        List<FolderOwner> folderOwners = db.Folders.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault().Owners.ToList();
+                        List<FolderOwner> folderOwners = db.FolderOwners.Where(i => i.FolderId == accessPermission.FolderId.Value).ToList();
 
                         foreach (var friendship in friendships)
                         {
@@ -816,7 +826,7 @@ namespace Penfolio2.Controllers
                     } //if the AccessPermission is for a Series
                     else if (accessPermission.SeriesId != null)
                     {
-                        List<SeriesOwner> seriesOwners = db.Series.Where(i => i.AccessPermissionId == accessPermissionId).FirstOrDefault().Owners.ToList();
+                        List<SeriesOwner> seriesOwners = db.SeriesOwners.Where(i => i.SeriesId == accessPermission.SeriesId.Value).ToList();
 
                         foreach (var friendship in friendships)
                         {
@@ -830,7 +840,7 @@ namespace Penfolio2.Controllers
 
                 if(accessPermission.MyAgentAccess && !accessPermission.PublisherAccess && accessPermission.FriendAccess)
                 {
-                    if (UserHasPublisherProfile() && UserHasVerifiedPublisherProfile())
+                    if (UserHasVerifiedPublisherProfile())
                     {
                         errors.Add(new IdentityError
                         {
@@ -854,7 +864,7 @@ namespace Penfolio2.Controllers
                 }
                 else if (accessPermission.MyAgentAccess && !accessPermission.PublisherAccess)
                 {
-                    if (UserHasPublisherProfile() && UserHasVerifiedPublisherProfile())
+                    if (UserHasVerifiedPublisherProfile())
                     {
                         errors.Add(new IdentityError
                         {
@@ -1049,6 +1059,11 @@ namespace Penfolio2.Controllers
 
         protected ICollection<PenProfile> GetVerifiedPublisherProfiles(string userId)
         {
+            if(userId == null)
+            {
+                return new List<PenProfile>();
+            }
+
             List<PenProfile> penProfiles = db.PenProfiles.Where(i => i.UserId == userId && i.RoleId == 2 && i.Verified).ToList();
             List<PenProfile> profiles = new List<PenProfile>();
 
@@ -1060,6 +1075,157 @@ namespace Penfolio2.Controllers
             }
 
             return penProfiles.Equals(profiles) ? penProfiles : profiles;
+        }
+
+        protected void GetCommentsForCommenterId(int profileId, ref List<Comment> comments, ref List<CommentReply> replies, ref List<CommentFlag> flags)
+        {
+            if(comments == null)
+            {
+                comments = new List<Comment>();
+            }
+
+            if(replies == null)
+            {
+                replies = new List<CommentReply>();
+            }
+
+            if (flags == null)
+            {
+                flags = new List<CommentFlag>();
+            }
+
+            var penProfile = db.PenProfiles.Where(i => i.ProfileId == profileId).FirstOrDefault();
+
+            if(penProfile == null)
+            {
+                return;
+            }
+
+            if(comments.Count == 0)
+            {
+                comments = db.Comments.Where(i => i.CommenterId == profileId).ToList();
+            }
+
+            foreach (var comment in comments)
+            {
+                GetRepliesAndFlagsForCommentId(comment.CommentId, ref replies, ref flags);
+            }
+
+            if(comments.Count > 0)
+            {
+                List<int> commentIds = comments.Select(i => i.CommentId).ToList();
+
+                foreach(var replyId in replies.Select(i => i.ReplyId).ToList().Except(commentIds))
+                {
+                    var comment = db.Comments.Where(i => i.CommentId == replyId).FirstOrDefault();
+
+                    if(comment != null)
+                    {
+                        comments.Add(comment);
+                    }
+                }
+
+                comments = comments.Distinct().ToList();
+
+                if(replies.Count > 0)
+                {
+                    replies = replies.Distinct().ToList();
+                }
+
+                if(flags.Count > 0)
+                {
+                    flags = flags.Distinct().ToList();
+                }
+            }
+        }
+
+        protected void GetCommentsForWritingId(int writingId, ref List<Comment> comments, ref List<CommentReply> replies, ref List<CommentFlag> flags)
+        {
+            if (comments == null)
+            {
+                comments = new List<Comment>();
+            }
+
+            if (replies == null)
+            {
+                replies = new List<CommentReply>();
+            }
+
+            if (flags == null)
+            {
+                flags = new List<CommentFlag>();
+            }
+
+            var writing = db.Writings.Where(i => i.WritingId == writingId).FirstOrDefault();
+
+            if (writing == null)
+            {
+                return;
+            }
+
+            if (comments.Count == 0)
+            {
+                comments = db.Comments.Where(i => i.WritingId == writingId).ToList();
+            }
+
+            foreach (var comment in comments)
+            {
+                GetRepliesAndFlagsForCommentId(comment.CommentId, ref replies, ref flags);
+            }
+
+            if (comments.Count > 0)
+            {
+                List<int> commentIds = comments.Select(i => i.CommentId).ToList();
+
+                foreach (var replyId in replies.Select(i => i.ReplyId).ToList().Except(commentIds))
+                {
+                    var comment = db.Comments.Where(i => i.CommentId == replyId).FirstOrDefault();
+
+                    if (comment != null)
+                    {
+                        comments.Add(comment);
+                    }
+                }
+
+                comments = comments.Distinct().ToList();
+
+                if (replies.Count > 0)
+                {
+                    replies = replies.Distinct().ToList();
+                }
+
+                if (flags.Count > 0)
+                {
+                    flags = flags.Distinct().ToList();
+                }
+            }
+        }
+
+        protected void GetRepliesAndFlagsForCommentId(int commentId, ref List<CommentReply> replies, ref List<CommentFlag> flags)
+        {
+            List<CommentReply> commentReplies = db.CommentReplies.Where(i => i.CommentId == commentId).ToList();
+            List<CommentFlag> commentFlags = db.CommentFlags.Where(i => i.CommentId == commentId).ToList();
+
+            foreach(var reply in commentReplies)
+            {
+                if(db.CommentReplies.Any(i => i.CommentId == reply.ReplyId) || db.CommentFlags.Any(i => i.CommentId == reply.ReplyId))
+                {
+                    GetRepliesAndFlagsForCommentId(reply.ReplyId, ref replies, ref flags);
+                }
+
+                if(!replies.Select(i => i.ReplyId).ToList().Contains(reply.ReplyId))
+                {
+                    replies.Add(reply);
+                }
+            }
+
+            foreach(var flag in commentFlags)
+            {
+                if(!flags.Select(i => i.CommentFlagId).ToList().Contains(flag.CommentFlagId))
+                {
+                    flags.Add(flag);
+                }
+            }
         }
 
         protected PenProfile PopulatePenProfile(PenProfile penProfile)

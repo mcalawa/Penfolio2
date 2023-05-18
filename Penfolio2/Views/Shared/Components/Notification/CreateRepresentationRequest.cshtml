@@ -1,6 +1,6 @@
 ﻿@model Penfolio2.Models.RequestRepresentationViewModel
 @{
-    List<PenProfile> penProfilesForAuthor = Model.Authors.Count > 0 && Model.Authors.First().WriterPublishers.Count > 0 ? Model.PenProfiles.Except(Model.Authors.First().WriterPublishers.Select(i => i.Publisher).ToList()).ToList() : Model.PenProfiles.ToList();
+    List<PenProfile> penProfilesForAuthor = Model.Authors.Count > 0 && Model.Authors.First().WriterPublishers.Count > 0 ? UpdatePenProfilesForAuthor(Model.Authors.First().ProfileId) : Model.PenProfiles.ToList();
     penProfilesForAuthor = new List<PenProfile>();
 
     foreach (var profile in Model.PenProfiles)

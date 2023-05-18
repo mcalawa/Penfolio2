@@ -47,7 +47,4 @@ function changeAccess(id) {
         $("div#public-access input[type=checkbox]").prop('checked', false);
         $("div#publisher-access input[type=checkbox]").prop('checked', false);
     }
-    else if (id === "my-agent-access" && $("div#" + id + " input[type=checkbox]").is(':checked') === true) {
-        $("div#publisher-access input[type=checkbox]").prop('checked', true);
-    }
 }

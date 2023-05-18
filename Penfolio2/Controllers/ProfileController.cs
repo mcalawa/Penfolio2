@@ -28,14 +28,14 @@ namespace Penfolio2.Controllers
         {
             if (UserHasProfile())
             {
-                PenProfile mainProfile = GetMainProfile();
+                PenProfile? mainProfile = GetMainProfile();
 
                 if (mainProfile == null)
                 {
                     List<PenProfile> penProfiles = GetPenProfiles().ToList();
                     penProfiles.OrderBy(i => i.ProfileId).ToList();
 
-                    mainProfile = penProfiles.FirstOrDefault();
+                    mainProfile = penProfiles.First();
                     mainProfile.IsMainProfile = true;
                     db.Entry(mainProfile).State = EntityState.Modified;
                     db.SaveChanges();
@@ -94,6 +94,13 @@ namespace Penfolio2.Controllers
         [Route("Profile/ViewAll")]
         public ActionResult ViewAll()
         {
+            var userId = GetUserId();
+            if(userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            ViewBag.UserId = userId;
             List<PenProfile> penProfiles = GetAllAvailableProfiles();
 
             return View(penProfiles);
@@ -106,7 +113,7 @@ namespace Penfolio2.Controllers
             foreach(var profile in db.PenProfiles.ToList())
             {
                 List<IdentityError> errors = new List<IdentityError>();
-                bool isAccessable = IsAccessableByUser(profile.AccessPermissionId, ref errors);
+                bool isAccessable = IsAccessableByUser(profile.AccessPermissionId, ref errors, "search");
 
                 if(isAccessable)
                 {
@@ -139,7 +146,13 @@ namespace Penfolio2.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(CreateProfileViewModel model)
         {
-            string userId = GetUserId();
+            string? userId = GetUserId();
+
+            if(userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             if (ModelState.IsValid)
             {
                 //Create Access Permission
@@ -158,10 +171,14 @@ namespace Penfolio2.Controllers
                 //if we are changing which profile is the main profile, make that update first
                 if (UserHasProfile() && model.IsMainProfile)
                 {
-                    PenProfile mainProfile = db.PenProfiles.Where(i => i.UserId == userId && i.IsMainProfile).FirstOrDefault();
-                    mainProfile.IsMainProfile = false;
-                    db.Entry(mainProfile).State = EntityState.Modified;
-                    db.SaveChanges();
+                    PenProfile? mainProfile = db.PenProfiles.Where(i => i.UserId == userId && i.IsMainProfile).FirstOrDefault();
+
+                    if(mainProfile != null)
+                    {
+                        mainProfile.IsMainProfile = false;
+                        db.Entry(mainProfile).State = EntityState.Modified;
+                        db.SaveChanges();
+                    }
                 }
 
                 //Create Profile
@@ -199,7 +216,13 @@ namespace Penfolio2.Controllers
         {
             if (string.IsNullOrEmpty(id) != true)
             {
-                string userId = GetUserId();
+                string? userId = GetUserId();
+
+                if(userId == null)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+
                 PenProfile? penProfile = db.PenProfiles.Where(i => i.UrlString == id).FirstOrDefault();
 
                 if(penProfile == null)
@@ -207,7 +230,7 @@ namespace Penfolio2.Controllers
                     return RedirectToAction("NotFound");
                 }
 
-                AccessPermission accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == penProfile.AccessPermissionId).FirstOrDefault();
+                AccessPermission? accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == penProfile.AccessPermissionId).FirstOrDefault();
 
                 if(accessPermission == null)
                 {
@@ -217,7 +240,7 @@ namespace Penfolio2.Controllers
                 if (penProfile.UserId == userId)
                 {
                     string name = penProfile.DisplayName;
-                    PenRole role = db.ProfileRoles.Where(i => i.RoleId == penProfile.RoleId).FirstOrDefault();
+                    PenRole? role = db.ProfileRoles.Where(i => i.RoleId == penProfile.RoleId).FirstOrDefault();
 
                     if(role != null)
                     {
@@ -267,7 +290,13 @@ namespace Penfolio2.Controllers
         [Route("Profile/Edit/{id}")]
         public ActionResult Edit(string id, EditProfileViewModel model)
         {
-            string userId = GetUserId();
+            string? userId = GetUserId();
+
+            if(userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             PenProfile? penProfile = db.PenProfiles.Where(i => i.UrlString.ToUpper().Trim() == id.ToUpper().Trim()).FirstOrDefault();
 
             if(penProfile == null)
@@ -380,13 +409,13 @@ namespace Penfolio2.Controllers
                 else
                 {
                     //if ap's ProfileId matches penProfile's id and there are no other conflicts, set accessPermission to no longer reference penProfile's id
-                    if(penProfile.ProfileId == ap.ProfileId && ap.WritingId == null && ap.FolderId == null && ap.SeriesId == null)
+                    if(ap != null && accessPermission != null && penProfile.ProfileId == ap.ProfileId && ap.WritingId == null && ap.FolderId == null && ap.SeriesId == null)
                     {
                         accessPermission.ProfileId = null;
                         db.Entry(accessPermission).State = EntityState.Modified;
                         db.SaveChanges();
                     } //if ap matches penProfile's id and has conflicts but accessPermission doesn't, set ap to no longer reference penProfile and update penProfile to point to accessPermission instead
-                    else if(penProfile.ProfileId == ap.ProfileId && accessPermission.FolderId == null && accessPermission.WritingId == null && accessPermission.SeriesId == null)
+                    else if(ap != null && accessPermission != null && penProfile.ProfileId == ap.ProfileId && accessPermission.FolderId == null && accessPermission.WritingId == null && accessPermission.SeriesId == null)
                     {
                         ap.ProfileId = null;
                         db.Entry(ap).State = EntityState.Modified;
@@ -396,11 +425,11 @@ namespace Penfolio2.Controllers
                         db.Entry(penProfile).State = EntityState.Modified;
                         db.SaveChanges();
                     } //if ap references penProfile but both ap and accessPermission have conflicts, there's something weird going on, just redirect
-                    else if(penProfile.ProfileId == ap.ProfileId)
+                    else if(ap != null && penProfile.ProfileId == ap.ProfileId)
                     {
                         return RedirectToAction("EditAccessDenied");
                     } //if ap doesn't reference penProfile and accessPermission has no conflicts, update penProfile to point to accessPermission instead
-                    else if(penProfile.ProfileId != ap.ProfileId && accessPermission.FolderId == null && accessPermission.WritingId == null && accessPermission.SeriesId == null)
+                    else if(ap != null && accessPermission != null && penProfile.ProfileId != ap.ProfileId && accessPermission.FolderId == null && accessPermission.WritingId == null && accessPermission.SeriesId == null)
                     {
                         penProfile.AccessPermissionId = accessPermission.AccessPermissionId;
                         db.Entry(penProfile).State = EntityState.Modified;
@@ -408,19 +437,22 @@ namespace Penfolio2.Controllers
                     } //if ap doesn't reference penProfile and accessPermission has conflicts
                     else
                     {
-                        accessPermission.ProfileId = null;
-                        db.Entry(accessPermission).State = EntityState.Modified;
-                        db.SaveChanges();
+                        if(accessPermission != null)
+                        {
+                            accessPermission.ProfileId = null;
+                            db.Entry(accessPermission).State = EntityState.Modified;
+                            db.SaveChanges();
+                        }
 
                         AccessPermission access = new AccessPermission
                         {
                             ProfileId = penProfile.ProfileId,
-                            PublicAccess = accessPermission.PublicAccess == ap.PublicAccess ? ap.PublicAccess : false,
-                            PublisherAccess = accessPermission.PublisherAccess == ap.PublisherAccess ? ap.PublisherAccess : false,
-                            MyAgentAccess = accessPermission.MyAgentAccess == ap.MyAgentAccess ? ap.MyAgentAccess : false,
-                            FriendAccess = accessPermission.FriendAccess == ap.FriendAccess ? ap.FriendAccess : false,
-                            MinorAccess = accessPermission.MinorAccess == ap.MinorAccess ? ap.MinorAccess : false,
-                            ShowsUpInSearch = accessPermission.ShowsUpInSearch == ap.ShowsUpInSearch ? ap.ShowsUpInSearch : false
+                            PublicAccess = accessPermission != null && ap != null && accessPermission.PublicAccess == ap.PublicAccess ? ap.PublicAccess : false,
+                            PublisherAccess = accessPermission != null && ap != null && accessPermission.PublisherAccess == ap.PublisherAccess ? ap.PublisherAccess : false,
+                            MyAgentAccess = accessPermission != null && ap != null && accessPermission.MyAgentAccess == ap.MyAgentAccess ? ap.MyAgentAccess : false,
+                            FriendAccess = accessPermission != null && ap != null && accessPermission.FriendAccess == ap.FriendAccess ? ap.FriendAccess : false,
+                            MinorAccess = accessPermission != null && ap != null && accessPermission.MinorAccess == ap.MinorAccess ? ap.MinorAccess : false,
+                            ShowsUpInSearch = accessPermission != null && ap != null && accessPermission.ShowsUpInSearch == ap.ShowsUpInSearch ? ap.ShowsUpInSearch : false
                         };
                         db.AccessPermissions.Add(access);
                         db.SaveChanges();
@@ -504,7 +536,7 @@ namespace Penfolio2.Controllers
                     penProfile.AccessPermissionId = accessPermission.AccessPermissionId;
                     db.Entry(penProfile).State = EntityState.Modified;
                 } //if the access permission pointing to this profile doesn't match the AccessPermissionId of penProfile
-                else if(accessPermission != ap)
+                else if(accessPermission != null && ap != null && accessPermission != ap)
                 {
                     //if accessPermission only has one thing it is pointing to
                     if(accessPermission.FolderId == null && accessPermission.WritingId == null && accessPermission.SeriesId == null)
@@ -561,13 +593,16 @@ namespace Penfolio2.Controllers
                 }
                 else
                 {
-                    accessPermission.PublicAccess = model.PublicAccess;
-                    accessPermission.FriendAccess = model.FriendAccess;
-                    accessPermission.PublisherAccess = model.PublisherAccess;
-                    accessPermission.MyAgentAccess = model.MyAgentAccess;
-                    accessPermission.MinorAccess = model.MinorAccess;
-                    accessPermission.ShowsUpInSearch = model.ShowsUpInSearch;
-                    db.Entry(accessPermission).State = EntityState.Modified;
+                    if(accessPermission != null)
+                    {
+                        accessPermission.PublicAccess = model.PublicAccess;
+                        accessPermission.FriendAccess = model.FriendAccess;
+                        accessPermission.PublisherAccess = model.PublisherAccess;
+                        accessPermission.MyAgentAccess = model.MyAgentAccess;
+                        accessPermission.MinorAccess = model.MinorAccess;
+                        accessPermission.ShowsUpInSearch = model.ShowsUpInSearch;
+                        db.Entry(accessPermission).State = EntityState.Modified;
+                    }
                 } //AccessPermission stuff
                 db.SaveChanges();
 
@@ -593,7 +628,7 @@ namespace Penfolio2.Controllers
 
                 penProfile.ProfileDescription = model.ProfileDescription;
                 penProfile.DisplayName = model.DisplayName;
-                penProfile.UrlString = model.UrlString;
+                penProfile.UrlString = model.UrlString != null ? model.UrlString : penProfile.UrlString;
                 db.Entry(penProfile).State = EntityState.Modified;
                 db.SaveChanges();
 
@@ -616,7 +651,13 @@ namespace Penfolio2.Controllers
         {
             if (!string.IsNullOrEmpty(id))
             {
-                string userId = GetUserId();
+                string? userId = GetUserId();
+
+                if(userId == null)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+
                 PenProfile? penProfile = db.PenProfiles.Where(i => i.UrlString == id).FirstOrDefault();
 
                 if (penProfile == null)
@@ -624,7 +665,7 @@ namespace Penfolio2.Controllers
                     return RedirectToAction("NotFound");
                 }
 
-                AccessPermission accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == penProfile.AccessPermissionId).FirstOrDefault();
+                AccessPermission? accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == penProfile.AccessPermissionId).FirstOrDefault();
 
                 if (accessPermission == null)
                 {
@@ -638,13 +679,13 @@ namespace Penfolio2.Controllers
 
                     foreach(var profile in profileList)
                     {
-                        PenRole profileRole = db.ProfileRoles.Where(i => i.RoleId == profile.RoleId).FirstOrDefault();
+                        PenRole? profileRole = db.ProfileRoles.Where(i => i.RoleId == profile.RoleId).FirstOrDefault();
 
                         var deleteModel = new DeleteProfileViewModel
                         {
                             ProfileId = profile.ProfileId,
                             DisplayName = profile.DisplayName,
-                            RoleName = profile.RoleId == null ? "" : profile.UseSecondaryRoleName ? profileRole.SecondaryRoleName : profileRole.RoleName,
+                            RoleName = profileRole == null ? "" : profile.UseSecondaryRoleName && profileRole.SecondaryRoleName != null ? profileRole.SecondaryRoleName : profileRole.RoleName,
                             IsMainProfile = profile.IsMainProfile,
                             OtherProfiles = new List<DeleteProfileViewModel>(),
                             NewMainProfile = null
@@ -653,8 +694,8 @@ namespace Penfolio2.Controllers
                         otherProfiles.Add(deleteModel);
                     }
 
-                    PenRole role = db.ProfileRoles.Where(i => i.RoleId == penProfile.RoleId).FirstOrDefault();
-                    string roleName = role == null ? "" : penProfile.UseSecondaryRoleName ? role.SecondaryRoleName : role.RoleName;
+                    PenRole? role = db.ProfileRoles.Where(i => i.RoleId == penProfile.RoleId).FirstOrDefault();
+                    string roleName = role == null ? "" : penProfile.UseSecondaryRoleName && role.SecondaryRoleName != null ? role.SecondaryRoleName : role.RoleName;
                     string name = penProfile.DisplayName + " (" + roleName + ")";
 
                     ViewBag.ProfileName = name;
@@ -691,7 +732,13 @@ namespace Penfolio2.Controllers
                 return RedirectToAction("NotFound");
             }
 
-            string userId = GetUserId();
+            string? userId = GetUserId();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             PenProfile? penProfile = db.PenProfiles.Where(i => i.UrlString == id).FirstOrDefault();
 
             if (penProfile == null)
@@ -720,6 +767,12 @@ namespace Penfolio2.Controllers
                     }
 
                     PenProfile? newMainProfile = db.PenProfiles.Where(i => i.ProfileId == model.NewMainProfile.Value).FirstOrDefault();
+
+                    if(newMainProfile == null)
+                    {
+                        return RedirectToAction("NotFound");
+                    }
+
                     newMainProfile.IsMainProfile = true;
                     db.Entry(newMainProfile).State = EntityState.Modified;
                     db.SaveChanges();
@@ -729,7 +782,12 @@ namespace Penfolio2.Controllers
                     db.SaveChanges();
                 }
 
-                AccessPermission accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == penProfile.AccessPermissionId).FirstOrDefault();
+                AccessPermission? accessPermission = db.AccessPermissions.Where(i => i.AccessPermissionId == penProfile.AccessPermissionId).FirstOrDefault();
+
+                if(accessPermission == null)
+                {
+                    return RedirectToAction("NotFound");
+                }
 
                 List<int> writingProfileIds = db.WritingProfiles.Where(i => i.ProfileId == model.ProfileId).ToList().Select(i => i.WritingId).ToList();
                 List<int> indvidualAccessRevokeIds = db.IndividualAccessRevokes.Where(i => i.RevokeeId == model.ProfileId).ToList().Select(i => i.IndividualAccessRevokeId).ToList(); //revokes for this profile will be deleted when the AccessPermission is
@@ -744,26 +802,15 @@ namespace Penfolio2.Controllers
                 //Critique should cascade on profile delete
                 List<int> followerFollowingIds = db.FollowersFollowing.Where(i => i.FollowerId == model.ProfileId || i.ProfileId == model.ProfileId).ToList().Select(i => i.FollowerFollowingId).ToList();
                 List<int> likeIds = db.Likes.Where(i => i.LikerId == model.ProfileId || i.ProfileId == model.ProfileId).ToList().Select(i => i.LikeId).ToList();
-                List<int> commentIds = db.Comments.Where(i => i.CommenterId == model.ProfileId || i.ProfileId == model.ProfileId).ToList().Select(i => i.CommentId).ToList();
-                List<int> commentReplyIds = new List<int>();
-                List<int> commentFlagIds = new List<int>(); //CommentFlags will cascade on FlaggerId delete
+                List<Comment> comments = new List<Comment>();
+                List<CommentReply> commentReplies = new List<CommentReply>();
+                List<CommentFlag> commentFlags = new List<CommentFlag>();
 
-                foreach(var commentId in  commentIds)
-                {
-                    List<int> replyIds = db.CommentReplies.Where(i => i.CommentId == commentId).ToList().Select(i => i.ReplyId).ToList();
-                    List<int> flagIds = db.CommentFlags.Where(i => i.CommentId == commentId).ToList().Select(i => i.CommentFlagId).ToList();
-
-                    foreach(var replyId in replyIds)
-                    {
-                        commentReplyIds.Add(replyId);
-                        commentIds.Add(replyId);
-                    }
-
-                    foreach(var flagId in flagIds)
-                    {
-                        commentFlagIds.Add(flagId);
-                    }
-                }
+                GetCommentsForCommenterId(model.ProfileId, ref comments, ref commentReplies, ref commentFlags);
+                
+                List<int> commentIds = comments.Count > 0 ? comments.Select(i => i.CommentId).ToList() : new List<int>();
+                List<int> commentReplyIds = commentReplies.Count > 0 ? commentReplies.Select(i => i.ReplyId).ToList() : new List<int>();
+                List<int> commentFlagIds = commentFlags.Count > 0 ? commentFlags.Select(i => i.CommentFlagId).ToList() : new List<int>(); //CommentFlags will cascade on FlaggerId delete
 
                 //SeriesOwner should cascade on profile delete
                 List<int> folderOwnerIds = db.FolderOwners.Where(i => i.OwnerId == model.ProfileId).ToList().Select(i => i.FolderId).ToList();
@@ -971,6 +1018,7 @@ namespace Penfolio2.Controllers
                 errorString += error.Description + " ";
             }
 
+            ViewBag.VerifiedPublisher = UserHasVerifiedPublisherProfile();
             ViewBag.RepresentationRequest = false;
 
             if (errorString.Contains("represent the owner"))
@@ -1115,7 +1163,7 @@ namespace Penfolio2.Controllers
         public byte[] CreateProfileImage()
         {
             Stream stream = environment.WebRootFileProvider.GetFileInfo("images/defaultprofileicon.png").CreateReadStream();
-            byte[] profileImage = null;
+            byte[]? profileImage = null;
             using(BinaryReader reader = new BinaryReader(stream))
             {
                 profileImage = reader.ReadBytes(Convert.ToInt32(stream.Length));

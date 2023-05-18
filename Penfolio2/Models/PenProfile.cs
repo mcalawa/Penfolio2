@@ -35,10 +35,10 @@ namespace Penfolio2.Models
 
         [Required, NotNull]
         [ForeignKey("PenUser")]
-        public string UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
         [Required, NotNull]
-        public string DisplayName { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
 
         [Required, NotNull]
         [ForeignKey("PenRole")]
@@ -53,7 +53,7 @@ namespace Penfolio2.Models
 
         [Required, NotNull]
         [StringLength(900)]
-        public string UrlString { get; set; }
+        public string UrlString { get; set; } = string.Empty;
 
         [Required, NotNull]
         public bool IsMainProfile { get; set; } = false;

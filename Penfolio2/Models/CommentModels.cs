@@ -20,7 +20,6 @@ namespace Penfolio2.Models
         public int CommentId { get; set; }
 
         [Required, NotNull]
-        //[ForeignKey("PenProfile")]
         public int CommenterId { get; set; }
 
         [Required, NotNull]
@@ -30,7 +29,7 @@ namespace Penfolio2.Models
         public DateTime? EditDate { get; set; }
 
         [Required, NotNull]
-        public string CommentText { get; set; }
+        public string CommentText { get; set; } = string.Empty;
 
         public int? ProfileId { get; set; }
 
@@ -87,7 +86,6 @@ namespace Penfolio2.Models
 
         public virtual Comment? Comment { get; set; }
 
-        //[ForeignKey("FlaggerId")]
         public virtual PenProfile? Flagger { get; set; }
     }
 

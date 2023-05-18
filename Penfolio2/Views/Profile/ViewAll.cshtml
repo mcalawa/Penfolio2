@@ -1,7 +1,60 @@
-﻿@model IEnumerable<Penfolio2.Models.PenProfile>
-@{
+﻿@model IEnumerable<PenProfile>
+@*@{
+
+    List<PenProfile> filteredPenProfiles = Model.PenProfiles.ToList();
+
+    List<PenProfile> UpdatePenProfiles(string filterBy) {
+        if(filterBy == "Writers")
+        {
+            return Model.PenProfiles.Where(i => i.RoleId == 1).ToList();
+        }
+        else if(filterBy == "Publishers")
+        {
+            return Model.PenProfiles.Where(i => i.RoleId == 2 && i.UseSecondaryRoleName == false).ToList();
+        }
+        else if(filterBy == "Literary Agents")
+        {
+            return Model.PenProfiles.Where(i => i.RoleId == 2 && i.UseSecondaryRoleName).ToList();
+        }
+        else if(filterBy == "Publishers and Literary Agents")
+        {
+            return Model.PenProfiles.Where(i => i.RoleId == 2).ToList();
+        }
+        else if(filterBy == "Verified Publishers")
+        {
+            return Model.PenProfiles.Where(i => i.RoleId == 2 && !i.UseSecondaryRoleName && i.Verified).ToList();
+        }
+        else if(filterBy == "Verified Literary Agents")
+        {
+            return Model.PenProfiles.Where(i => i.RoleId == 2 && i.UseSecondaryRoleName && i.Verified).ToList();
+        }
+        else if(filterBy == "Verified Publishers and Literary Agents")
+        {
+            return Model.PenProfiles.Where(i => i.RoleId == 2 && i.Verified).ToList();
+        }
+        else if(filterBy == "My Profiles")
+        {
+            return Model.PenProfiles.Where(i => i.UserId == ViewBag.UserId).ToList();
+        }
+
+        return Model.PenProfiles.ToList();
+    }
 }
-<h2>Profiles</h2>
+<div class="right-align">
+    <select asp-for="OptionValue" onchange="@filteredPenProfiles = @UpdatePenProfiles(Model.OptionValue);">
+        <option value="All">All Profiles</option>
+        <option value="My Profiles">My Profiles</option>
+        <option value="Writers">Writer Profiles</option>
+        <option value="Publishers">Publisher Profiles</option>
+        <option value="Literary Agents">Literary Agent Profiles</option>
+        <option value="Publishers and Literary Agents">Publisher and Literary Agent Profiles</option>
+        <option value="Verified Publishers">Verified Publisher Profiles</option>
+        <option value="Verified Literary Agents">Verified Literary Agent Profiles</option>
+        <option value="Verified Publishers and Literary Agents">Verified Publisher and Literary Agent Profiles</option>
+    </select>
+</div>*@
+
+<h2 class="clear-right">Profiles</h2>
 @foreach(var profile in Model) {
     var roleName = profile.UseSecondaryRoleName && profile.RoleId == 2 ? "Literary Agent" : profile.RoleId == 2 ? "Publisher" : "Writer";
     <div class="profile">

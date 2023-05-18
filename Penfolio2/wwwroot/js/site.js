@@ -54,8 +54,8 @@
                 }
             }
 
-            if ($("#notificationsMenu .dropdownContent").hasClass("show")) {
-                $("#notificationsMenu .dropdownContent").removeClass("show");
+            if ($("#notificationsMenu + .dropdownContent").hasClass("show")) {
+                $("#notificationsMenu + .dropdownContent").removeClass("show");
             }
         });
 
@@ -94,8 +94,8 @@
                 }
             }
 
-            if ($("#notificationsMenu .dropdownContent").hasClass("show")) {
-                $("#notificationsMenu .dropdownContent").removeClass("show");
+            if ($("#notificationsMenu + .dropdownContent").hasClass("show")) {
+                $("#notificationsMenu + .dropdownContent").removeClass("show");
             }
         });
 
@@ -112,8 +112,8 @@
                 }
             }
 
-            if ($("#notificationsMenu .dropdownContent").hasClass("show")) {
-                $("#notificationsMenu .dropdownContent").removeClass("show");
+            if ($("#notificationsMenu + .dropdownContent").hasClass("show")) {
+                $("#notificationsMenu + .dropdownContent").removeClass("show");
             }
         });
 
@@ -136,18 +136,18 @@
                 return;
             }
 
-            $("#notificationsMenu .dropdownContent").toggleClass("show");
+            $("#notificationsMenu + .dropdownContent").toggleClass("show");
         });
 
         $("#logoutMenu").on("focusin", function () {
-            if ($("#notificationsMenu .dropdownContent").hasClass("show")) {
-                $("#notificationsMenu .dropdownContent").removeClass("show");
+            if ($("#notificationsMenu + .dropdownContent").hasClass("show")) {
+                $("#notificationsMenu + .dropdownContent").removeClass("show");
             }
         });
 
         $("#loginMenu").on("focusin", function () {
-            if ($("#notificationsMenu .dropdownContent").hasClass("show")) {
-                $("#notificationsMenu .dropdownContent").removeClass("show");
+            if ($("#notificationsMenu + .dropdownContent").hasClass("show")) {
+                $("#notificationsMenu + .dropdownContent").removeClass("show");
             }
         });
     })

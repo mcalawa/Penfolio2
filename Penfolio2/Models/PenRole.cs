@@ -15,7 +15,7 @@ namespace Penfolio2.Models
         public int RoleId { get; set; }
 
         [Required, NotNull]
-        public string RoleName { get; set; }
+        public string RoleName { get; set; } = string.Empty;
 
         [AllowNull]
         public string? SecondaryRoleName { get; set; }

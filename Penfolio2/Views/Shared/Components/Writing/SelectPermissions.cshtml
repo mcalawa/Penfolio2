@@ -53,7 +53,7 @@
                         }
                         else
                         {
-                            <input asp-for="MyAgentAccess" onfocus='showExplanation("permissionsDescription", "If you would like even more control over who can access your writing, this option allows it to be accessed by a publisher or literary agent who is representing a writer profile that is one of the authors. This means that by selecting this option and not allowing general publisher access, you can limit which publishers are able to access what you&#39;ve written. Since this option is limiting which publishers and literary agents are able to view your work, it is automatically selected when you allow publisher access, and publisher access is automatically removed if you uncheck this item.")' onchange='changeAccess("my-agent-access")' checked /> @Html.DisplayNameFor(model => model.MyAgentAccess)
+                            <input asp-for="MyAgentAccess" onfocus='showExplanation("permissionsDescription", "If you would like even more control over who can access your writing, this option allows it to be accessed by a publisher or literary agent who is representing a writer profile that is one of the authors. This means that by selecting this option and not allowing general publisher access, you can limit which publishers are able to access what you&#39;ve written. Since this option is limiting which publishers and literary agents are able to view your work, it is automatically selected when you allow publisher access, and publisher access is automatically removed if you uncheck this item.")' onchange='changeAccess("my-agent-access")' /> @Html.DisplayNameFor(model => model.MyAgentAccess)
                         }
                     </label>
                 </div>
@@ -92,8 +92,8 @@
                         <h4 onmouseover='showExplanation("permissionDescription", "Anyone in this list has special permission to to see this piece of writing even if they otherwise wouldn&#39;t qualify based on your selected permissions.")'>Individual Access Grantees</h4>
                         @foreach (var grant in Model.IndividualAccessGrants.Where(i => i.Active).ToList())
                         {
-                            var grantRoleName = grant.Grantee.UseSecondaryRoleName && grant.Grantee.RoleId == 2 ? "Literary Agent" : grant.Grantee.RoleId == 2 ? "Publisher" : "Writer";
-                            <span><a href="/Profile/@grant.Grantee.UrlString">@grant.Grantee.DisplayName (@grantRoleName)</a> | <a href="/Notification/RemoveIndividualAccessGrant/@grant.IndividualAccessGrantId">Remove Individual Access Grant</a></span>
+                            var grantRoleName = grant.Grantee != null && grant.Grantee.UseSecondaryRoleName && grant.Grantee.RoleId == 2 ? "Literary Agent" : grant.Grantee != null && grant.Grantee.RoleId == 2 ? "Publisher" : "Writer";
+                            <span><a href="/Profile/@grant?.Grantee?.UrlString">@grant?.Grantee?.DisplayName (@grantRoleName)</a> | <a href="/Notification/RemoveIndividualAccessGrant/@grant?.IndividualAccessGrantId">Remove Individual Access Grant</a></span>
 
                             <br />
                         }
@@ -103,8 +103,8 @@
                         <h4 onmouseover='showExplanation("permissionDescription", "Everyone in this list has been blocked from accessing this piece of writing even if they would otherwise be allowed to based on your selected permissions.")'>Individual Access Revokees</h4>
                         @foreach (var revoke in Model.IndividualAccessRevokes.Where(i => i.Active).ToList())
                         {
-                            var revokeRoleName = revoke.Revokee.UseSecondaryRoleName && revoke.Revokee.RoleId == 2 ? "Literary Agent" : revoke.Revokee.RoleId == 2 ? "Publisher" : "Writer";
-                            <span><a href="/Profile/@revoke.Revokee.UrlString">@revoke.Revokee.DisplayName (@revokeRoleName)</a> | <a href="/Notification/RemoveIndividualAccessRevoke/@revoke.IndividualAccessRevokeId">Remove Individual Access Revoke</a></span>
+                            var revokeRoleName = revoke.Revokee != null && revoke.Revokee.UseSecondaryRoleName && revoke.Revokee.RoleId == 2 ? "Literary Agent" : revoke.Revokee != null && revoke.Revokee.RoleId == 2 ? "Publisher" : "Writer";
+                            <span><a href="/Profile/@revoke?.Revokee?.UrlString">@revoke?.Revokee?.DisplayName (@revokeRoleName)</a> | <a href="/Notification/RemoveIndividualAccessRevoke/@revoke?.IndividualAccessRevokeId">Remove Individual Access Revoke</a></span>
 
                             <br />
                         }

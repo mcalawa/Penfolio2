@@ -1013,7 +1013,7 @@ namespace Penfolio2.Controllers
                     }
                 }
 
-                if(!writingProfiles.Where(i => i.PenProfile != null).Select(i => i.PenProfile.UserId).ToList().Contains(userId))
+                if(!writingProfiles.Any(i => i.PenProfile != null && i.PenProfile.UserId == userId))
                 {
                     return RedirectToAction("NotificationError");
                 }
@@ -1105,7 +1105,7 @@ namespace Penfolio2.Controllers
                     }
                 }
 
-                if (!writingProfiles.Where(i => i.PenProfile != null).Select(i => i.PenProfile.UserId).ToList().Contains(userId))
+                if (!writingProfiles.Any(i => i.PenProfile != null && i.PenProfile.UserId == userId))
                 {
                     return RedirectToAction("NotificationError");
                 }

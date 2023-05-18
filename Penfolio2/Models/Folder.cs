@@ -26,11 +26,11 @@ namespace Penfolio2.Models
         public int AccessPermissionId { get; set; }
 
         [Required, NotNull]
-        [ForeignKey("PenUser")]
-        public string CreatorId { get; set; }
+        [ForeignKey("PenUser")] 
+        public string CreatorId { get; set; } = string.Empty;
 
         [Required, NotNull]
-        public string FolderName { get; set; }
+        public string FolderName { get; set; } = string.Empty;
 
         [AllowNull]
         public string? FolderDescription { get; set; }

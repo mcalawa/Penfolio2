@@ -22,120 +22,123 @@ else
 <div>
     @if (Model.UseSecondaryRoleName)
     {
-        <h4>@Model.PenRole.SecondaryRoleName</h4>
+        <h4>@Model?.PenRole?.SecondaryRoleName</h4>
     }
     else
     {
-        <h4>@Model.PenRole.RoleName</h4>
+        <h4>@Model?.PenRole?.RoleName</h4>
     }
     <hr />
     <dl class="row">
-        @if(Model.RoleId == 2 && Model.Verified)
+        @if(Model != null && Model.RoleId == 2 && Model.Verified)
         {
             <dd class="col-sm-10">
                 <img id="profilePicture" style="width:350px;height:350px;object-fit:cover" src="data:image/*;base64,@(Convert.ToBase64String(Model.ProfileImage))" />
                 <span class="verified"><i class="fa-solid fa-circle-check" alt="Verified"></i></span>
             </dd>
         }
-        else
+        else if(Model != null)
         {
             <dd class="col-sm-10">
                 <img id="profilePicture" style="width:350px;height:350px;object-fit:cover" src="data:image/*;base64,@(Convert.ToBase64String(Model.ProfileImage))" />
             </dd>
         }
         <dd class="col-sm-10">
-            @Model.ProfileDescription
+            @Model?.ProfileDescription
         </dd>
     </dl>
     <hr />
-    @if (Model.RoleId == 1)
+    @if (Model != null && Model.RoleId == 1 && Model.ProfileWritings != null)
     {
         <h4>Writing</h4>
         @foreach (var writing in Model.ProfileWritings.Select(i => i.Writing).OrderByDescending(i => i.EditDate == null ? i.AddDate : i.EditDate))
         {
-            @await Component.InvokeAsync("Writing", new { id = writing.WritingId })
+            if(writing != null)
+            {
+                @await Component.InvokeAsync("Writing", new { id = writing.WritingId })
+            }
         }
     }
     else
     {
         <h4>Writers</h4>
-        @if(Model.PublisherWriters.Where(i => i.Active).ToList().Count > 0)
+        @if(Model != null && Model.PublisherWriters.Where(i => i.Active).ToList().Count > 0)
         {
             @foreach(var publisherWriter in Model.PublisherWriters.Where(i => i.Active).ToList())
             {
-                <span><a href="/Profile/@publisherWriter.Writer.UrlString">@publisherWriter.Writer.DisplayName</a> | <a href="/Notification/RemoveRepresentation/@publisherWriter.PublisherWriterId">Stop Representing Writer</a></span><br />
+                <span><a href="/Profile/@publisherWriter?.Writer?.UrlString">@publisherWriter?.Writer?.DisplayName</a> | <a href="/Notification/RemoveRepresentation/@publisherWriter?.PublisherWriterId">Stop Representing Writer</a></span><br />
             }
             <br />
         }
     }
     @if(ViewBag.OwnProfile == "true")
     {
-        @if(Model.RoleId == 1)
+        @if(Model != null && Model.RoleId == 1)
         {
             <hr />
         }
-        @if(Model.Friends.Where(i => i.Active).ToList().Count > 0)
+        @if(Model != null && Model.Friends.Where(i => i.Active).ToList().Count > 0)
         {
             <h4>Friends</h4>
             @foreach(var friend in Model.Friends.Where(i => i.Active).ToList())
             {
-                var friendRoleName = friend.SecondFriend.UseSecondaryRoleName && friend.SecondFriend.RoleId == 2 ? "Literary Agent" : friend.SecondFriend.RoleId == 2 ? "Publisher" : "Writer";
-                <span><a href="/Profile/@friend.SecondFriend.UrlString">@friend.SecondFriend.DisplayName (@friendRoleName)</a> | <a href="/Notification/RemoveFriend/@friend.FriendshipId">Remove Friend</a></span><br />
+                var friendRoleName = friend.SecondFriend != null && friend.SecondFriend.UseSecondaryRoleName && friend.SecondFriend.RoleId == 2 ? "Literary Agent" : friend.SecondFriend != null && friend.SecondFriend.RoleId == 2 ? "Publisher" : "Writer";
+                <span><a href="/Profile/@friend?.SecondFriend?.UrlString">@friend?.SecondFriend?.DisplayName (@friendRoleName)</a> | <a href="/Notification/RemoveFriend/@friend?.FriendshipId">Remove Friend</a></span><br />
             }
             <br />
         }
         
 
-        @if(!Model.AccessPermission.PublicAccess && Model.AccessPermission.IndividualAccessGrants.Count > 0)
+        @if(Model != null && Model.AccessPermission != null && !Model.AccessPermission.PublicAccess && Model.AccessPermission.IndividualAccessGrants.Count > 0)
         {
             <h4>Individual Access Grantees</h4>
             @foreach(var grant in Model.AccessPermission.IndividualAccessGrants.Where(i => i.Active).ToList())
             {
-                var grantRoleName = grant.Grantee.UseSecondaryRoleName && grant.Grantee.RoleId == 2 ? "Literary Agent" : grant.Grantee.RoleId == 2 ? "Publisher" : "Writer";
-                <span><a href="/Profile/@grant.Grantee.UrlString">@grant.Grantee.DisplayName (@grantRoleName)</a> | <a href="/Notification/RemoveIndividualAccessGrant/@grant.IndividualAccessGrantId">Remove Individual Access Grant</a></span><br />
+                var grantRoleName = grant.Grantee != null && grant.Grantee.UseSecondaryRoleName && grant.Grantee.RoleId == 2 ? "Literary Agent" : grant.Grantee != null && grant.Grantee.RoleId == 2 ? "Publisher" : "Writer";
+                <span><a href="/Profile/@grant?.Grantee?.UrlString">@grant?.Grantee?.DisplayName (@grantRoleName)</a> | <a href="/Notification/RemoveIndividualAccessGrant/@grant?.IndividualAccessGrantId">Remove Individual Access Grant</a></span><br />
             }
             <br />
         }
 
-        @if(Model.AccessPermission.IndividualAccessRevokes.Count > 0)
+        @if(Model != null && Model.AccessPermission != null && Model.AccessPermission.IndividualAccessRevokes.Count > 0)
         {
             <h4>Individual Access Revokees</h4>
             @foreach(var revoke in Model.AccessPermission.IndividualAccessRevokes.Where(i => i.Active).ToList())
             {
-                var revokeRoleName = revoke.Revokee.UseSecondaryRoleName && revoke.Revokee.RoleId == 2 ? "Literary Agent" : revoke.Revokee.RoleId == 2 ? "Publisher" : "Writer";
-                <span><a href="/Profile/@revoke.Revokee.UrlString">@revoke.Revokee.DisplayName (@revokeRoleName)</a> | <a href="/Notification/RemoveIndividualAccessRevoke/@revoke.IndividualAccessRevokeId">Remove Individual Access Revoke</a></span><br />
+                var revokeRoleName = revoke.Revokee != null && revoke.Revokee.UseSecondaryRoleName && revoke.Revokee.RoleId == 2 ? "Literary Agent" : revoke.Revokee !=null && revoke.Revokee.RoleId == 2 ? "Publisher" : "Writer";
+                <span><a href="/Profile/@revoke?.Revokee?.UrlString">@revoke?.Revokee?.DisplayName (@revokeRoleName)</a> | <a href="/Notification/RemoveIndividualAccessRevoke/@revoke?.IndividualAccessRevokeId">Remove Individual Access Revoke</a></span><br />
             }
             <br />
         }
 
-        @if(Model.WriterPublishers.Count > 0)
+        @if(Model != null && Model.WriterPublishers.Count > 0)
         {
             <h4>Represented By</h4>
             @foreach(var writerPublisher in Model.WriterPublishers.Where(i => i.Active).ToList())
             {
-                var publisherRoleName = writerPublisher.Publisher.UseSecondaryRoleName ? "Literary Agent" : "Publisher";
-                <span><a href="/Profile/@writerPublisher.Publisher.UrlString">@writerPublisher.Publisher.DisplayName (@publisherRoleName)</a> | <a href="/Notification/RemoveRepresentation/@writerPublisher.PublisherWriterId">Stop Being Represented By @publisherRoleName</a></span><br />
+                var publisherRoleName = writerPublisher.Publisher != null && writerPublisher.Publisher.UseSecondaryRoleName ? "Literary Agent" : "Publisher";
+                <span><a href="/Profile/@writerPublisher?.Publisher?.UrlString">@writerPublisher?.Publisher?.DisplayName (@publisherRoleName)</a> | <a href="/Notification/RemoveRepresentation/@writerPublisher?.PublisherWriterId">Stop Being Represented By @publisherRoleName</a></span><br />
             }
         }
     }
-    else if(Model.Friends.Where(i => i.Active).Select(i => i.SecondFriend).Any(i => i.UserId == ViewBag.UserId))
+    else if(Model != null && Model.Friends.Where(i => i.Active).Select(i => i.SecondFriend).Any(i => i?.UserId == ViewBag.UserId))
     {
         <h4>Friends</h4>
-        @foreach (var friend in Model.Friends.Where(i => i.Active && i.SecondFriend.UserId == ViewBag.UserId).ToList())
+        @foreach (var friend in Model.Friends.Where(i => i.Active && i.SecondFriend != null && i.SecondFriend.UserId == ViewBag.UserId).ToList())
         {
-            var friendRoleName = friend.SecondFriend.UseSecondaryRoleName && friend.SecondFriend.RoleId == 2 ? "Literary Agent" : friend.SecondFriend.RoleId == 2 ? "Publisher" : "Writer";
-            <span><a href="/Profile/@friend.SecondFriend.UrlString">@friend.SecondFriend.DisplayName (@friendRoleName)</a> | <a href="/Notification/RemoveFriend/@friend.OtherFriendshipId">Remove Friend</a></span>
+            var friendRoleName = friend.SecondFriend != null && friend.SecondFriend.UseSecondaryRoleName && friend.SecondFriend.RoleId == 2 ? "Literary Agent" : friend.SecondFriend != null && friend.SecondFriend.RoleId == 2 ? "Publisher" : "Writer";
+            <span><a href="/Profile/@friend?.SecondFriend?.UrlString">@friend?.SecondFriend?.DisplayName (@friendRoleName)</a> | <a href="/Notification/RemoveFriend/@friend?.OtherFriendshipId">Remove Friend</a></span>
 
             <br />
         }
         <br />
-        @if(Model.WriterPublishers.Count > 0 && Model.WriterPublishers.Any(i => i.Active && i.Publisher.UserId == ViewBag.UserId))
+        @if(Model.WriterPublishers.Count > 0 && Model.WriterPublishers.Any(i => i.Active && i.Publisher != null && i.Publisher.UserId == ViewBag.UserId))
         {
             <h4>Represented By</h4>
-            @foreach(var writerPublisher in Model.WriterPublishers.Where(i => i.Active && i.Publisher.UserId == ViewBag.UserId).ToList())
+            @foreach(var writerPublisher in Model.WriterPublishers.Where(i => i.Active && i.Publisher != null && i.Publisher.UserId == ViewBag.UserId).ToList())
             {
-                var publisherRoleName = writerPublisher.Publisher.UseSecondaryRoleName ? "Literary Agent" : "Publisher";
-                <span><a href="/Profile/@writerPublisher.Publisher.UrlString">@writerPublisher.Publisher.DisplayName (@publisherRoleName)</a> | <a href="/Notification/RemoveRepresentation/@writerPublisher.PublisherWriterId">Stop Representing Writer</a></span>
+                var publisherRoleName = writerPublisher.Publisher != null && writerPublisher.Publisher.UseSecondaryRoleName ? "Literary Agent" : "Publisher";
+                <span><a href="/Profile/@writerPublisher?.Publisher?.UrlString">@writerPublisher?.Publisher?.DisplayName (@publisherRoleName)</a> | <a href="/Notification/RemoveRepresentation/@writerPublisher?.PublisherWriterId">Stop Representing Writer</a></span>
 
                 <br />
             }
