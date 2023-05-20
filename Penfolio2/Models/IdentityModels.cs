@@ -69,6 +69,8 @@ namespace Penfolio2.Models
         /// <returns>A normalized value representing the specified <paramref name="email"/>.</returns>
         [return: NotNullIfNotNull("email")]
         public override string? NormalizeEmail(string? email)
+#pragma warning disable CS8604 // Possible null reference argument.
             => (KeyNormalizer == null) ? email : CustomUsernameEmailPolicy.NormalizeEmail(email);
+#pragma warning restore CS8604 // Possible null reference argument.
     }
 }

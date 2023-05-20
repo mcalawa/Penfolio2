@@ -20,7 +20,7 @@
     {
         if (input == null)
         {
-            return null;
+            return "";
         }
 
         string output = Uri.EscapeDataString(input);
@@ -70,26 +70,32 @@
         <div class="tagScrollbar" data-parent="@Model.WritingId">
             @foreach(var format in Model.WritingFormats)
             {
-                <span class="scrollbarTag">
-                    <a href="/Writing/SearchByFormatTag/@FormatURLString(format.FormatTag.FormatName)" data-parent="@Model.WritingId">#@format.FormatTag.FormatName</a>
-                </span>
-                foreach (var altName in format.FormatTag.AltFormatNames)
+                @if(format.FormatTag != null)
                 {
                     <span class="scrollbarTag">
-                        <a href="/Writing/SearchByFormatTag/@FormatURLString(altName.AltName)" data-parent="@Model.WritingId">#@altName.AltName</a>
+                        <a href="/Writing/SearchByFormatTag/@FormatURLString(format.FormatTag.FormatName)" data-parent="@Model.WritingId">#@format.FormatTag.FormatName</a>
                     </span>
+                    foreach (var altName in format.FormatTag.AltFormatNames)
+                    {
+                        <span class="scrollbarTag">
+                            <a href="/Writing/SearchByFormatTag/@FormatURLString(altName.AltName)" data-parent="@Model.WritingId">#@altName.AltName</a>
+                        </span>
+                    }
                 }
             }
             @foreach(var genre in Model.WritingGenres)
             {
-                <span class="scrollbarTag">
-                    <a href="/Writing/SearchByGenreTag/@FormatURLString(genre.GenreTag.GenreName)" data-parent="@Model.WritingId">#@genre.GenreTag.GenreName</a>
-                </span>
-                foreach(var altName in genre.GenreTag.AltGenreNames)
+                @if(genre.GenreTag != null)
                 {
                     <span class="scrollbarTag">
-                        <a href="/Writing/SearchByGenreTag/@FormatURLString(altName.AltName)" data-parent="@Model.WritingId">#@altName.AltName</a>
+                        <a href="/Writing/SearchByGenreTag/@FormatURLString(genre.GenreTag.GenreName)" data-parent="@Model.WritingId">#@genre.GenreTag.GenreName</a>
                     </span>
+                    foreach(var altName in genre.GenreTag.AltGenreNames)
+                    {
+                        <span class="scrollbarTag">
+                            <a href="/Writing/SearchByGenreTag/@FormatURLString(altName.AltName)" data-parent="@Model.WritingId">#@altName.AltName</a>
+                        </span>
+                    }
                 }
             }
         </div>

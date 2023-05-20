@@ -17,9 +17,9 @@ namespace Penfolio2.Validation
                 DbContextOptions<ApplicationDbContext> options = new DbContextOptions<ApplicationDbContext>();
                 ApplicationDbContext db = new ApplicationDbContext(options);
                 var httpContextAccesor = (IHttpContextAccessor)validationContext.GetService(typeof(IHttpContextAccessor));
-                var validationUser = httpContextAccesor.HttpContext.User;
-                string username = validationUser.Identity.Name;
-                PenUser user;
+                var validationUser = httpContextAccesor?.HttpContext?.User;
+                string? username = validationUser?.Identity?.Name;
+                PenUser? user;
 
                 if (profile == null)
                 {
@@ -85,11 +85,11 @@ namespace Penfolio2.Validation
                 List<IdentityError> errors = new List<IdentityError>();
                 DbContextOptions<ApplicationDbContext> options = new DbContextOptions<ApplicationDbContext>();
                 ApplicationDbContext db = new ApplicationDbContext(options);
-                PenProfile currentProfile;
+                PenProfile? currentProfile;
                 var httpContextAccesor = (IHttpContextAccessor)validationContext.GetService(typeof(IHttpContextAccessor));
-                var validationUser = httpContextAccesor.HttpContext.User;
-                string username = validationUser.Identity.Name;
-                PenUser user;
+                var validationUser = httpContextAccesor?.HttpContext?.User;
+                string? username = validationUser?.Identity?.Name;
+                PenUser? user;
 
                 if (profile == null)
                 {
@@ -164,8 +164,8 @@ namespace Penfolio2.Validation
                 DbContextOptions<ApplicationDbContext> options = new DbContextOptions<ApplicationDbContext>();
                 ApplicationDbContext db = new ApplicationDbContext(options);
                 var httpContextAccesor = (IHttpContextAccessor)validationContext.GetService(typeof(IHttpContextAccessor));
-                var validationUser = httpContextAccesor.HttpContext.User;
-                string username = validationUser.Identity.Name;
+                var validationUser = httpContextAccesor?.HttpContext?.User;
+                string? username = validationUser?.Identity?.Name;
 
                 if (profile == null)
                 {
@@ -206,8 +206,8 @@ namespace Penfolio2.Validation
                 DbContextOptions<ApplicationDbContext> options = new DbContextOptions<ApplicationDbContext>();
                 ApplicationDbContext db = new ApplicationDbContext(options);
                 var httpContextAccesor = (IHttpContextAccessor)validationContext.GetService(typeof(IHttpContextAccessor));
-                var validationUser = httpContextAccesor.HttpContext.User;
-                string username = validationUser.Identity.Name;
+                var validationUser = httpContextAccesor?.HttpContext?.User;
+                string? username = validationUser?.Identity?.Name;
 
                 if (profile == null)
                 {
@@ -276,7 +276,7 @@ namespace Penfolio2.Validation
             {
                 if (displayName.Equals(NormalizeName(penProfile.DisplayName)) && penProfile.RoleId == roleId && penProfile.UseSecondaryRoleName == useSecondaryRoleName)
                 {
-                    string roleName = useSecondaryRoleName ? penProfile.PenRole.SecondaryRoleName : penProfile.PenRole.RoleName;
+                    string? roleName = useSecondaryRoleName ? penProfile?.PenRole?.SecondaryRoleName : penProfile?.PenRole?.RoleName;
 
                     errors.Add(new IdentityError()
                     {

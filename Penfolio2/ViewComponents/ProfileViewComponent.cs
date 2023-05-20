@@ -23,14 +23,14 @@ namespace Penfolio2.ViewComponents
 
             var penProfile = _db.PenProfiles.Where(i => i.UrlString == urlString).FirstOrDefault();
             List<PenProfile> penProfiles = new List<PenProfile>();
-            string username = User?.Identity?.Name;
+            string? username = User?.Identity?.Name;
 
             if (username != null)
             {
                 username = username.ToUpper().Trim();
             }
 
-            PenUser currentUser = _db.PenUsers.Where(i => i.NormalizedUserName == username).FirstOrDefault();
+            PenUser? currentUser = _db.PenUsers.Where(i => i.NormalizedUserName == username).FirstOrDefault();
 
             if (currentUser != null && penProfile != null)
             {
@@ -47,8 +47,11 @@ namespace Penfolio2.ViewComponents
                     {
                         var mainProfile = _db.PenProfiles.Where(i => i.IsMainProfile && i.UserId == userId).FirstOrDefault();
 
-                        penProfiles.Add(mainProfile);
-                        userProfiles.Remove(mainProfile);
+                        if(mainProfile != null)
+                        {
+                            penProfiles.Add(mainProfile);
+                            userProfiles.Remove(mainProfile);
+                        }
                     }
 
                     foreach (var profile in userProfiles)

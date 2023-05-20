@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.SqlServer.Server;
-using Mono.TextTemplating;
 using Penfolio2.Data;
 using Penfolio2.Models;
 using System.Text;

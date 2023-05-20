@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Penfolio2.Data;
 using Penfolio2.Models;
-using System.Drawing;
 
 namespace Penfolio2.Controllers
 {

@@ -71,7 +71,9 @@ namespace Penfolio2.Areas.Identity.Pages.Account
                     errorString += error.Description + " ";
                 }
 
+#pragma warning disable CS8603 // Possible null reference return.
                 return errors.Count == 0 ? ValidationResult.Success : new ValidationResult(errorString);
+#pragma warning restore CS8603 // Possible null reference return.
             }
         }
 
