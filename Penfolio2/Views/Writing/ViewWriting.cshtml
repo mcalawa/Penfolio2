@@ -16,23 +16,30 @@
 @if(ViewBag.Author)
 {
     <hr />
-    @if (!Model.AccessPermission.PublicAccess && Model.AccessPermission.IndividualAccessGrants.Count > 0)
+    @if (Model.AccessPermission != null && !Model.AccessPermission.PublicAccess && Model.AccessPermission.IndividualAccessGrants.Count > 0)
     {
         <h4>Individual Access Grantees</h4>
         @foreach (var grant in Model.AccessPermission.IndividualAccessGrants.Where(i => i.Active).ToList())
         {
-            var grantRoleName = grant.Grantee.UseSecondaryRoleName && grant.Grantee.RoleId == 2 ? "Literary Agent" : grant.Grantee.RoleId == 2 ? "Publisher" : "Writer";
-            <span><a href="/Profile/@grant.Grantee.UrlString">@grant.Grantee.DisplayName (@grantRoleName)</a> | <a href="/Notification/RemoveIndividualAccessGrant/@grant.IndividualAccessGrantId">Remove Individual Access Grant</a></span><br />
+            @if(grant.Grantee != null)
+            {
+                var grantRoleName = grant.Grantee.UseSecondaryRoleName && grant.Grantee.RoleId == 2 ? "Literary Agent" : grant.Grantee.RoleId == 2 ? "Publisher" : "Writer";
+                <span><a href="/Profile/@grant.Grantee.UrlString">@grant.Grantee.DisplayName (@grantRoleName)</a> | <a href="/Notification/RemoveIndividualAccessGrant/@grant.IndividualAccessGrantId">Remove Individual Access Grant</a></span><br />
+            }
         }
     }
 
-    @if(Model.AccessPermission.IndividualAccessRevokes.Count > 0)
+    @if(Model.AccessPermission != null && Model.AccessPermission.IndividualAccessRevokes.Count > 0)
     {
         <h4>Individual Access Revokees</h4>
         @foreach (var revoke in Model.AccessPermission.IndividualAccessRevokes.Where(i => i.Active).ToList())
         {
-            var revokeRoleName = revoke.Revokee.UseSecondaryRoleName && revoke.Revokee.RoleId == 2 ? "Literary Agent" : revoke.Revokee.RoleId == 2 ? "Publisher" : "Writer";
-            <span><a href="/Profile/@revoke.Revokee.UrlString">@revoke.Revokee.DisplayName (@revokeRoleName)</a> | <a href="/Notification/RemoveIndividualAccessRevoke/@revoke.IndividualAccessRevokeId">Remove Individual Access Revoke</a></span><br />
+            @if(revoke.Revokee != null)
+            {
+                var revokeRoleName = revoke.Revokee.UseSecondaryRoleName && revoke.Revokee.RoleId == 2 ? "Literary Agent" : revoke.Revokee.RoleId == 2 ? "Publisher" : "Writer";
+                <span><a href="/Profile/@revoke.Revokee.UrlString">@revoke.Revokee.DisplayName (@revokeRoleName)</a> | <a href="/Notification/RemoveIndividualAccessRevoke/@revoke.IndividualAccessRevokeId">Remove Individual Access Revoke</a></span><br />
+            }
+            
         }
     }
 }

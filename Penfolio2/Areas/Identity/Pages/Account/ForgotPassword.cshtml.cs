@@ -67,10 +67,9 @@ namespace Penfolio2.Areas.Identity.Pages.Account
                     values: new { area = "Identity", code },
                     protocol: Request.Scheme);
 
-                await _emailSender.SendEmailAsync(
-                    Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                var subject = "Reset Your Password for Penfolio";
+                var message = "<p>Hello, " + user.UserName + "!</p><p>We have received a request to reset the password for the account with the email address <i>" + user.Email + "</i>. To reset your account\'s password, please click the following link:</p><p><a href=\"" + HtmlEncoder.Default.Encode(callbackUrl) + "\">Click Here to Reset Your Password</a></p><p><strong>Not sure why you received this email?</strong></p><p>Your Penfolio password will only be reset if you click on the above link. If you did not make this request, you can disregard this email.</p>";
+                await _emailSender.SendEmailAsync(user.Email, subject, message);
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }

@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -131,8 +133,9 @@ namespace Penfolio2.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    var subject = "Verify Your Email Address for Penfolio";
+                    var message = "<p>Hello, " + user.UserName + "!</p><p><i>" + user.Email + "</i> was used to register for a new account on Penfolio. To verify your Penfolio account, please click the following link:</p><p><a href=\"" + HtmlEncoder.Default.Encode(callbackUrl) + "\">Click Here to Verify Your Account</a></p><p><strong>Not sure why you received this email?</strong></p><p>Penfolio requires a two-step email verification. You cannot access your account until you verify it. If you did not make this request, you can disregard this email.</p>";
+                    await _emailSender.SendEmailAsync(user.Email, subject, message);
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
