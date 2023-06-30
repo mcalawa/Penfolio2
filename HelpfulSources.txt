@@ -7,6 +7,8 @@ https://learn.microsoft.com/en-us/aspnet/core/security/authentication/accconfirm
 https://learn.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity?view=aspnetcore-7.0&tabs=visual-studio#scaffold-identity-into-a-razor-project-with-authorization Documentation for scaffolding identity
 https://developer.okta.com/blog/2020/09/23/secure-pii-ef-core-dotnet How to secure PII with Entity Framework Core
 https://stackoverflow.com/questions/53030838/net-core-get-user-in-validationattribute Getting user in Validation
+https://www.twilio.com/blog/better-configure-csharp-and-dotnet-apps-for-sendgrid Email verification 1
+https://learn.microsoft.com/en-us/aspnet/core/security/authentication/accconfirm?view=aspnetcore-7.0&tabs=visual-studio Email verification 2
 
 Model:
 https://learn.microsoft.com/en-us/aspnet/core/mvc/models/validation?view=aspnetcore-7.0 Documentation for model validation
